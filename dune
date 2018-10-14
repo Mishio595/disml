@@ -1,0 +1,6 @@
+(library
+	(name animus)
+	(libraries lwt lwt.unix cohttp cohttp.lwt yojson)
+)
+
+(include_subdirs unqualified)

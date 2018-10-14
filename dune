@@ -1,6 +1,13 @@
 (library
 	(name animus)
-	(libraries lwt lwt.unix cohttp cohttp.lwt yojson)
+	(modules endpoints gateway http)
+	(libraries lwt lwt.unix cohttp cohttp.lwt yojson websocket)
+)
+
+(executable
+    (name bot)
+	(modules bot)
+    (libraries lwt lwt.unix animus)
 )
 
 (include_subdirs unqualified)

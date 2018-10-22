@@ -314,3 +314,6 @@ let execute_slack_webhook webhook_id token body =
 
 let execute_git_webhook webhook_id token body =
     Base.request ~body `POST (Endpoints.webhook_git webhook_id token)
+
+let get_audit_logs guild_id body =
+    Base.request ~body `GET (Endpoints.guild_audit_logs guild_id)

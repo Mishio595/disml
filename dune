@@ -1,9 +1,10 @@
 (library
 	(name animus)
-	(modules endpoints gateway http)
-	(libraries lwt lwt.unix cohttp cohttp.lwt yojson websocket)
+	(modules endpoints client shardManager http)
+	(libraries lwt lwt.unix cohttp cohttp.lwt yojson websocket websocket.lwt)
 )
 
+; Test executable
 (executable
     (name bot)
 	(modules bot)

@@ -87,6 +87,7 @@ let application_information = "/oauth2/applications/@me"
 let group_recipient group_id user_id = "/channels/"^group_id^"/recipients/"^user_id
 let guild_me_nick guild_id = "/guilds/"^guild_id^"/members/@me/nick"
 let guild_vanity_url guild_id = "/guilds/"^guild_id^"/vanity-url"
+let guild_audit_logs guild_id = "/guilds/"^guild_id^"/audit-logs"
 
 (* let cdn_avatar id avatar image_format = "/avatars/"^id^"/"^avatar^"."^image_format *)
 let cdn_embed_avatar image_name = "/embed/avatars/"^image_name^".png"

@@ -42,27 +42,26 @@ module Opcode = struct
         | HEARTBEAT_ACK -> "HEARTBEAT_ACK"
 end
 
+module ShardMap = Map.Make(
+    struct
+        type t = int
+        let compare: int -> int -> int = Pervasives.compare
+    end
+)
+
 module Shard = struct
     type t = {
         send: (Frame.t -> unit Lwt.t);
         recv: (unit -> Frame.t Lwt. t);
+        id: int;
         hb_interval: int;
         session_id: string;
         seq: int;
     }
 
-    let connect uri =
-        let url = Uri.to_string uri in
-        let ip = Ipaddr.V4 Ipaddr.V4.any in
-        Websocket_lwt.with_connection (`TLS (`Hostname url, `IP ip, `Port 443)) uri
-        >|= fun (recv, send) ->
-        (* Start heartbeat sequencing *)
-        { send; recv; hb_interval = 42500; session_id = ""; seq = 0; }
-
     let send payload shard =
         payload
         |> shard.send
-        |> ignore
 
     let wrap_payload d op =
         `Assoc [
@@ -70,8 +69,11 @@ module Shard = struct
             ("d", d)
         ]
 
-    let identify ?(threshold=250) shard id total token =
-        let p = wrap_payload(`Assoc [
+    let create_frame content =
+        Frame.create ~content ()
+
+    let identify ?(threshold=250) shard total token =
+        let p = wrap_payload (`Assoc [
             ("token", `String token);
             ("properties", `Assoc [
                 ("$os", `String Sys.os_type);
@@ -79,9 +81,9 @@ module Shard = struct
                 ("$device", `String "animus");
             ]);
             ("large_threshold", `Int threshold);
-            ("shard", `List [`Int id; `Int total]);
+            ("shard", `List [`Int shard.id; `Int total]);
         ]) (Opcode.to_int IDENTIFY) in
-        let p = Frame.create ~content:(Yojson.Basic.to_string p) () in
+        let p = create_frame (Yojson.Basic.to_string p) in
         send p shard
 
     let resume shard token =
@@ -90,20 +92,26 @@ module Shard = struct
             ("session_id", `String shard.session_id);
             ("seq", `Int shard.seq);
         ]) (Opcode.to_int RESUME) in
-        let p = Frame.create ~content:(Yojson.Basic.to_string p) () in
+        let p = create_frame (Yojson.Basic.to_string p) in
         send p shard
 
     let heartbeat shard =
-        let p = Frame.create () in
+        let p = wrap_payload (`Int shard.seq) (Opcode.to_int HEARTBEAT) in
+        let p = create_frame (Yojson.Basic.to_string p) in
         send p shard
-end
 
-module ShardMap = Map.Make(
-    struct
-        type t = int
-        let compare: int -> int -> int = Pervasives.compare
-    end
-)
+    (* Use options *)
+    let connect ~options uri id total token =
+        let url = Uri.to_string uri in
+        let ip = Ipaddr.V4 Ipaddr.V4.any in
+        Websocket_lwt.with_connection (`TLS (`Hostname url, `IP ip, `Port 443)) uri
+        >|= fun (recv, send) ->
+        let shard = { send; recv; hb_interval = 42500; id; session_id = ""; seq = 0; } in
+        heartbeat shard >>= (fun _ ->
+            identify shard total token (* This needs to be handled, I'm just pleasing the compiler *)
+        ) |> ignore;
+        shard
+end
 
 type t = {
     shards: Shard.t ShardMap.t;
@@ -111,16 +119,25 @@ type t = {
     token: string;
 }
 
-let create_shard manager =
-    Shard.connect manager.gateway_url
-    >|= fun shard ->
+let create_shard ?(options=[]) manager =
     let id = (ShardMap.cardinal manager.shards) + 1 in
+    Shard.connect ~options manager.gateway_url id (ShardMap.cardinal manager.shards) manager.token
+    >|= fun shard ->
     ShardMap.add id shard manager.shards
+
+let update_shard id shard manager =
+    match ShardMap.exists (fun k _ -> id == k) manager.shards with
+    | true -> ShardMap.add id shard manager.shards
+    | false -> manager.shards
+
+let heartbeat manager id =
+    let shard = ShardMap.find id manager.shards in
+    Shard.heartbeat shard
 
 let identify manager id =
     let total = ShardMap.cardinal manager.shards in
     let shard = ShardMap.find id manager.shards in
-    Shard.identify shard id total manager.token
+    Shard.identify shard total manager.token
 
 let resume manager id =
     let shard = ShardMap.find id manager.shards in

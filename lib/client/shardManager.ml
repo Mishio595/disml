@@ -42,26 +42,28 @@ module Opcode = struct
         | HEARTBEAT_ACK -> "HEARTBEAT_ACK"
 end
 
-module ShardMap = Map.Make(
-    struct
-        type t = int
-        let compare: int -> int -> int = Pervasives.compare
-    end
-)
-
 module Shard = struct
     type t = {
         send: (Frame.t -> unit Lwt.t);
-        recv: (unit -> Frame.t Lwt. t);
         id: int;
         hb_interval: int;
         session_id: string;
         seq: int;
     }
 
+    let init ?(hb_interval=42500) ?(session_id="") ?(seq=0)
+        send id =
+        { send; recv; id; hb_interval; session_id; seq; }
+
+    let compare s1 s2 =
+        Pervasives.compare s1.id s2.id
+
     let send payload shard =
         payload
         |> shard.send
+
+    let process_frame shard frame = 
+        (* Add processor *)
 
     let wrap_payload d op =
         `Assoc [
@@ -72,7 +74,7 @@ module Shard = struct
     let create_frame content =
         Frame.create ~content ()
 
-    let identify ?(threshold=250) shard total token =
+    let identify ?(threshold=250) total token shard =
         let p = wrap_payload (`Assoc [
             ("token", `String token);
             ("properties", `Assoc [
@@ -86,7 +88,7 @@ module Shard = struct
         let p = create_frame (Yojson.Basic.to_string p) in
         send p shard
 
-    let resume shard token =
+    let resume token shard =
         let p = wrap_payload (`Assoc [
             ("token", `String token);
             ("session_id", `String shard.session_id);
@@ -101,44 +103,46 @@ module Shard = struct
         send p shard
 
     (* Use options *)
-    let connect ~options uri id total token =
-        let url = Uri.to_string uri in
+    let connect ~options ~uri ~id ~total ~token () =
+        let url = uri |> Uri.to_string in
         let ip = Ipaddr.V4 Ipaddr.V4.any in
-        Websocket_lwt.with_connection (`TLS (`Hostname url, `IP ip, `Port 443)) uri
+        Websocket_lwt.with_connection (`TLS (`Hostname url, `IP ip, `Port 443)) uri (* Maybe use upgrade_connection? *)
         >|= fun (recv, send) ->
-        let shard = { send; recv; hb_interval = 42500; id; session_id = ""; seq = 0; } in
+        let shard = init send id in
         heartbeat shard >>= (fun _ ->
-            identify shard total token (* This needs to be handled, I'm just pleasing the compiler *)
-        ) |> ignore;
+            identify shard total token 
+        ) |> ignore; (* This feels really hacky *)
+        let handle_frame = process_frame shard in
+        let rec recv_loop () = recv () >>= handle_frame >>= recv_loop () in
+        recv_loop (); (* This is a bad way to do this. We should abstract the shard.send away and use Lwt.choose *)
         shard
 end
 
+module ShardSet = Set.Make(Shard)
+
 type t = {
-    shards: Shard.t ShardMap.t;
+    shards: Shard.t ShardSet.t;
     gateway_url: Uri.t;
     token: string;
 }
 
 let create_shard ?(options=[]) manager =
-    let id = (ShardMap.cardinal manager.shards) + 1 in
-    Shard.connect ~options manager.gateway_url id (ShardMap.cardinal manager.shards) manager.token
+    let id = (ShardSet.cardinal manager.shards) + 1 in
+    Shard.connect ~options ~uri:manager.gateway_url ~id ~total:(ShardSet.cardinal manager.shards) ~token:manager.token ()
     >|= fun shard ->
-    ShardMap.add id shard manager.shards
+    ShardSet.add shard manager.shards
 
-let update_shard id shard manager =
-    match ShardMap.exists (fun k _ -> id == k) manager.shards with
-    | true -> ShardMap.add id shard manager.shards
+let update_shard shard manager =
+    match ShardSet.mem shard manager.shards with
+    | true -> ShardSet.add shard manager.shards
     | false -> manager.shards
 
-let heartbeat manager id =
-    let shard = ShardMap.find id manager.shards in
+let heartbeat shard manager =
     Shard.heartbeat shard
 
-let identify manager id =
-    let total = ShardMap.cardinal manager.shards in
-    let shard = ShardMap.find id manager.shards in
-    Shard.identify shard total manager.token
+let identify shard manager =
+    let total = ShardSet.cardinal manager.shards in
+    Shard.identify total manager.token shard
 
-let resume manager id =
-    let shard = ShardMap.find id manager.shards in
-    Shard.resume shard manager.token
+let resume shard manager =
+    Shard.resume manager.token shard

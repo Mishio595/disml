@@ -38,7 +38,7 @@ let from_int = function
     | 9 -> INVALID_SESSION
     | 10 -> HELLO
     | 11 -> HEARTBEAT_ACK
-    | op -> raise Invalid_Opcode op
+    | op -> raise (Invalid_Opcode op)
 
 let to_string = function
     | DISPATCH -> "DISPATCH"

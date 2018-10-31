@@ -1,14 +1,14 @@
 (library
 	(name animus)
 	(modules endpoints client shard opcode shardManager http)
-	(libraries lwt lwt.unix cohttp cohttp.lwt yojson websocket websocket.lwt)
+	(libraries core async cohttp cohttp.async yojson websocket websocket.async)
 )
 
 ; Test executable
 (executable
     (name bot)
 	(modules bot)
-    (libraries lwt lwt.unix animus)
+    (libraries core async animus)
 )
 
 (include_subdirs unqualified)

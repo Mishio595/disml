@@ -1,7 +1,7 @@
 (library
 	(name animus)
 	(modules endpoints http client sharder opcode)
-	(libraries lwt cohttp cohttp.lwt yojson websocket websocket-lwt-unix)
+	(libraries lwt cohttp cohttp.lwt yojson websocket websocket-lwt-unix zlib)
 )
 
 ; Test executable

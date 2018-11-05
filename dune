@@ -1,6 +1,6 @@
 (library
 	(name animus)
-	(modules endpoints http client shard opcode shardManager)
+	(modules endpoints http client sharder opcode)
 	(libraries lwt cohttp cohttp.lwt yojson websocket websocket-lwt-unix)
 )
 

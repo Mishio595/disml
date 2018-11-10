@@ -38,6 +38,7 @@ module Shard = struct
             ])
         in
         let frame = Frame.create ?content () in
+        print_endline @@ Frame.show frame;
         shard.send frame
         |> ignore;
         shard
@@ -61,24 +62,21 @@ module Shard = struct
         let data = List.assoc "d" payload in
         shard.seq <- seq;
         let _ = match t with
-        | "READY" -> Lwt.wakeup_later resolver ()
+        | "READY" -> Lwt.wakeup resolver ()
         | _ -> ()
         in
         Client.notify t data;
         shard
 
     let set_status shard game =
-        let d = `Assoc [
+        let payload = `Assoc [
             ("status", `String "online");
             ("afk", `Bool false);
+            ("since", `Null);
             ("game", `Assoc [
                 ("name", `String game);
                 ("type", `Int 0)
             ])
-        ] in
-        let payload = `Assoc [
-            ("op", `Int 3);
-            ("d", d)
         ] in
         shard.ready >|= fun _ -> push_frame ~payload shard STATUS_UPDATE
 
@@ -90,7 +88,6 @@ module Shard = struct
                 Yojson.Basic.Util.to_assoc data
                 |> Yojson.Basic.Util.to_int
             in
-            heartbeat shard |> ignore;
             Lwt_engine.on_timer
             (Float.of_int hb_interval /. 1000.0)
             true
@@ -124,8 +121,8 @@ module Shard = struct
     let handle_frame shard (term : Yojson.Basic.json) resolver =
         match term with
         | `Assoc term -> begin
-            Yojson.Basic.pretty_print Format.std_formatter @@ `Assoc term;
-            print_newline ();
+            (* Yojson.Basic.pretty_print Format.std_formatter @@ `Assoc term;
+            print_newline (); *)
             let op = List.assoc "op" term
             |> Yojson.Basic.Util.to_int
             |> Opcode.from_int
@@ -144,7 +141,7 @@ module Shard = struct
         | _ -> print_endline "Invalid payload"; shard
 
     let create data =
-        let uri = (data.url ^ "?v=7&encoding=json") |> Uri.of_string in
+        let uri = (data.url ^ "?v=6&encoding=json") |> Uri.of_string in
         let http_uri = Uri.with_scheme uri (Some "https") in
         let headers = Http.Base.process_request_headers () in
         Resolver_lwt.resolve_uri ~uri:http_uri Resolver_lwt_unix.system >>= fun endp ->
@@ -159,12 +156,9 @@ module Shard = struct
         let rec recv_forever s = begin
             s.recv ()
             >>= fun frame ->
-            match frame.opcode with
-            | Text ->
-                let p = parse frame in
-                handle_frame s p ready_resolver
-                |> Lwt.return
-            | _ -> Lwt.return s
+            let p = parse frame in
+            handle_frame s p ready_resolver
+            |> Lwt.return
             >>= fun s -> recv_forever s
         end in
         let shard = {
@@ -177,7 +171,7 @@ module Shard = struct
             session = None;
             token = data.token;
         } in
-        Lwt.return (shard, recv_forever shard) (* Not sure why the return is needed *)
+        Lwt.return (shard, recv_forever shard)
 end
 
 type t = {

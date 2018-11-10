@@ -16,15 +16,12 @@ module Shard = struct
         shard: int list;
         send: Frame.t -> unit Lwt.t;
         recv: unit -> Frame.t Lwt.t;
+        ready: unit Lwt.t;
     }
 
     let parse (frame : Frame.t) =
-        try
-            frame.content
-            |> Yojson.Basic.from_string
-        with Yojson.Json_error err ->
-            print_endline err;
-            `String ""
+        frame.content
+        |> Yojson.Basic.from_string
 
     let encode term =
         let content = term |> Yojson.Basic.to_string in
@@ -35,15 +32,55 @@ module Shard = struct
         let content = match payload with
         | None -> None
         | Some p ->
-            Some (Yojson.Basic.to_string (`Assoc [
+            Some (Yojson.Basic.to_string @@ `Assoc [
             ("op", `Int (Opcode.to_int ev));
             ("d", p);
-        ]))
+            ])
         in
         let frame = Frame.create ?content () in
         shard.send frame
         |> ignore;
         shard
+
+    let heartbeat shard =
+        let seq = match shard.seq with
+        | 0 -> `Null
+        | i -> `Int i
+        in
+        let payload = `Assoc [
+            ("op", `Int 1);
+            ("d", seq);
+        ] in
+        push_frame ~payload shard HEARTBEAT
+
+    let dispatch shard payload resolver =
+        let t = List.assoc "t" payload
+        |> Yojson.Basic.Util.to_string in
+        let seq = List.assoc "s" payload
+        |> Yojson.Basic.Util.to_int in
+        let data = List.assoc "d" payload in
+        shard.seq <- seq;
+        let _ = match t with
+        | "READY" -> Lwt.wakeup_later resolver ()
+        | _ -> ()
+        in
+        Client.notify t data;
+        shard
+
+    let set_status shard game =
+        let d = `Assoc [
+            ("status", `String "online");
+            ("afk", `Bool false);
+            ("game", `Assoc [
+                ("name", `String game);
+                ("type", `Int 0)
+            ])
+        ] in
+        let payload = `Assoc [
+            ("op", `Int 3);
+            ("d", d)
+        ] in
+        shard.ready >|= fun _ -> push_frame ~payload shard STATUS_UPDATE
 
     let initialize shard data =
         print_endline "Initializing...";
@@ -53,22 +90,15 @@ module Shard = struct
                 Yojson.Basic.Util.to_assoc data
                 |> Yojson.Basic.Util.to_int
             in
-            let seq = match shard.seq with
-            | 0 -> `Null
-            | i -> `Int i
-            in
-            let payload = `Assoc [
-                ("op", `Int 1);
-                ("d", seq);
-            ] in
+            heartbeat shard |> ignore;
             Lwt_engine.on_timer
-            (Float.of_int hb_interval)
+            (Float.of_int hb_interval /. 1000.0)
             true
-            (fun _ev -> push_frame ~payload shard HEARTBEAT |> ignore)
+            (fun _ev -> heartbeat shard |> ignore)
         end
         | Some s -> s
         in
-        let shard = { shard with hb = Some hb; } in
+        shard.hb <- Some hb;
         match shard.session with
         | None ->
             let payload = `Assoc [
@@ -91,28 +121,27 @@ module Shard = struct
             ] in
             push_frame ~payload shard RECONNECT
 
-
-
-    let handle_frame shard (term : Yojson.Basic.json) =
-        Yojson.Basic.pretty_print Format.std_formatter term;
-        print_newline ();
+    let handle_frame shard (term : Yojson.Basic.json) resolver =
         match term with
         | `Assoc term -> begin
+            Yojson.Basic.pretty_print Format.std_formatter @@ `Assoc term;
+            print_newline ();
             let op = List.assoc "op" term
             |> Yojson.Basic.Util.to_int
             |> Opcode.from_int
             in
             match op with
-            | DISPATCH -> print_endline "OP 0"; shard (* TODO dispatch *)
-            | HEARTBEAT -> push_frame shard HEARTBEAT
+            | DISPATCH -> dispatch shard term resolver
+            | HEARTBEAT -> heartbeat shard
             | RECONNECT -> print_endline "OP 7"; shard (* TODO reconnect *)
             | INVALID_SESSION -> print_endline "OP 9"; shard (* TODO invalid session *)
             | HELLO ->
                 let data = List.assoc "d" term in
                 initialize shard data
-            | _opcode -> print_endline "no match"; shard
+            | HEARTBEAT_ACK -> shard
+            | opcode -> print_endline @@ "Invalid Opcode:" ^ Opcode.to_string opcode; shard
         end
-        | _ -> shard
+        | _ -> print_endline "Invalid payload"; shard
 
     let create data =
         let uri = (data.url ^ "?v=7&encoding=json") |> Uri.of_string in
@@ -126,22 +155,29 @@ module Shard = struct
             client
             uri
         >>= fun (recv, send) ->
-        let rec recv_forever shard = begin
-            recv ()
+        let (ready, ready_resolver) = Lwt.task () in
+        let rec recv_forever s = begin
+            s.recv ()
             >>= fun frame ->
-            Lwt.return @@ handle_frame shard @@ parse frame
-            >>= fun shard -> recv_forever shard
+            match frame.opcode with
+            | Text ->
+                let p = parse frame in
+                handle_frame s p ready_resolver
+                |> Lwt.return
+            | _ -> Lwt.return s
+            >>= fun s -> recv_forever s
         end in
         let shard = {
             send;
             recv;
+            ready;
             hb = None;
             seq = 0;
             shard = data.shards;
             session = None;
             token = data.token;
         } in
-        recv_forever shard
+        Lwt.return (shard, recv_forever shard) (* Not sure why the return is needed *)
 end
 
 type t = {

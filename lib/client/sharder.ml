@@ -1,6 +1,10 @@
 open Lwt.Infix
 open Websocket
 
+(* TODO handle wait to identify on multiple shards *)
+
+exception Invalid_Payload
+
 type data = {
     shards: int list;
     token: string;
@@ -68,16 +72,30 @@ module Shard = struct
         Client.notify t data;
         shard
 
-    let set_status shard game =
-        let payload = `Assoc [
-            ("status", `String "online");
-            ("afk", `Bool false);
-            ("since", `Null);
-            ("game", `Assoc [
-                ("name", `String game);
-                ("type", `Int 0)
-            ])
-        ] in
+    let set_status shard status =
+        let payload = match status with
+        | `Assoc [("name", `String name); ("type", `Int t)] ->
+            `Assoc [
+                ("status", `String "online");
+                ("afk", `Bool false);
+                ("since", `Null);
+                ("game", `Assoc [
+                    ("name", `String name);
+                    ("type", `Int t)
+                ])
+            ]
+        | `String name ->
+            `Assoc [
+                ("status", `String "online");
+                ("afk", `Bool false);
+                ("since", `Null);
+                ("game", `Assoc [
+                    ("name", `String name);
+                    ("type", `Int 0)
+                ])
+            ]
+        | _ -> raise Invalid_Payload
+        in
         shard.ready >|= fun _ -> push_frame ~payload shard STATUS_UPDATE
 
     let initialize shard data =
@@ -174,6 +192,45 @@ module Shard = struct
         Lwt.return (shard, recv_forever shard)
 end
 
-type t = {
-    shards: Shard.t list;
+type 'a t = {
+    shards: (Shard.t * 'a Lwt.t) list;
+    promise: 'a Lwt.t;
 }
+
+let start ?count token =
+    Http.get_gateway_bot ()
+    >|= fun data ->
+    let data = Yojson.Basic.Util.to_assoc data in
+    let url = List.assoc "url" data
+    |> Yojson.Basic.Util.to_string in
+    let count = match count with
+    | Some c -> c
+    | None -> List.assoc "shards" data
+        |> Yojson.Basic.Util.to_int
+    in
+    let shard_list = [0; count] in
+    let rec gen_shards l accum =
+        match l with
+        | [id; total;] when id < total ->
+            let shard_data = Lwt_main.run @@ Shard.create {
+                url;
+                shards = [id; total;];
+                token;
+            } in
+            shard_data :: gen_shards [id+1; total;] accum
+        | [id; total;] when id >= total -> accum
+        | _ -> failwith "Sharding Error"
+    in
+    let shards = gen_shards shard_list [] in
+    let p_list = List.map (fun (_, loop) -> loop) shards in
+    let promise = Lwt.choose p_list in
+    {
+        shards;
+        promise;
+    }
+
+let set_status sharder status =
+    List.map (fun (shard, _) ->
+        Shard.set_status shard status
+    ) sharder.shards
+    |> Lwt.nchoose

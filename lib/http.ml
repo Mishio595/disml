@@ -20,7 +20,7 @@ module Base = struct
         let token = try
             Sys.getenv "DISCORD_TOKEN"
         with Not_found -> failwith "Please provide a token" in
-        let h = Header.init_with "User-Agent" "Animus v0.1.0" in
+        let h = Header.init_with "User-Agent" "Dis.ml v0.1.0" in
         let h = Header.add h "Authorization" ("Bot " ^ token) in
         Header.add h "Content-Type" "application/json"
 

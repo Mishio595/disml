@@ -138,8 +138,8 @@ module Shard = struct
                 ("token", `String shard.token);
                 ("properties", `Assoc [
                     ("$os", `String Sys.os_type);
-                    ("$device", `String "animus");
-                    ("$browser", `String "animus")
+                    ("$device", `String "dis.ml");
+                    ("$browser", `String "dis.ml")
                 ]);
                 ("compress", `Bool false); (* TODO add compression handling*)
                 ("large_threshold", `Int 250);

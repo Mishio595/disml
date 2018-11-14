@@ -1,9 +1,8 @@
 open Lwt.Infix
 open Websocket
 
-(* TODO handle wait to identify on multiple shards *)
-
 exception Invalid_Payload
+exception Invalid_Shards
 
 type data = {
     shards: int list;
@@ -15,7 +14,7 @@ module Shard = struct
     type t = {
         mutable hb: Lwt_engine.event option;
         mutable seq: int;
-        session: string option;
+        mutable session: string option;
         token: string;
         shard: int list;
         send: Frame.t -> unit Lwt.t;
@@ -65,10 +64,15 @@ module Shard = struct
         |> Yojson.Basic.Util.to_string in
         let seq = List.assoc "s" payload
         |> Yojson.Basic.Util.to_int in
-        let data = List.assoc "d" payload in
+        let data = List.assoc "d" payload
+        |> Yojson.Basic.Util.to_assoc in
         shard.seq <- seq;
         let _ = match t with
-        | "READY" -> Lwt.wakeup resolver ()
+        | "READY" ->
+            Lwt.wakeup resolver ();
+            let session = List.assoc "session_id" data
+            |> Yojson.Basic.Util.to_string in
+            shard.session <- Some session;
         | _ -> ()
         in
         Client.notify t data;
@@ -168,13 +172,15 @@ module Shard = struct
             | HEARTBEAT -> heartbeat shard
             | RECONNECT -> print_endline "OP 7"; Lwt.return shard (* TODO reconnect *)
             | INVALID_SESSION -> print_endline "OP 9"; Lwt.return shard (* TODO invalid session *)
-            | HELLO ->
-                let data = List.assoc "d" term in
-                initialize shard data
+            | HELLO -> initialize shard @@ List.assoc "d" term
             | HEARTBEAT_ACK -> Lwt.return shard
-            | opcode -> print_endline @@ "Invalid Opcode:" ^ Opcode.to_string opcode; Lwt.return shard
+            | opcode ->
+                print_endline @@ "Invalid Opcode:" ^ Opcode.to_string opcode;
+                Lwt.return shard
         end
-        | _ -> print_endline "Invalid payload"; Lwt.return shard
+        | _ ->
+            print_endline "Invalid payload";
+            Lwt.return shard
 
     let create data =
         let uri = (data.url ^ "?v=6&encoding=json") |> Uri.of_string in
@@ -235,8 +241,8 @@ let start ?count token =
                 token;
             } in
             shard_data :: gen_shards [id+1; total;] accum
-        | [id; total;] when id >= total -> accum
-        | _ -> failwith "Sharding Error"
+        | [_; _;] -> accum
+        | _ -> raise Invalid_Shards
     in
     let shards = gen_shards shard_list [] in
     let p_list = List.map (fun (_, loop) -> loop) shards in
@@ -249,6 +255,12 @@ let start ?count token =
 let set_status sharder status =
     List.map (fun (shard, _) ->
         Shard.set_status shard status
+    ) sharder.shards
+    |> Lwt.nchoose
+
+let set_status_with sharder f =
+    List.map (fun (shard, _) ->
+        Shard.set_status shard @@ f shard
     ) sharder.shards
     |> Lwt.nchoose
 

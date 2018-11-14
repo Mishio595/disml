@@ -23,6 +23,8 @@ module Shard = struct
         ready: unit Lwt.t;
     }
 
+    let id_rt = Lwt_mutex.create ()
+
     let parse (frame : Frame.t) =
         frame.content
         |> Yojson.Basic.from_string
@@ -44,7 +46,7 @@ module Shard = struct
         let frame = Frame.create ?content () in
         print_endline @@ Frame.show frame;
         shard.send frame
-        |> ignore;
+        >|= fun () ->
         shard
 
     let heartbeat shard =
@@ -70,7 +72,7 @@ module Shard = struct
         | _ -> ()
         in
         Client.notify t data;
-        shard
+        Lwt.return shard
 
     let set_status shard status =
         let payload = match status with
@@ -98,6 +100,16 @@ module Shard = struct
         in
         shard.ready >|= fun _ -> push_frame ~payload shard STATUS_UPDATE
 
+    let request_guild_members ~guild ?(query="") ?(limit=0) shard =
+        let payload = `Assoc [
+            ("guild_id", `String (string_of_int guild));
+            ("query", `String query);
+            ("limit", `Int limit);
+        ] in
+        shard.ready >|= fun _ -> push_frame ~payload shard REQUEST_GUILD_MEMBERS
+
+
+
     let initialize shard data =
         print_endline "Initializing...";
         let hb = match shard.hb with
@@ -114,6 +126,8 @@ module Shard = struct
         | Some s -> s
         in
         shard.hb <- Some hb;
+        Lwt_mutex.lock id_rt
+        >>= fun () ->
         match shard.session with
         | None ->
             let payload = `Assoc [
@@ -134,7 +148,11 @@ module Shard = struct
                 ("session_id", `String s);
                 ("seq", `Int shard.seq)
             ] in
-            push_frame ~payload shard RECONNECT
+            push_frame ~payload shard RESUME
+        >|= fun s ->
+        Lwt_engine.on_timer 5.0 false (fun _ -> Lwt_mutex.unlock id_rt)
+        |> ignore;
+        s
 
     let handle_frame shard (term : Yojson.Basic.json) resolver =
         match term with
@@ -148,15 +166,15 @@ module Shard = struct
             match op with
             | DISPATCH -> dispatch shard term resolver
             | HEARTBEAT -> heartbeat shard
-            | RECONNECT -> print_endline "OP 7"; shard (* TODO reconnect *)
-            | INVALID_SESSION -> print_endline "OP 9"; shard (* TODO invalid session *)
+            | RECONNECT -> print_endline "OP 7"; Lwt.return shard (* TODO reconnect *)
+            | INVALID_SESSION -> print_endline "OP 9"; Lwt.return shard (* TODO invalid session *)
             | HELLO ->
                 let data = List.assoc "d" term in
                 initialize shard data
-            | HEARTBEAT_ACK -> shard
-            | opcode -> print_endline @@ "Invalid Opcode:" ^ Opcode.to_string opcode; shard
+            | HEARTBEAT_ACK -> Lwt.return shard
+            | opcode -> print_endline @@ "Invalid Opcode:" ^ Opcode.to_string opcode; Lwt.return shard
         end
-        | _ -> print_endline "Invalid payload"; shard
+        | _ -> print_endline "Invalid payload"; Lwt.return shard
 
     let create data =
         let uri = (data.url ^ "?v=6&encoding=json") |> Uri.of_string in
@@ -176,7 +194,6 @@ module Shard = struct
             >>= fun frame ->
             let p = parse frame in
             handle_frame s p ready_resolver
-            |> Lwt.return
             >>= fun s -> recv_forever s
         end in
         let shard = {
@@ -232,5 +249,11 @@ let start ?count token =
 let set_status sharder status =
     List.map (fun (shard, _) ->
         Shard.set_status shard status
+    ) sharder.shards
+    |> Lwt.nchoose
+
+let request_guild_members ~guild ?query ?limit sharder =
+    List.map (fun (shard, _) ->
+        Shard.request_guild_members ~guild ?query ?limit shard
     ) sharder.shards
     |> Lwt.nchoose

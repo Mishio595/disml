@@ -9,7 +9,7 @@ let main sharder =
     end
 
 let _ =
-    Animus.Sharder.start @@ Sys.getenv "DISCORD_TOKEN"
+    Animus.Sharder.start ~count:2 @@ Sys.getenv "DISCORD_TOKEN"
     >>= (fun sharder ->
     main sharder
     |> ignore;

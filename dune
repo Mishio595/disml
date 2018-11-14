@@ -1,5 +1,5 @@
 (library
-	(name animus)
+	(name disml)
 	(modules endpoints http client sharder opcode)
 	(libraries lwt cohttp cohttp.lwt yojson websocket websocket-lwt-unix zlib)
 )
@@ -8,7 +8,7 @@
 (executable
     (name bot)
 	(modules bot)
-    (libraries lwt animus)
+    (libraries lwt disml)
 )
 
 (include_subdirs unqualified)

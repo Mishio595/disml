@@ -1,6 +1,6 @@
-open Lwt.Infix
+open Async
 open Cohttp
-open Cohttp_lwt_unix
+open Cohttp_async
 
 module Base = struct
     exception Invalid_Method
@@ -14,19 +14,20 @@ module Base = struct
     let process_request_body body =
         body
         |> Yojson.Basic.to_string
-        |> Cohttp_lwt.Body.of_string
+        |> Cohttp_async.Body.of_string
 
     let process_request_headers () =
-        let token = try
-            Sys.getenv "DISCORD_TOKEN"
-        with Not_found -> failwith "Please provide a token" in
+        let token = match Sys.getenv "DISCORD_TOKEN" with
+        | Some t -> t
+        | None -> failwith "Please provide a token"
+        in
         let h = Header.init_with "User-Agent" "Dis.ml v0.1.0" in
         let h = Header.add h "Authorization" ("Bot " ^ token) in
         Header.add h "Content-Type" "application/json"
 
     (* TODO Finish processor *)
     let process_response (_resp, body) =
-        body |> Cohttp_lwt.Body.to_string >|= Yojson.Basic.from_string
+        body |> Cohttp_async.Body.to_string >>| Yojson.Basic.from_string
 
     let request ?(body=`Null) m path =
         let uri = process_url path in

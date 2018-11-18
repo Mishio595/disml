@@ -1,14 +1,14 @@
 (library
 	(name disml)
 	(modules endpoints http client sharder opcode)
-	(libraries lwt cohttp cohttp.lwt yojson websocket websocket-lwt-unix zlib)
+	(libraries core async_ssl cohttp-async yojson websocket-async zlib)
 )
 
 ; Test executable
 (executable
     (name bot)
 	(modules bot)
-    (libraries lwt disml)
+    (libraries core async disml)
 )
 
 (include_subdirs unqualified)

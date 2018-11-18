@@ -20,7 +20,7 @@ type handler = {
     guild_member_add: (Yojson.Basic.json -> unit) option;
     guild_member_remove: (Yojson.Basic.json -> unit) option;
     guild_member_update: (Yojson.Basic.json -> unit) option;
-    guild_members_chunk: (Yojson.Basic.json -> unit) option; (* Not sure if this should be exposed *)
+    guild_members_chunk: (Yojson.Basic.json -> unit) option;
     guild_role_create: (Yojson.Basic.json -> unit) option;
     guild_role_delete: (Yojson.Basic.json -> unit) option;
     guild_role_update: (Yojson.Basic.json -> unit) option;

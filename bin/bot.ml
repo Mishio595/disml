@@ -9,6 +9,7 @@ let main () =
     in
     let client = Client.make token in
     Client.on "MESSAGE_CREATE" client (fun msg ->
+        let msg_time = Time.(to_span_since_epoch @@ now ()) in
         let content = Yojson.Basic.Util.(member "content" msg |> to_string) in
         let channel = Yojson.Basic.Util.(member "channel_id" msg |> to_string) in
         if String.is_prefix ~prefix:"!?ping" content then
@@ -16,7 +17,13 @@ let main () =
                 ("content", `String "Pong!");
                 ("tts", `Bool false);
             ]
-            >>> fun _ -> print_endline "Message sent!";
+            >>> fun resp ->
+            let message_id = Yojson.Basic.Util.(member "id" resp |> to_string) in
+            let rtt = Time.(to_span_since_epoch @@ sub (now ()) msg_time) in
+            Http.edit_message channel message_id @@ `Assoc [
+                ("content", `String ("Pong! `" ^ (Float.to_string @@ Time.Span.to_ms rtt) ^ " ms`"));
+            ]
+            >>> fun _ -> print_endline "Message Edited!"
     );
     Client.start client
     >>> fun client ->

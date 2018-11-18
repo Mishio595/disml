@@ -1,12 +1,43 @@
 open Async
+open Core
 open Websocket_async
 
 exception Invalid_Payload
 
-type data = {
-    shards: int * int;
-    token: string;
-    url: string;
+type handler = {
+    ready: (Yojson.Basic.json -> unit) option;
+    resumed: (Yojson.Basic.json -> unit) option;
+    channel_create: (Yojson.Basic.json -> unit) option;
+    channel_delete: (Yojson.Basic.json -> unit) option;
+    channel_update: (Yojson.Basic.json -> unit) option;
+    channel_pins_update: (Yojson.Basic.json -> unit) option;
+    guild_create: (Yojson.Basic.json -> unit) option;
+    guild_delete: (Yojson.Basic.json -> unit) option;
+    guild_update: (Yojson.Basic.json -> unit) option;
+    guild_ban_add: (Yojson.Basic.json -> unit) option;
+    guild_ban_remove: (Yojson.Basic.json -> unit) option;
+    guild_emojis_update: (Yojson.Basic.json -> unit) option;
+    guild_integrations_update: (Yojson.Basic.json -> unit) option;
+    guild_member_add: (Yojson.Basic.json -> unit) option;
+    guild_member_remove: (Yojson.Basic.json -> unit) option;
+    guild_member_update: (Yojson.Basic.json -> unit) option;
+    guild_members_chunk: (Yojson.Basic.json -> unit) option; (* Not sure if this should be exposed *)
+    guild_role_create: (Yojson.Basic.json -> unit) option;
+    guild_role_delete: (Yojson.Basic.json -> unit) option;
+    guild_role_update: (Yojson.Basic.json -> unit) option;
+    message_create: (Yojson.Basic.json -> unit) option;
+    message_delete: (Yojson.Basic.json -> unit) option;
+    message_update: (Yojson.Basic.json -> unit) option;
+    message_delete_bulk: (Yojson.Basic.json -> unit) option;
+    message_reaction_add: (Yojson.Basic.json -> unit) option;
+    message_reaction_remove: (Yojson.Basic.json -> unit) option;
+    message_reaction_remove_all: (Yojson.Basic.json -> unit) option;
+    presence_update: (Yojson.Basic.json -> unit) option;
+    typing_start: (Yojson.Basic.json -> unit) option;
+    user_update: (Yojson.Basic.json -> unit) option;
+    voice_state_update: (Yojson.Basic.json -> unit) option;
+    voice_server_update: (Yojson.Basic.json -> unit) option;
+    webhooks_update: (Yojson.Basic.json -> unit) option;
 }
 
 module Shard = struct
@@ -14,6 +45,7 @@ module Shard = struct
         mutable hb: unit Ivar.t option;
         mutable seq: int;
         mutable session: string option;
+        mutable handler: handler;
         token: string;
         shard: int * int;
         write: string Pipe.Writer.t;
@@ -25,16 +57,10 @@ module Shard = struct
 
     let parse frame =
         match frame with
-        | `Ok s ->
-            (* print_endline s; *)
-            Yojson.Basic.from_string s
+        | `Ok s -> Yojson.Basic.from_string s
         | `Eof -> raise Invalid_Payload
 
-    let encode term =
-        let content = term |> Yojson.Basic.to_string in
-        Frame.create ~content ()
-
-    let push_frame ?payload shard (ev : Opcode.t) =
+    let push_frame ?payload shard ev =
         print_endline @@ "Pushing frame. OP: " ^ Opcode.to_string @@ ev;
         let content = match payload with
         | None -> ""
@@ -44,7 +70,6 @@ module Shard = struct
             ("d", p);
             ]
         in
-        print_endline content;
         Pipe.write shard.write content
         >>| fun () ->
         shard
@@ -62,22 +87,181 @@ module Shard = struct
 
     let dispatch shard payload =
         let module J = Yojson.Basic.Util in
-        let seq = List.assoc "s" payload
-        |> J.to_int in
+        let seq = J.(member "s" payload |> to_int) in
         shard.seq <- seq;
-        let t = List.assoc "t" payload
-        |> J.to_string in
-        let data = List.assoc "d" payload
-        |> J.to_assoc in
+        let t = J.(member "t" payload |> to_string) in
+        let data = J.member "d" payload in
         let _ = match t with
-        | "READY" ->
+        | "READY" -> begin
             Ivar.fill_if_empty shard.ready ();
-            let session = List.assoc "session_id" data
-            |> J.to_string in
+            let session = J.(member "session_id" data |> to_string) in
             shard.session <- Some session;
+            match shard.handler.ready with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "RESUMED" -> begin
+            match shard.handler.resumed with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "CHANNEL_CREATE" -> begin
+            match shard.handler.channel_create with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "CHANNEL_DELETE" -> begin
+            match shard.handler.channel_delete with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "CHANNEL_UPDATE" -> begin
+            match shard.handler.channel_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "CHANNEL_PINS_UPDATE" -> begin
+            match shard.handler.channel_pins_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_CREATE" -> begin
+            match shard.handler.guild_create with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_DELETE" -> begin
+            match shard.handler.guild_delete with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_UPDATE" -> begin
+            match shard.handler.guild_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_BAN_ADD" -> begin
+            match shard.handler.guild_ban_add with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_BAN_REMOVE" -> begin
+            match shard.handler.guild_ban_remove with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_EMOJIS_UPDATE" -> begin
+            match shard.handler.guild_emojis_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_INTEGRATIONS_UPDATE" -> begin
+            match shard.handler.guild_integrations_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_MEMBER_ADD" -> begin
+            match shard.handler.guild_member_add with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_MEMBER_REMOVE" -> begin
+            match shard.handler.guild_member_remove with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_MEMBER_UPDATE" -> begin
+            match shard.handler.guild_member_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_MEMBERS_CHUNK" -> begin
+            match shard.handler.guild_members_chunk with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_ROLE_CREATE" -> begin
+            match shard.handler.guild_role_create with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_ROLE_DELETE" -> begin
+            match shard.handler.guild_role_delete with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "GUILD_ROLE_UPDATE" -> begin
+            match shard.handler.guild_role_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "MESSAGE_CREATE" -> begin
+            match shard.handler.message_create with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "MESSAGE_DELETE" -> begin
+            match shard.handler.message_delete with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "MESSAGE_UPDATE" -> begin
+            match shard.handler.message_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "MESSAGE_DELETE_BULK" -> begin
+            match shard.handler.message_delete_bulk with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "MESSAGE_REACTION_ADD" -> begin
+            match shard.handler.message_reaction_add with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "MESSAGE_REACTION_REMOVE" -> begin
+            match shard.handler.message_reaction_remove with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "MESSAGE_REACTION_REMOVE_ALL" -> begin
+            match shard.handler.message_reaction_remove_all with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "PRESENCE_UPDATE" -> begin
+            match shard.handler.presence_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "TYPING_START" -> begin
+            match shard.handler.typing_start with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "USER_UPDATE" -> begin
+            match shard.handler.user_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "VOICE_STATE_UPDATE" -> begin
+            match shard.handler.voice_state_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "VOICE_SERVER_UPDATE" -> begin
+            match shard.handler.voice_server_update with
+            | Some f -> f data
+            | None -> ()
+            end
+        | "WEBHOOKS_UPDATE" -> begin
+            match shard.handler.webhooks_update with
+            | Some f -> f data
+            | None -> ()
+            end
         | _ -> ()
         in
-        (* Client.notify t data; *)
         return shard
 
     let set_status shard status =
@@ -120,9 +304,7 @@ module Shard = struct
         let module J = Yojson.Basic.Util in
         let hb = match shard.hb with
         | None -> begin
-            let hb_interval = J.member "heartbeat_interval" data
-                |> J.to_int
-            in
+            let hb_interval = J.(member "heartbeat_interval" data |> to_int) in
             let finished = Ivar.create () in
             Clock.every'
             ~continue_on_error:true
@@ -164,33 +346,25 @@ module Shard = struct
         |> ignore;
         s
 
-    let handle_frame shard (term : Yojson.Basic.json)=
-        match term with
-        | `Assoc term -> begin
-            (* Yojson.Basic.pretty_print Format.std_formatter @@ `Assoc term;
-            print_newline (); *)
-            let op = List.assoc "op" term
-                |> Yojson.Basic.Util.to_int
-                |> Opcode.from_int
-            in
-            match op with
-            | DISPATCH -> dispatch shard term
-            | HEARTBEAT -> heartbeat shard
-            | RECONNECT -> print_endline "OP 7"; return shard (* TODO reconnect *)
-            | INVALID_SESSION -> print_endline "OP 9"; return shard (* TODO invalid session *)
-            | HELLO -> initialize shard @@ List.assoc "d" term
-            | HEARTBEAT_ACK -> return shard
-            | opcode ->
-                print_endline @@ "Invalid Opcode:" ^ Opcode.to_string opcode;
-                return shard
-        end
-        | _ ->
-            print_endline "Invalid payload";
+    let handle_frame shard term =
+        let module J = Yojson.Basic.Util in
+        let op = J.(member "op" term |> to_int)
+            |> Opcode.from_int
+        in
+        match op with
+        | DISPATCH -> dispatch shard term
+        | HEARTBEAT -> heartbeat shard
+        | RECONNECT -> print_endline "OP 7"; return shard (* TODO reconnect *)
+        | INVALID_SESSION -> print_endline "OP 9"; return shard (* TODO invalid session *)
+        | HELLO -> initialize shard @@ J.member "d" term
+        | HEARTBEAT_ACK -> return shard
+        | opcode ->
+            print_endline @@ "Invalid Opcode:" ^ Opcode.to_string opcode;
             return shard
 
-    let create data =
+    let create ~url ~shards ~token ~handler () =
         let open Core in
-        let uri = (data.url ^ "?v=6&encoding=json") |> Uri.of_string in
+        let uri = (url ^ "?v=6&encoding=json") |> Uri.of_string in
         let extra_headers = Http.Base.process_request_headers () in
         let host = Option.value_exn ~message:"no host in uri" Uri.(host uri) in
         let port =
@@ -214,12 +388,13 @@ module Shard = struct
             let shard = {
                 read;
                 write;
+                handler;
                 ready = Ivar.create ();
                 hb = None;
                 seq = 0;
-                shard = data.shards;
+                shard = shards;
                 session = None;
-                token = data.token;
+                token = token;
             }
             in
             ev_loop shard |> ignore;
@@ -242,31 +417,24 @@ module Shard = struct
             Conduit_async.V2.connect addr >>= tcp_fun
 end
 
-type 'a t = {
+type t = {
     shards: Shard.t list;
 }
 
-let start ?count token =
+let start ?count ~handler token =
     let module J = Yojson.Basic.Util in
-    Http.get_gateway_bot () >>| fun data ->
-    print_endline "Gateway obtained";
-    let url = J.member "url" data
-    |> J.to_string in
+    Http.get_gateway_bot () >>= fun data ->
+    let url = J.(member "url" data |> to_string) in
     let count = match count with
     | Some c -> c
-    | None -> J.member "shards" data
-        |> J.to_int
+    | None -> J.(member "shards" data |> to_int)
     in
     let shard_list = (0, count) in
     let rec gen_shards l a =
         match l with
         | (id, total) when id >= total -> return a
         | (id, total) ->
-            Shard.create {
-                url;
-                shards = (id, total);
-                token;
-            }
+            Shard.create ~url ~shards:(id, total) ~token ~handler ()
             >>= fun shard ->
             let a = shard :: a in
             gen_shards (id+1, total) a
@@ -278,16 +446,21 @@ let start ?count token =
     }
 
 let set_status sharder status =
-    Deferred.all @@ List.map (fun shard ->
+    Deferred.all @@ List.map ~f:(fun shard ->
         Shard.set_status shard status
     ) sharder.shards
 
 let set_status_with sharder f =
-    Deferred.all @@ List.map (fun shard ->
+    Deferred.all @@ List.map ~f:(fun shard ->
         Shard.set_status shard @@ f shard
     ) sharder.shards
 
 let request_guild_members ~guild ?query ?limit sharder =
-    Deferred.all @@ List.map (fun shard ->
+    Deferred.all @@ List.map ~f:(fun shard ->
         Shard.request_guild_members ~guild ?query ?limit shard
+    ) sharder.shards
+
+let update_handler sharder handler =
+    List.iter ~f:(fun shard ->
+        shard.handler <- handler
     ) sharder.shards

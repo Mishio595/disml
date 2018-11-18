@@ -1,6 +1,5 @@
 open Async
 open Cohttp
-open Cohttp_async
 
 module Base = struct
     exception Invalid_Method
@@ -34,11 +33,11 @@ module Base = struct
         let headers = process_request_headers () in
         let body = process_request_body body in
         (match m with
-        | `DELETE -> Client.delete ~headers ~body uri
-        | `GET -> Client.get ~headers uri
-        | `PATCH -> Client.patch ~headers ~body uri
-        | `POST -> Client.post ~headers ~body uri
-        | `PUT -> Client.put ~headers ~body uri
+        | `DELETE -> Cohttp_async.Client.delete ~headers ~body uri
+        | `GET -> Cohttp_async.Client.get ~headers uri
+        | `PATCH -> Cohttp_async.Client.patch ~headers ~body uri
+        | `POST -> Cohttp_async.Client.post ~headers ~body uri
+        | `PUT -> Cohttp_async.Client.put ~headers ~body uri
         | _ -> raise Invalid_Method)
         >>= process_response
 end

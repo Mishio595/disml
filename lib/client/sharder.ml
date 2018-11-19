@@ -58,7 +58,7 @@ module Shard = struct
     let parse frame =
         match frame with
         | `Ok s -> Yojson.Basic.from_string s
-        | `Eof -> raise Invalid_Payload
+        | `Eof -> raise Invalid_Payload (* This needs to go into reconnect code, or stop using client_ez and handle frames manually *)
 
     let push_frame ?payload shard ev =
         print_endline @@ "Pushing frame. OP: " ^ Opcode.to_string @@ ev;

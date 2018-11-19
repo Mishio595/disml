@@ -7,7 +7,7 @@ This is being actively developed and is definitely still in the early stages. Wh
 
 #### What is implemented?
 * The full Discord REST API
-* Redimentary gateway support
+* Rudimentary gateway support
 * Automatic sharding
 * Event dispatch to a user-defined consumer
 
@@ -16,3 +16,10 @@ This is being actively developed and is definitely still in the early stages. Wh
 * Automatic reconnection of dropped gateway connections
 * Voice
 * Cache
+
+## Getting started
+In order to get started you'll first need to install OCaml (of course). I recommend using OPAM and Dune as a package manage and build tool respectively.
+
+I currently don't provide an opam build file nor is the project uploaded to opam. This will happen with the first stable release.
+
+You'll find an example bot in /bin directory.

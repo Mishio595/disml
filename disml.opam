@@ -1,0 +1,12 @@
+opam-version: "2.0"
+name: "disml"
+version: "~dev"
+synopsis: "A Discord API wrapper"
+maintainer: "Mishio595 <tenseiken595@gmail.com>"
+authors: "Mishio595 <tenseiken595@gmail.com>"
+license: "MIT"
+homepage: "https://gitlab.com/Mishio595/disml"
+bug-reports: "https://gitlab.com/Mishio595/disml/issues"
+build: [dune build disml]
+install: [dune install disml]
+dev-repo: "git+https://gitlab.com/Mishio595/disml"

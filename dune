@@ -1,14 +1,14 @@
 (library
 	(name disml)
-	(modules endpoints http client sharder opcode)
+	(modules endpoints http client sharder opcode model s message guild channel)
 	(libraries core async_ssl cohttp-async yojson websocket-async zlib)
 )
 
 ; Test executable
 (executable
-    (name bot)
+	(name bot)
 	(modules bot)
-    (libraries core async disml)
+	(libraries core async_ssl disml)
 )
 
 (include_subdirs unqualified)

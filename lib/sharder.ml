@@ -4,48 +4,12 @@ open Websocket_async
 
 exception Invalid_Payload
 
-type handler = {
-    ready: (Yojson.Basic.json -> unit) option;
-    resumed: (Yojson.Basic.json -> unit) option;
-    channel_create: (Yojson.Basic.json -> unit) option;
-    channel_delete: (Yojson.Basic.json -> unit) option;
-    channel_update: (Yojson.Basic.json -> unit) option;
-    channel_pins_update: (Yojson.Basic.json -> unit) option;
-    guild_create: (Yojson.Basic.json -> unit) option;
-    guild_delete: (Yojson.Basic.json -> unit) option;
-    guild_update: (Yojson.Basic.json -> unit) option;
-    guild_ban_add: (Yojson.Basic.json -> unit) option;
-    guild_ban_remove: (Yojson.Basic.json -> unit) option;
-    guild_emojis_update: (Yojson.Basic.json -> unit) option;
-    guild_integrations_update: (Yojson.Basic.json -> unit) option;
-    guild_member_add: (Yojson.Basic.json -> unit) option;
-    guild_member_remove: (Yojson.Basic.json -> unit) option;
-    guild_member_update: (Yojson.Basic.json -> unit) option;
-    guild_members_chunk: (Yojson.Basic.json -> unit) option; (* Not sure if this should be exposed *)
-    guild_role_create: (Yojson.Basic.json -> unit) option;
-    guild_role_delete: (Yojson.Basic.json -> unit) option;
-    guild_role_update: (Yojson.Basic.json -> unit) option;
-    message_create: (Yojson.Basic.json -> unit) option;
-    message_delete: (Yojson.Basic.json -> unit) option;
-    message_update: (Yojson.Basic.json -> unit) option;
-    message_delete_bulk: (Yojson.Basic.json -> unit) option;
-    message_reaction_add: (Yojson.Basic.json -> unit) option;
-    message_reaction_remove: (Yojson.Basic.json -> unit) option;
-    message_reaction_remove_all: (Yojson.Basic.json -> unit) option;
-    presence_update: (Yojson.Basic.json -> unit) option;
-    typing_start: (Yojson.Basic.json -> unit) option;
-    user_update: (Yojson.Basic.json -> unit) option;
-    voice_state_update: (Yojson.Basic.json -> unit) option;
-    voice_server_update: (Yojson.Basic.json -> unit) option;
-    webhooks_update: (Yojson.Basic.json -> unit) option;
-}
-
 module Shard = struct
     type t = {
         mutable hb: unit Ivar.t option;
         mutable seq: int;
         mutable session: string option;
-        mutable handler: handler;
+        handler: (string * Model.t) Pipe.Writer.t;
         token: string;
         shard: int * int;
         write: string Pipe.Writer.t;
@@ -92,174 +56,16 @@ module Shard = struct
         let t = J.(member "t" payload |> to_string) in
         let data = J.member "d" payload in
         let _ = match t with
-        | "READY" -> begin
+        | "READY" ->
             Ivar.fill_if_empty shard.ready ();
             let session = J.(member "session_id" data |> to_string) in
-            shard.session <- Some session;
-            match shard.handler.ready with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "RESUMED" -> begin
-            match shard.handler.resumed with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "CHANNEL_CREATE" -> begin
-            match shard.handler.channel_create with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "CHANNEL_DELETE" -> begin
-            match shard.handler.channel_delete with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "CHANNEL_UPDATE" -> begin
-            match shard.handler.channel_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "CHANNEL_PINS_UPDATE" -> begin
-            match shard.handler.channel_pins_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_CREATE" -> begin
-            match shard.handler.guild_create with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_DELETE" -> begin
-            match shard.handler.guild_delete with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_UPDATE" -> begin
-            match shard.handler.guild_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_BAN_ADD" -> begin
-            match shard.handler.guild_ban_add with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_BAN_REMOVE" -> begin
-            match shard.handler.guild_ban_remove with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_EMOJIS_UPDATE" -> begin
-            match shard.handler.guild_emojis_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_INTEGRATIONS_UPDATE" -> begin
-            match shard.handler.guild_integrations_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_MEMBER_ADD" -> begin
-            match shard.handler.guild_member_add with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_MEMBER_REMOVE" -> begin
-            match shard.handler.guild_member_remove with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_MEMBER_UPDATE" -> begin
-            match shard.handler.guild_member_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_MEMBERS_CHUNK" -> begin
-            match shard.handler.guild_members_chunk with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_ROLE_CREATE" -> begin
-            match shard.handler.guild_role_create with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_ROLE_DELETE" -> begin
-            match shard.handler.guild_role_delete with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "GUILD_ROLE_UPDATE" -> begin
-            match shard.handler.guild_role_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "MESSAGE_CREATE" -> begin
-            match shard.handler.message_create with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "MESSAGE_DELETE" -> begin
-            match shard.handler.message_delete with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "MESSAGE_UPDATE" -> begin
-            match shard.handler.message_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "MESSAGE_DELETE_BULK" -> begin
-            match shard.handler.message_delete_bulk with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "MESSAGE_REACTION_ADD" -> begin
-            match shard.handler.message_reaction_add with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "MESSAGE_REACTION_REMOVE" -> begin
-            match shard.handler.message_reaction_remove with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "MESSAGE_REACTION_REMOVE_ALL" -> begin
-            match shard.handler.message_reaction_remove_all with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "PRESENCE_UPDATE" -> begin
-            match shard.handler.presence_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "TYPING_START" -> begin
-            match shard.handler.typing_start with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "USER_UPDATE" -> begin
-            match shard.handler.user_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "VOICE_STATE_UPDATE" -> begin
-            match shard.handler.voice_state_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "VOICE_SERVER_UPDATE" -> begin
-            match shard.handler.voice_server_update with
-            | Some f -> f data
-            | None -> ()
-            end
-        | "WEBHOOKS_UPDATE" -> begin
-            match shard.handler.webhooks_update with
-            | Some f -> f data
-            | None -> ()
-            end
+            shard.session <- Some session
+        | "MESSAGE_CREATE" ->
+            let msg = Model.Message.from_json data in
+            Pipe.write shard.handler (t, Message msg) >>> ignore
+        | "GUILD_CREATE" ->
+            let guild = Model.Guild.from_json data in
+            Pipe.write shard.handler (t, Guild guild) >>> ignore
         | _ -> ()
         in
         return shard
@@ -458,9 +264,4 @@ let set_status_with sharder f =
 let request_guild_members ~guild ?query ?limit sharder =
     Deferred.all @@ List.map ~f:(fun shard ->
         Shard.request_guild_members ~guild ?query ?limit shard
-    ) sharder.shards
-
-let update_handler sharder handler =
-    List.iter ~f:(fun shard ->
-        shard.handler <- handler
     ) sharder.shards

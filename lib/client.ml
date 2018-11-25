@@ -6,7 +6,7 @@ type t = {
     token: string;
 }
 
-let make ~handler token =
+let create ~handler token =
     {
         sharder = Ivar.create ();
         handler;
@@ -19,12 +19,12 @@ let start ?count client =
     Ivar.fill_if_empty client.sharder sharder;
     client
 
-let set_status client status =
+let set_status ~status client =
     Ivar.read client.sharder
     >>= fun sharder ->
     Sharder.set_status sharder status
 
-let set_status_with client f =
+let set_status_with ~f client =
     Ivar.read client.sharder
     >>= fun sharder ->
     Sharder.set_status_with sharder f

@@ -23,7 +23,7 @@ module Shard = struct
         | `Ok s -> Yojson.Basic.from_string s
         | `Eof -> raise Invalid_Payload (* This needs to go into reconnect code, or stop using client_ez and handle frames manually *)
 
-    let push_frame ?payload shard ev =
+    let push_frame ?payload ~ev shard =
         print_endline @@ "Pushing frame. OP: " ^ Opcode.to_string @@ ev;
         let content = match payload with
         | None -> ""
@@ -46,9 +46,9 @@ module Shard = struct
             ("op", `Int 1);
             ("d", seq);
         ] in
-        push_frame ~payload shard HEARTBEAT
+        push_frame ~payload ~ev:HEARTBEAT shard
 
-    let dispatch shard payload =
+    let dispatch ~payload shard =
         let module J = Yojson.Basic.Util in
         let seq = J.(member "s" payload |> to_int) in
         shard.seq <- seq;
@@ -61,7 +61,7 @@ module Shard = struct
         end;
         return shard
 
-    let set_status shard status =
+    let set_status ~status shard =
         let payload = match status with
         | `Assoc [("name", `String name); ("type", `Int t)] ->
             `Assoc [
@@ -86,7 +86,7 @@ module Shard = struct
         | _ -> raise Invalid_Payload
         in
         Ivar.read shard.ready >>= fun _ ->
-        push_frame ~payload shard STATUS_UPDATE
+        push_frame ~payload ~ev:STATUS_UPDATE shard
 
     let request_guild_members ~guild ?(query="") ?(limit=0) shard =
         let payload = `Assoc [
@@ -95,9 +95,9 @@ module Shard = struct
             ("limit", `Int limit);
         ] in
         Ivar.read shard.ready >>= fun _ ->
-        push_frame ~payload shard REQUEST_GUILD_MEMBERS
+        push_frame ~payload ~ev:REQUEST_GUILD_MEMBERS shard
 
-    let initialize shard data =
+    let initialize ~data shard =
         let module J = Yojson.Basic.Util in
         let hb = match shard.hb with
         | None -> begin
@@ -129,31 +129,31 @@ module Shard = struct
                 ("large_threshold", `Int 250);
                 ("shard", `List shards);
             ] in
-            push_frame ~payload shard IDENTIFY
+            push_frame ~payload ~ev:IDENTIFY shard
         | Some s ->
             let payload = `Assoc [
                 ("token", `String shard.token);
                 ("session_id", `String s);
                 ("seq", `Int shard.seq)
             ] in
-            push_frame ~payload shard RESUME
+            push_frame ~payload ~ev:RESUME shard
         >>| fun s ->
         Clock.after (Core.Time.Span.create ~sec:5 ())
         >>| (fun _ -> Mutex.unlock identify_lock)
         |> ignore;
         s
 
-    let handle_frame shard term =
+    let handle_frame ~f shard =
         let module J = Yojson.Basic.Util in
-        let op = J.(member "op" term |> to_int)
+        let op = J.(member "op" f |> to_int)
             |> Opcode.from_int
         in
         match op with
-        | DISPATCH -> dispatch shard term
+        | DISPATCH -> dispatch ~payload:f shard
         | HEARTBEAT -> heartbeat shard
         | RECONNECT -> print_endline "OP 7"; return shard (* TODO reconnect *)
         | INVALID_SESSION -> print_endline "OP 9"; return shard (* TODO invalid session *)
-        | HELLO -> initialize shard @@ J.member "d" term
+        | HELLO -> initialize ~data:(J.member "d" f) shard
         | HEARTBEAT_ACK -> return shard
         | opcode ->
             print_endline @@ "Invalid Opcode:" ^ Opcode.to_string opcode;
@@ -178,7 +178,7 @@ module Shard = struct
             let rec ev_loop shard =
                 Pipe.read read
                 >>= fun frame ->
-                handle_frame shard @@ parse frame
+                handle_frame ~f:(parse frame) shard
                 >>= fun shard ->
                 ev_loop shard
             in
@@ -243,12 +243,12 @@ let start ?count token =
 
 let set_status sharder status =
     Deferred.all @@ List.map ~f:(fun shard ->
-        Shard.set_status shard status
+        Shard.set_status ~status shard
     ) sharder.shards
 
 let set_status_with sharder f =
     Deferred.all @@ List.map ~f:(fun shard ->
-        Shard.set_status shard @@ f shard
+        Shard.set_status ~status:(f shard) shard
     ) sharder.shards
 
 let request_guild_members ~guild ?query ?limit sharder =

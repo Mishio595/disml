@@ -1,6 +1,6 @@
 (library
 	(name disml)
-	(modules endpoints http client sharder opcode model s message guild channel)
+	(modules attachment channel embed emoji guild member message reaction role snowflake user client endpoints http opcode sharder)
 	(libraries core async_ssl cohttp-async yojson websocket-async zlib)
 )
 

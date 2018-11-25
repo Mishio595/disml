@@ -2,7 +2,7 @@ open Async
 
 type t = {
     sharder: Sharder.t Ivar.t;
-    handler: (string * Model.t) Pipe.Writer.t;
+    handler: string Pipe.Writer.t;
     token: string;
 }
 
@@ -14,7 +14,7 @@ let make ~handler token =
     }
 
 let start ?count client =
-    Sharder.start ?count ~handler:client.handler client.token
+    Sharder.start ?count client.token
     >>| fun sharder ->
     Ivar.fill_if_empty client.sharder sharder;
     client

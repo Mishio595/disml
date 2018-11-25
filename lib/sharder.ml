@@ -9,7 +9,6 @@ module Shard = struct
         mutable hb: unit Ivar.t option;
         mutable seq: int;
         mutable session: string option;
-        handler: (string * Model.t) Pipe.Writer.t;
         token: string;
         shard: int * int;
         write: string Pipe.Writer.t;
@@ -55,19 +54,11 @@ module Shard = struct
         shard.seq <- seq;
         let t = J.(member "t" payload |> to_string) in
         let data = J.member "d" payload in
-        let _ = match t with
-        | "READY" ->
+        if t = "READY" then begin
             Ivar.fill_if_empty shard.ready ();
             let session = J.(member "session_id" data |> to_string) in
             shard.session <- Some session
-        | "MESSAGE_CREATE" ->
-            let msg = Model.Message.from_json data in
-            Pipe.write shard.handler (t, Message msg) >>> ignore
-        | "GUILD_CREATE" ->
-            let guild = Model.Guild.from_json data in
-            Pipe.write shard.handler (t, Guild guild) >>> ignore
-        | _ -> ()
-        in
+        end;
         return shard
 
     let set_status shard status =
@@ -168,7 +159,7 @@ module Shard = struct
             print_endline @@ "Invalid Opcode:" ^ Opcode.to_string opcode;
             return shard
 
-    let create ~url ~shards ~token ~handler () =
+    let create ~url ~shards ~token () =
         let open Core in
         let uri = (url ^ "?v=6&encoding=json") |> Uri.of_string in
         let extra_headers = Http.Base.process_request_headers () in
@@ -194,7 +185,6 @@ module Shard = struct
             let shard = {
                 read;
                 write;
-                handler;
                 ready = Ivar.create ();
                 hb = None;
                 seq = 0;
@@ -227,7 +217,7 @@ type t = {
     shards: Shard.t list;
 }
 
-let start ?count ~handler token =
+let start ?count token =
     let module J = Yojson.Basic.Util in
     Http.get_gateway_bot () >>= fun data ->
     let url = J.(member "url" data |> to_string) in
@@ -240,7 +230,7 @@ let start ?count ~handler token =
         match l with
         | (id, total) when id >= total -> return a
         | (id, total) ->
-            Shard.create ~url ~shards:(id, total) ~token ~handler ()
+            Shard.create ~url ~shards:(id, total) ~token ()
             >>= fun shard ->
             let a = shard :: a in
             gen_shards (id+1, total) a

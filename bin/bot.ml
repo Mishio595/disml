@@ -2,7 +2,7 @@ open Async
 open Core
 open Disml
 
-let rec ev_loop read =
+(* let rec ev_loop read =
     Pipe.read read >>= fun frame ->
     match frame with
     | `Eof -> return ()
@@ -35,22 +35,22 @@ let rec ev_loop read =
         end
         | _ -> return ()
     end
-    >>= fun _ -> ev_loop read
+    >>= fun _ -> ev_loop read *)
 
 let main () =
     let token = match Sys.getenv "DISCORD_TOKEN" with
     | Some s -> s
     | None -> failwith "No token"
     in
-    let (r,w) = Pipe.create () in
-    let client = Client.make ~handler:w token in
-    ev_loop r >>> ignore;
+    let (_r,w) = Pipe.create () in
+    let client = Client.create ~handler:w token in
+    (* ev_loop r >>> ignore; *)
     Client.start client
     >>> fun client ->
     Clock.every
     (Time.Span.create ~sec:60 ())
     (fun () ->
-        Client.set_status_with client (fun shard -> `String ("Current seq: " ^ (Int.to_string shard.seq)))
+        Client.set_status_with ~f:(fun shard -> `String ("Current seq: " ^ (Int.to_string shard.seq))) client
         |> ignore)
 
 let _ =

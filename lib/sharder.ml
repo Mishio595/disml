@@ -263,15 +263,16 @@ let start ?count token =
             let rec ev_loop t =
                 let (read, _) = t.shard.pipe in
                 Pipe.read read
-                >>= fun frame ->
-                (match parse frame with
+                >>| fun frame ->
+                let _ = match parse frame with
                 | Some f -> begin
                     handle_frame ~f t.shard
-                    >>| fun shard ->
+                    >>> fun shard ->
                     t.shard <- shard;
-                    t
                 end
-                | None -> recreate t.shard)
+                | None -> t.shard <- recreate t.shard;
+                in
+                t
                 >>= fun t ->
                 List.iter ~f:(fun f -> f t.shard) t.binds;
                 ev_loop t

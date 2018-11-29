@@ -1,6 +1,11 @@
 open Async
 open Core
-open Disml
+
+module Client = Disml.Client.Make(struct
+    let token = match Sys.getenv "DISCORD_TOKEN" with
+    | Some t -> t
+    | None -> failwith "No token in env"
+end)
 
 (* let rec ev_loop read =
     Pipe.read read >>= fun frame ->
@@ -38,12 +43,8 @@ open Disml
     >>= fun _ -> ev_loop read *)
 
 let main () =
-    let token = match Sys.getenv "DISCORD_TOKEN" with
-    | Some s -> s
-    | None -> failwith "No token"
-    in
     let (_r,w) = Pipe.create () in
-    let client = Client.create ~handler:w token in
+    let client = Client.init ~handler:w () in
     (* ev_loop r >>> ignore; *)
     Client.start client
     >>> fun client ->

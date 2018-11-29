@@ -50,8 +50,9 @@ let main () =
     Clock.every
     (Time.Span.create ~sec:60 ())
     (fun () ->
+        print_endline "Setting status";
         Client.set_status_with ~f:(fun shard -> `String ("Current seq: " ^ (Int.to_string shard.seq))) client
-        |> ignore)
+        >>> ignore)
 
 let _ =
     Scheduler.go_main ~main ()

@@ -254,33 +254,32 @@ let start ?count token =
     | None -> J.(member "shards" data |> to_int)
     in
     let shard_list = (0, count) in
+    let rec ev_loop t =
+        let (read, _) = t.shard.pipe in
+        Pipe.read read
+        >>| fun frame ->
+        let _ = match parse frame with
+        | Some f -> begin
+            handle_frame ~f t.shard
+            >>> fun shard ->
+            t.shard <- shard;
+        end
+        | None -> t.shard <- recreate t.shard;
+        in
+        t
+        >>= fun t ->
+        List.iter ~f:(fun f -> f t.shard) t.binds;
+        ev_loop t
+    in
     let rec gen_shards l a =
         match l with
         | (id, total) when id >= total -> return a
         | (id, total) ->
             Shard.create ~url ~shards:(id, total) ~token ()
             >>= fun shard ->
-            let rec ev_loop t =
-                let (read, _) = t.shard.pipe in
-                Pipe.read read
-                >>| fun frame ->
-                let _ = match parse frame with
-                | Some f -> begin
-                    handle_frame ~f t.shard
-                    >>> fun shard ->
-                    t.shard <- shard;
-                end
-                | None -> t.shard <- recreate t.shard;
-                in
-                t
-                >>= fun t ->
-                List.iter ~f:(fun f -> f t.shard) t.binds;
-                ev_loop t
-            in
             let t = { shard; binds = []; } in
             ev_loop t >>> ignore;
-            let a = t :: a in
-            gen_shards (id+1, total) a
+            gen_shards (id+1, total) (t :: a)
     in
     gen_shards shard_list []
     >>| fun shards ->

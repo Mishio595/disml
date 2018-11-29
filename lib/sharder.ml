@@ -104,7 +104,7 @@ module Make(H: S.Http) = struct
 
         let request_guild_members ~guild ?(query="") ?(limit=0) shard =
             let payload = `Assoc [
-                ("guild_id", `String (string_of_int guild));
+                ("guild_id", `String (Snowflake.to_string guild));
                 ("query", `String query);
                 ("limit", `Int limit);
             ] in
@@ -287,12 +287,12 @@ module Make(H: S.Http) = struct
         >>| fun shards ->
         { shards; }
 
-    let set_status sharder status =
+    let set_status ~status sharder =
         Deferred.all @@ List.map ~f:(fun t ->
             Shard.set_status ~status t.shard
         ) sharder.shards
 
-    let set_status_with sharder f =
+    let set_status_with ~f sharder =
         Deferred.all @@ List.map ~f:(fun t ->
             Shard.set_status ~status:(f t.shard) t.shard
         ) sharder.shards

@@ -8,7 +8,6 @@ module Make(T : S.Token) = struct
         exception Invalid_Method
 
         let base_url = "https://discordapp.com/api/v7"
-        let cdn_url = "https://cdn.discordapp.com"
 
         let process_url path =
             Uri.of_string (base_url ^ path)

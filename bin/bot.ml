@@ -52,7 +52,7 @@ let main () =
     (Time.Span.create ~sec:60 ())
     (fun () ->
         print_endline "Setting status";
-        Client.set_status_with ~f:(fun shard -> `String ("Current seq: " ^ (Int.to_string shard.seq))) client
+        Client.set_status ~status:(`String "Hello!") client
         >>> ignore)
 
 let _ =

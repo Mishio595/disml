@@ -1,8 +1,8 @@
-open Async
-open Core
-open Websocket_async
-
 module Make(H: S.Http) = struct
+    open Async
+    open Core
+    open Websocket_async
+
     exception Invalid_Payload
     exception Failure_to_Establish_Heartbeat
 
@@ -20,7 +20,7 @@ module Make(H: S.Http) = struct
         }
 
         type 'a t = {
-            mutable shard: 'a;
+            mutable state: 'a;
             mutable binds: ('a -> unit) list;
         }
 
@@ -75,7 +75,7 @@ module Make(H: S.Http) = struct
                 session = session;
             }
 
-        let set_status ~status shard =
+        let set_status ~(status:Yojson.Basic.json) shard =
             let payload = match status with
             | `Assoc [("name", `String name); ("type", `Int t)] ->
                 `Assoc [
@@ -102,7 +102,7 @@ module Make(H: S.Http) = struct
             Ivar.read shard.ready >>= fun _ ->
             push_frame ~payload ~ev:STATUS_UPDATE shard
 
-        let request_guild_members ~guild ?(query="") ?(limit=0) shard =
+        let request_guild_members ?(query="") ?(limit=0) ~guild shard =
             let payload = `Assoc [
                 ("guild_id", `String (Snowflake.to_string guild));
                 ("query", `String query);
@@ -136,7 +136,7 @@ module Make(H: S.Http) = struct
             | None -> begin
                 Mutex.lock identify_lock;
                 let payload = `Assoc [
-                    ("token", `String shard.token);
+                    ("token", `String token);
                     ("properties", `Assoc [
                         ("$os", `String Sys.os_type);
                         ("$device", `String "dis.ml");
@@ -155,7 +155,7 @@ module Make(H: S.Http) = struct
             end
             | Some s ->
                 let payload = `Assoc [
-                    ("token", `String shard.token);
+                    ("token", `String token);
                     ("session_id", `String s);
                     ("seq", `Int shard.seq)
                 ] in
@@ -183,7 +183,7 @@ module Make(H: S.Http) = struct
                 print_endline @@ "Invalid Opcode: " ^ Opcode.to_string opcode;
                 return shard
 
-        let rec create ~url ~shards ~token () =
+        let rec create ~url ~shards () =
             let open Core in
             let uri = (url ^ "?v=6&encoding=json") |> Uri.of_string in
             let extra_headers = H.Base.process_request_headers () in
@@ -215,7 +215,6 @@ module Make(H: S.Http) = struct
                     seq = 0;
                     id = shards;
                     session = None;
-                    token;
                     url;
                 }
             in
@@ -240,46 +239,46 @@ module Make(H: S.Http) = struct
             | Some hb -> Ivar.fill_if_empty hb ()
             | None -> ()
             );
-            create ~url:(shard.url) ~shards:(shard.id) ~token:(shard.token) ()
+            create ~url:(shard.url) ~shards:(shard.id) ()
     end
 
     type t = {
         shards: (Shard.shard Shard.t) list;
     }
 
-    let start ?count token =
+    let start ?count () =
         let module J = Yojson.Basic.Util in
-        Http.get_gateway_bot () >>= fun data ->
+        H.get_gateway_bot () >>= fun data ->
         let url = J.(member "url" data |> to_string) in
         let count = match count with
         | Some c -> c
         | None -> J.(member "shards" data |> to_int)
         in
         let shard_list = (0, count) in
-        let rec ev_loop t =
-            let (read, _) = t.shard.pipe in
+        let rec ev_loop (t:Shard.shard Shard.t) =
+            let (read, _) = t.state.pipe in
             Pipe.read read
-            >>| fun frame ->
-            let _ = match parse frame with
+            >>= fun frame ->
+            let _ = match Shard.parse frame with
             | Some f -> begin
-                handle_frame ~f t.shard
+                Shard.handle_frame ~f t.state
                 >>> fun shard ->
-                t.shard <- shard;
+                t.state <- shard;
             end
-            | None -> t.shard <- recreate t.shard;
+            | None -> Shard.recreate t.state >>> fun s -> t.state <- s;
             in
-            t
+            return t
             >>= fun t ->
-            List.iter ~f:(fun f -> f t.shard) t.binds;
+            List.iter ~f:(fun f -> f t.state) t.binds;
             ev_loop t
         in
         let rec gen_shards l a =
             match l with
             | (id, total) when id >= total -> return a
             | (id, total) ->
-                Shard.create ~url ~shards:(id, total) ~token ()
+                Shard.create ~url ~shards:(id, total) ()
                 >>= fun shard ->
-                let t = { shard; binds = []; } in
+                let t = Shard.{ state = shard; binds = []; } in
                 ev_loop t >>> ignore;
                 gen_shards (id+1, total) (t :: a)
         in
@@ -289,16 +288,16 @@ module Make(H: S.Http) = struct
 
     let set_status ~status sharder =
         Deferred.all @@ List.map ~f:(fun t ->
-            Shard.set_status ~status t.shard
+            Shard.set_status ~status t.state
         ) sharder.shards
 
     let set_status_with ~f sharder =
         Deferred.all @@ List.map ~f:(fun t ->
-            Shard.set_status ~status:(f t.shard) t.shard
+            Shard.set_status ~status:(f t.state) t.state
         ) sharder.shards
 
-    let request_guild_members ~guild ?query ?limit sharder =
+    let request_guild_members ?query ?limit ~guild sharder =
         Deferred.all @@ List.map ~f:(fun t ->
-            Shard.request_guild_members ~guild ?query ?limit t.shard
+            Shard.request_guild_members ~guild ?query ?limit t.state
         ) sharder.shards
 end

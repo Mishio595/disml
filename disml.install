@@ -1,0 +1,4 @@
+lib: [
+  "_build/install/default/lib/disml/META" {"META"}
+  "_build/install/default/lib/disml/opam" {"opam"}
+]

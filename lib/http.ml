@@ -1,7 +1,6 @@
-open Async
-open Cohttp
-
 module Make(T : S.Token) = struct
+    open Async
+    open Cohttp
     include T
 
     module Base = struct
@@ -18,7 +17,7 @@ module Make(T : S.Token) = struct
             |> Cohttp_async.Body.of_string
 
         let process_request_headers () =
-            let h = Header.init () in 
+            let h = Header.init () in
             Header.add_list h [
                 "User-Agent", "Dis.ml v0.1.0";
                 "Authorization", ("Bot " ^ token);
@@ -26,7 +25,7 @@ module Make(T : S.Token) = struct
             ]
 
         (* TODO Finish processor *)
-        let process_response (_resp, body) =
+        let process_response ((_resp:Response.t), body) =
             body |> Cohttp_async.Body.to_string >>| Yojson.Basic.from_string
 
         let request ?(body=`Null) m path =

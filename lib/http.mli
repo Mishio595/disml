@@ -1,1 +1,1 @@
-module Make(T: S.Token) : S.Http
+module Make(T : S.Token) : S.Http

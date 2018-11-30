@@ -183,7 +183,7 @@ module Make(H: S.Http) = struct
                 print_endline @@ "Invalid Opcode: " ^ Opcode.to_string opcode;
                 return shard
 
-        let rec create ~url ~shards () =
+        let create ~url ~shards () =
             let open Core in
             let uri = (url ^ "?v=6&encoding=json") |> Uri.of_string in
             let extra_headers = H.Base.process_request_headers () in
@@ -233,7 +233,8 @@ module Make(H: S.Http) = struct
                     `TCP (h, p)
                 in
                 Conduit_async.V2.connect addr >>= tcp_fun
-        and recreate shard =
+
+        let recreate shard =
             print_endline "Reconnecting...";
             (match shard.hb with
             | Some hb -> Ivar.fill_if_empty hb ()
@@ -259,14 +260,14 @@ module Make(H: S.Http) = struct
             let (read, _) = t.state.pipe in
             Pipe.read read
             >>= fun frame ->
-            let _ = match Shard.parse frame with
+            (match Shard.parse frame with
             | Some f -> begin
                 Shard.handle_frame ~f t.state
                 >>> fun shard ->
                 t.state <- shard;
             end
             | None -> Shard.recreate t.state >>> fun s -> t.state <- s;
-            in
+            );
             return t
             >>= fun t ->
             List.iter ~f:(fun f -> f t.state) t.binds;

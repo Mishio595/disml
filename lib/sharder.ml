@@ -50,7 +50,7 @@ module Make(H: S.Http) = struct
                 ]
             in
             let (_, write) = shard.pipe in
-            Pipe.write_if_open write @@ Frame.create ~content ()
+            Pipe.write write @@ Frame.create ~content ()
             >>| fun () ->
             shard
 
@@ -118,13 +118,19 @@ module Make(H: S.Http) = struct
                 match data with
                 | Some data ->
                     let hb_interval = J.(member "heartbeat_interval" data |> to_int) in
-                    let finished = Ivar.create () in
+                    let stop_hb = Ivar.create () in
+                    let stopper i =
+                        Ivar.read stop_hb
+                        >>> fun () ->
+                        Ivar.fill_if_empty i;
+                    in
+                    let stop = Deferred.create stopper in
                     Clock.every'
                     ~continue_on_error:true
-                    ~finished
+                    ~stop
                     (Core.Time.Span.create ~ms:hb_interval ())
                     (fun () -> heartbeat shard >>= fun _ -> return ());
-                    finished
+                    stop_hb
                 | None -> raise Failure_to_Establish_Heartbeat
             end
             | Some s -> s
@@ -263,12 +269,12 @@ module Make(H: S.Http) = struct
             (match Shard.parse frame with
             | Some f -> begin
                 Shard.handle_frame ~f t.state
-                >>> fun shard ->
-                t.state <- shard;
+                >>| fun s -> (t.state <- s; t)
             end
-            | None -> Shard.recreate t.state >>> fun s -> t.state <- s;
-            );
-            return t
+            | None -> begin
+                Shard.recreate t.state
+                >>| fun s -> (t.state <- s; t)
+            end)
             >>= fun t ->
             List.iter ~f:(fun f -> f t.state) t.binds;
             ev_loop t

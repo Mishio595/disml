@@ -122,7 +122,7 @@ module Make(H: S.Http) = struct
                     let stopper i =
                         Ivar.read stop_hb
                         >>> fun () ->
-                        Ivar.fill_if_empty i;
+                        Ivar.fill_if_empty i ()
                     in
                     let stop = Deferred.create stopper in
                     Clock.every'
@@ -189,6 +189,38 @@ module Make(H: S.Http) = struct
                 print_endline @@ "Invalid Opcode: " ^ Opcode.to_string opcode;
                 return shard
 
+        let rec make_client
+            ~initialized
+            ~extra_headers
+            ~app_to_ws
+            ~ws_to_app
+            ~net_to_ws
+            ~ws_to_net
+            uri =
+            client
+                ~initialized
+                ~extra_headers
+                ~app_to_ws
+                ~ws_to_app
+                ~net_to_ws
+                ~ws_to_net
+                uri
+                >>> fun res ->
+                    match res with
+                    | Ok () -> ()
+                    | Error _ ->
+                        let backoff = Time.Span.create ~ms:500 () in
+                        Clock.after backoff >>> (fun () ->
+                        make_client
+                            ~initialized
+                            ~extra_headers
+                            ~app_to_ws
+                            ~ws_to_app
+                            ~net_to_ws
+                            ~ws_to_net
+                            uri)
+
+
         let create ~url ~shards () =
             let open Core in
             let uri = (url ^ "?v=6&encoding=json") |> Uri.of_string in
@@ -204,15 +236,14 @@ module Make(H: S.Http) = struct
                 let (app_to_ws, write) = Pipe.create () in
                 let (read, ws_to_app) = Pipe.create () in
                 let initialized = Ivar.create () in
-                client
+                make_client
                     ~initialized
                     ~extra_headers
                     ~app_to_ws
                     ~ws_to_app
                     ~net_to_ws
                     ~ws_to_net
-                    uri
-                >>> ignore; (* TODO this needs to error check and retry with backoff *)
+                    uri;
                 Ivar.read initialized >>| fun () ->
                 {
                     pipe = (read, write);

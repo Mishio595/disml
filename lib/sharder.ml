@@ -1,4 +1,4 @@
-module Make(H: S.Http)(D : S.Dispatch) = struct
+module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
     open Async
     open Core
     open Websocket_async

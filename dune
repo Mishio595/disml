@@ -1,7 +1,8 @@
 (library
 	(name disml)
 	(modules activity attachment ban channel embed emoji guild member message presence reaction role snowflake user client dispatch endpoints event http opcode s sharder)
-	(libraries core async_ssl cohttp-async yojson websocket-async zlib)
+	(libraries core async_ssl cohttp-async yojson websocket-async zlib ppx_deriving_yojson.runtime)
+	(preprocess (pps ppx_jane ppx_deriving_yojson))
 )
 
 ; Test executable

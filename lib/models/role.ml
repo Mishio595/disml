@@ -7,4 +7,4 @@ type t = {
     permissions: int;
     managed: bool;
     mentionable: bool;
-}
+} [@@deriving yojson]

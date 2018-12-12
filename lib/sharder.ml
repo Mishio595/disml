@@ -34,7 +34,7 @@ module Make(H: S.Http) = struct
             | `Ok s -> begin
                 let open Frame.Opcode in
                 match s.opcode with
-                | Text -> Some (Yojson.Basic.from_string s.content)
+                | Text -> Some (Yojson.Safe.from_string s.content)
                 | _ -> None
             end
             | `Eof -> None
@@ -44,7 +44,7 @@ module Make(H: S.Http) = struct
             let content = match payload with
             | None -> ""
             | Some p ->
-                Yojson.Basic.to_string @@ `Assoc [
+                Yojson.Safe.to_string @@ `Assoc [
                 ("op", `Int (Opcode.to_int ev));
                 ("d", p);
                 ]
@@ -62,7 +62,7 @@ module Make(H: S.Http) = struct
             push_frame ~payload ~ev:HEARTBEAT shard
 
         let dispatch ~payload shard =
-            let module J = Yojson.Basic.Util in
+            let module J = Yojson.Safe.Util in
             let seq = J.(member "s" payload |> to_int) in
             let t = J.(member "t" payload |> to_string) in
             let data = J.member "d" payload in
@@ -75,7 +75,7 @@ module Make(H: S.Http) = struct
                 session = session;
             }
 
-        let set_status ~(status:Yojson.Basic.json) shard =
+        let set_status ~(status:Yojson.Safe.json) shard =
             let payload = match status with
             | `Assoc [("name", `String name); ("type", `Int t)] ->
                 `Assoc [
@@ -112,7 +112,7 @@ module Make(H: S.Http) = struct
             push_frame ~payload ~ev:REQUEST_GUILD_MEMBERS shard
 
         let initialize ?data shard =
-            let module J = Yojson.Basic.Util in
+            let module J = Yojson.Safe.Util in
             let hb = match shard.hb with
             | None -> begin
                 match data with
@@ -168,7 +168,7 @@ module Make(H: S.Http) = struct
                 push_frame ~payload ~ev:RESUME shard
 
         let handle_frame ~f shard =
-            let module J = Yojson.Basic.Util in
+            let module J = Yojson.Safe.Util in
             let op = J.(member "op" f |> to_int)
                 |> Opcode.from_int
             in
@@ -285,7 +285,7 @@ module Make(H: S.Http) = struct
     }
 
     let start ?count () =
-        let module J = Yojson.Basic.Util in
+        let module J = Yojson.Safe.Util in
         H.get_gateway_bot () >>= fun data ->
         let url = J.(member "url" data |> to_string) in
         let count = match count with

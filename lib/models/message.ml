@@ -18,4 +18,4 @@ type t = {
     pinned: bool;
     webhook_id: Snowflake.t;
     kind: int;
-}
+} [@@deriving yojson]

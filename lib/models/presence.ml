@@ -5,4 +5,4 @@ type t = {
     guild: Guild.t;
     status: string;
     activities: Activity.t list;
-}
+} [@@deriving yojson]

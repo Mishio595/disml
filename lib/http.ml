@@ -13,7 +13,7 @@ module Make(T : S.Token) = struct
 
         let process_request_body body =
             body
-            |> Yojson.Basic.to_string
+            |> Yojson.Safe.to_string
             |> Cohttp_async.Body.of_string
 
         let process_request_headers () =
@@ -26,7 +26,7 @@ module Make(T : S.Token) = struct
 
         (* TODO Finish processor *)
         let process_response ((_resp:Response.t), body) =
-            body |> Cohttp_async.Body.to_string >>| Yojson.Basic.from_string
+            body |> Cohttp_async.Body.to_string >>| Yojson.Safe.from_string
 
         let request ?(body=`Null) m path =
             let uri = process_url path in

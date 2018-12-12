@@ -25,4 +25,4 @@ type t = {
     member_count: int;
     members: Member.t list;
     channels: Channel.t list;
-}
+} [@@deriving yojson]

@@ -1,4 +1,4 @@
-module Make(H: S.Http) = struct
+module Make(H: S.Http)(D : S.Dispatch) = struct
     open Async
     open Core
     open Websocket_async
@@ -68,8 +68,9 @@ module Make(H: S.Http) = struct
             let data = J.member "d" payload in
             let session = J.(member "session_id" data |> to_string_option) in
             if t = "READY" then begin
-                Ivar.fill_if_empty shard.ready ();
+                Ivar.fill_if_empty shard.ready ()
             end;
+            D.dispatch ~ev:t data;
             return { shard with
                 seq = seq;
                 session = session;

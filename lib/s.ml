@@ -15,6 +15,50 @@ module type Handler = sig
         unit
 end
 
+module type Dispatch = sig
+    type dispatch_event =
+    | HELLO of Yojson.Safe.json
+    | READY of Yojson.Safe.json
+    | RESUMED of Yojson.Safe.json
+    | INVALID_SESSION of Yojson.Safe.json
+    | CHANNEL_CREATE of Channel.t
+    | CHANNEL_UPDATE of Channel.t
+    | CHANNEL_DELETE of Channel.t
+    | CHANNEL_PINS_UPDATE of Yojson.Safe.json
+    | GUILD_CREATE of Guild.t
+    | GUILD_UPDATE of Guild.t
+    | GUILD_DELETE of Guild.t
+    | GUILD_BAN_ADD of Ban.t
+    | GUILD_BAN_REMOVE of Ban.t
+    | GUILD_EMOJIS_UPDATE of Yojson.Safe.json
+    | GUILD_INTEGRATIONS_UPDATE of Yojson.Safe.json
+    | GUILD_MEMBER_ADD of Member.t
+    | GUILD_MEMBER_REMOVE of Member.t
+    | GUILD_MEMBER_UPDATE of Member.t
+    | GUILD_MEMBERS_CHUNK of Member.t list
+    | GUILD_ROLE_CREATE of Role.t (* * Guild.t *)
+    | GUILD_ROLE_UPDATE of Role.t (* * Guild.t *)
+    | GUILD_ROLE_DELETE of Role.t (* * Guild.t *)
+    | MESSAGE_CREATE of Message.t
+    | MESSAGE_UPDATE of Message.t
+    | MESSAGE_DELETE of Message.t
+    | MESSAGE_BULK_DELETE of Message.t list
+    | MESSAGE_REACTION_ADD of (* Message.t * *) Reaction.t
+    | MESSAGE_REACTION_REMOVE of (* Message.t * *) Reaction.t
+    | MESSAGE_REACTION_REMOVE_ALL of (* Message.t * *) Reaction.t list
+    | PRESENCE_UPDATE of Presence.t
+    | TYPING_START of Yojson.Safe.json
+    | USER_UPDATE of Yojson.Safe.json
+    | VOICE_STATE_UPDATE of Yojson.Safe.json
+    | VOICE_SERVER_UPDATE of Yojson.Safe.json
+    | WEBHOOKS_UPDATE of Yojson.Safe.json
+
+    exception Invalid_event of string
+
+    val event_of_string : contents:Yojson.Safe.json -> string -> dispatch_event
+    val dispatch : ev:string -> Yojson.Safe.json -> unit
+end
+
 module type Http = sig
     val token : string
 

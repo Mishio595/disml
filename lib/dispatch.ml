@@ -1,6 +1,6 @@
 open Core
 
-module Make(H : S.Handler) = struct
+module Make(H : S.Handler) : S.Dispatch = struct
     type dispatch_event =
     | HELLO of Yojson.Safe.json
     | READY of Yojson.Safe.json

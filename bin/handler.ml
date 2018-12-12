@@ -1,0 +1,1 @@
+let handle_event _a _b = print_endline "Received event!"

@@ -1,7 +1,7 @@
 type t = {
     id: int;
     as_string: string;
-}
+} [@@deriving yojson]
 
 let to_int t = t.id
 let to_string t = t.as_string

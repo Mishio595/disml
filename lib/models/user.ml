@@ -4,4 +4,4 @@ type t = {
     discriminator: string;
     avatar: string;
     bot: bool;
-}
+} [@@deriving yojson]

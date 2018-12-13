@@ -1,21 +1,20 @@
 open Async
 
-module Make(T : S.Token) = struct
+module Make(T : S.Token)(H : S.Handler) = struct
     include T
 
     module Http = Http.Make(T)
-    module Sharder = Sharder.Make(Http)
+    module Dispatch = Dispatch.Make(H)
+    module Sharder = Sharder.Make(Http)(Dispatch)
 
     type t = {
         sharder: Sharder.t Ivar.t;
-        handler: string Pipe.Writer.t;
         token: string;
     }
 
-    let init ~handler () =
+    let init () =
         {
             sharder = Ivar.create ();
-            handler;
             token;
         }
 

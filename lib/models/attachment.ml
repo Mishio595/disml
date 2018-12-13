@@ -6,4 +6,4 @@ type t = {
     proxy_url: string;
     height: int option;
     width: int option;
-}
+} [@@deriving yojson]

@@ -14,4 +14,4 @@ type t = {
     owner_id: Snowflake.t option;
     application_id: Snowflake.t option;
     parent_id: Snowflake.t option;
-}
+} [@@deriving yojson]

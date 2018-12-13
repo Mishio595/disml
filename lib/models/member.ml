@@ -5,4 +5,4 @@ type t = {
     joined_at: string;
     deaf: bool;
     mute: bool;
-}
+} [@@deriving yojson]

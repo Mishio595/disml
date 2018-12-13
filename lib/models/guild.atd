@@ -1,0 +1,36 @@
+type snowflake <ocaml from="Snowflake" t="t"> = abstract
+type user <ocaml from="User" t="t"> = abstract
+type member <ocaml from="Member" t="t"> = abstract
+type role <ocaml from="Role" t="t"> = abstract
+type channel <ocaml from="Channel" t="t"> = abstract
+type emoji <ocaml from="Emoji" t="t"> = abstract
+
+
+type t = {
+    id: snowflake;
+    name: string;
+    ?icon: string option;
+    ?splash: string option;
+    owner_id: snowflake;
+    region: string;
+    ?afk_channel_id: snowflake option;
+    afk_timeout: int;
+    ?embed_enabled: bool option;
+    ?embed_channel_id: snowflake option;
+    verification_level: int;
+    default_message_notifications: int;
+    explicit_content_filter: int;
+    roles: role list;
+    emojis: emoji list;
+    features: string list;
+    mfa_level: int;
+    ?application_id: snowflake option;
+    ?widget_enabled: bool option;
+    ?widget_channel: channel option;
+    ?system_channel: channel option;
+    ?large: bool option;
+    ?unavailable: bool option;
+    ?member_count: int option;
+    ?members: member list option;
+    ?channels: channel list option;
+}

@@ -1,0 +1,6 @@
+type emoji <ocaml from="Emoji" t="t"> = abstract
+
+type t = {
+    count: int;
+    emoji: emoji;
+}

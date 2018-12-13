@@ -5,6 +5,9 @@ module Make(T : S.Token) = struct
 
     module Base = struct
         exception Invalid_Method
+        exception Bad_response_headers
+
+        let rl = ref Rl.empty
 
         let base_url = "https://discordapp.com/api/v7"
 
@@ -24,22 +27,38 @@ module Make(T : S.Token) = struct
                 "Content-Type", "application/json";
             ]
 
-        (* TODO Finish processor *)
-        let process_response ((_resp:Response.t), body) =
+        let process_response path ((resp:Response.t), body) =
+            (match Response.headers resp
+            |> Rl.rl_of_header with
+            | Some r -> Mvar.put (Rl.find_exn !rl path) r
+            | None -> raise Bad_response_headers)
+            >>= fun () ->
             body |> Cohttp_async.Body.to_string >>| Yojson.Safe.from_string
 
         let request ?(body=`Null) m path =
-            let uri = process_url path in
-            let headers = process_request_headers () in
-            let body = process_request_body body in
-            (match m with
-            | `DELETE -> Cohttp_async.Client.delete ~headers ~body uri
-            | `GET -> Cohttp_async.Client.get ~headers uri
-            | `PATCH -> Cohttp_async.Client.patch ~headers ~body uri
-            | `POST -> Cohttp_async.Client.post ~headers ~body uri
-            | `PUT -> Cohttp_async.Client.put ~headers ~body uri
-            | _ -> raise Invalid_Method)
-            >>= process_response
+            rl := Rl.update ~f:(function
+                | None ->
+                    let r = Mvar.create () in
+                    Mvar.set r Rl.default;
+                    r
+                | Some r -> r
+            ) !rl path;
+            let limit = Rl.find_exn !rl path in
+            Mvar.take limit >>= fun limit ->
+            let process () =
+                let uri = process_url path in
+                let headers = process_request_headers () in
+                let body = process_request_body body in
+                (match m with
+                | `DELETE -> Cohttp_async.Client.delete ~headers ~body uri
+                | `GET -> Cohttp_async.Client.get ~headers uri
+                | `PATCH -> Cohttp_async.Client.patch ~headers ~body uri
+                | `POST -> Cohttp_async.Client.post ~headers ~body uri
+                | `PUT -> Cohttp_async.Client.put ~headers ~body uri
+                | _ -> raise Invalid_Method)
+                >>= process_response path
+            in if limit.remaining > 0 then process ()
+            else Clock.at (Core.Time.(Span.of_int_sec limit.reset |> of_span_since_epoch)) >>= process
     end
 
     let get_gateway () =

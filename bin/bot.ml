@@ -8,8 +8,7 @@ module Client = Disml.Client.Make(struct
 end)(Handler)
 
 let main () =
-    let client = Client.init () in
-    Client.start client
+    Client.start ()
     >>> fun client ->
     Clock.every
     (Time.Span.create ~sec:60 ())

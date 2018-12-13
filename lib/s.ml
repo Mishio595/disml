@@ -21,32 +21,32 @@ module type Dispatch = sig
     | READY of Yojson.Safe.json
     | RESUMED of Yojson.Safe.json
     | INVALID_SESSION of Yojson.Safe.json
-    | CHANNEL_CREATE of Channel.t
-    | CHANNEL_UPDATE of Channel.t
-    | CHANNEL_DELETE of Channel.t
+    | CHANNEL_CREATE of Channel_t.t
+    | CHANNEL_UPDATE of Channel_t.t
+    | CHANNEL_DELETE of Channel_t.t
     | CHANNEL_PINS_UPDATE of Yojson.Safe.json
-    | GUILD_CREATE of Guild.t
-    | GUILD_UPDATE of Guild.t
-    | GUILD_DELETE of Guild.t
-    | GUILD_BAN_ADD of Ban.t
-    | GUILD_BAN_REMOVE of Ban.t
+    | GUILD_CREATE of Guild_t.t
+    | GUILD_UPDATE of Guild_t.t
+    | GUILD_DELETE of Guild_t.t
+    | GUILD_BAN_ADD of Ban_t.t
+    | GUILD_BAN_REMOVE of Ban_t.t
     | GUILD_EMOJIS_UPDATE of Yojson.Safe.json
     | GUILD_INTEGRATIONS_UPDATE of Yojson.Safe.json
-    | GUILD_MEMBER_ADD of Member.t
-    | GUILD_MEMBER_REMOVE of Member.t
-    | GUILD_MEMBER_UPDATE of Member.t
-    | GUILD_MEMBERS_CHUNK of Member.t list
-    | GUILD_ROLE_CREATE of Role.t (* * Guild.t *)
-    | GUILD_ROLE_UPDATE of Role.t (* * Guild.t *)
-    | GUILD_ROLE_DELETE of Role.t (* * Guild.t *)
-    | MESSAGE_CREATE of Message.t
-    | MESSAGE_UPDATE of Message.t
-    | MESSAGE_DELETE of Message.t
-    | MESSAGE_BULK_DELETE of Message.t list
-    | MESSAGE_REACTION_ADD of (* Message.t * *) Reaction.t
-    | MESSAGE_REACTION_REMOVE of (* Message.t * *) Reaction.t
-    | MESSAGE_REACTION_REMOVE_ALL of (* Message.t * *) Reaction.t list
-    | PRESENCE_UPDATE of Presence.t
+    | GUILD_MEMBER_ADD of Member_t.t
+    | GUILD_MEMBER_REMOVE of Member_t.t
+    | GUILD_MEMBER_UPDATE of Member_t.t
+    | GUILD_MEMBERS_CHUNK of Member_t.t list
+    | GUILD_ROLE_CREATE of Role_t.t (* * Guild.t *)
+    | GUILD_ROLE_UPDATE of Role_t.t (* * Guild.t *)
+    | GUILD_ROLE_DELETE of Role_t.t (* * Guild.t *)
+    | MESSAGE_CREATE of Message_t.t
+    | MESSAGE_UPDATE of Message_t.t
+    | MESSAGE_DELETE of Message_t.t
+    | MESSAGE_BULK_DELETE of Message_t.t list
+    | MESSAGE_REACTION_ADD of (* Message.t * *) Reaction_t.t
+    | MESSAGE_REACTION_REMOVE of (* Message.t * *) Reaction_t.t
+    | MESSAGE_REACTION_REMOVE_ALL of (* Message.t * *) Reaction_t.t list
+    | PRESENCE_UPDATE of Presence_t.t
     | TYPING_START of Yojson.Safe.json
     | USER_UPDATE of Yojson.Safe.json
     | VOICE_STATE_UPDATE of Yojson.Safe.json
@@ -55,8 +55,8 @@ module type Dispatch = sig
 
     exception Invalid_event of string
 
-    val event_of_string : contents:Yojson.Safe.json -> string -> dispatch_event
-    val dispatch : ev:string -> Yojson.Safe.json -> unit
+    val event_of_string : contents:string -> string -> dispatch_event
+    val dispatch : ev:string -> string -> unit
 end
 
 module type Http = sig
@@ -72,6 +72,7 @@ module type Http = sig
         val process_request_headers : unit -> Cohttp.Header.t
 
         val process_response :
+            string ->
             Cohttp_async.Response.t * Cohttp_async.Body.t ->
             Yojson.Safe.json Deferred.t
 
@@ -277,7 +278,7 @@ module type Sharder = sig
         val request_guild_members :
             ?query:string ->
             ?limit:int ->
-            guild:Snowflake.t ->
+            guild:Snowflake_t.t ->
             shard ->
             shard Deferred.t
 
@@ -301,7 +302,7 @@ module type Sharder = sig
     val request_guild_members :
         ?query:string ->
         ?limit:int ->
-        guild:Snowflake.t ->
+        guild:Snowflake_t.t ->
         t ->
         Shard.shard list Deferred.t
 end

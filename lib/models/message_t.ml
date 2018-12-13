@@ -9,7 +9,7 @@ type role = Role_t.t
 
 type reaction = Reaction_t.t
 
-type member = Member_t.t
+type partial_member = Member_t.partial_member
 
 type embed = Embed_t.t
 
@@ -19,7 +19,7 @@ type t = {
   id: snowflake;
   author: user;
   channel_id: snowflake;
-  member: member option;
+  member: partial_member option;
   guild_id: snowflake option;
   content: string;
   timestamp: string;
@@ -36,3 +36,5 @@ type t = {
   webhook_id: snowflake;
   kind: int
 }
+
+type member = Member_t.t

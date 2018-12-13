@@ -3,17 +3,17 @@
 
 type user = User_t.t
 
-type role = Role_t.t
+type snowflake = Snowflake_t.t
 
-type guild = Guild_t.t
+type partial_user = User_t.partial_user
 
 type activity = Activity_t.t
 
 type t = Presence_t.t = {
-  user: user;
-  roles: role list;
+  user: partial_user;
+  roles: snowflake list;
   game: activity option;
-  guild: guild;
+  guild_id: snowflake;
   status: string;
   activities: activity list
 }
@@ -38,45 +38,45 @@ val user_of_string :
   string -> user
   (** Deserialize JSON data of type {!user}. *)
 
-val write_role :
-  Bi_outbuf.t -> role -> unit
-  (** Output a JSON value of type {!role}. *)
+val write_snowflake :
+  Bi_outbuf.t -> snowflake -> unit
+  (** Output a JSON value of type {!snowflake}. *)
 
-val string_of_role :
-  ?len:int -> role -> string
-  (** Serialize a value of type {!role}
+val string_of_snowflake :
+  ?len:int -> snowflake -> string
+  (** Serialize a value of type {!snowflake}
       into a JSON string.
       @param len specifies the initial length
                  of the buffer used internally.
                  Default: 1024. *)
 
-val read_role :
-  Yojson.Safe.lexer_state -> Lexing.lexbuf -> role
-  (** Input JSON data of type {!role}. *)
+val read_snowflake :
+  Yojson.Safe.lexer_state -> Lexing.lexbuf -> snowflake
+  (** Input JSON data of type {!snowflake}. *)
 
-val role_of_string :
-  string -> role
-  (** Deserialize JSON data of type {!role}. *)
+val snowflake_of_string :
+  string -> snowflake
+  (** Deserialize JSON data of type {!snowflake}. *)
 
-val write_guild :
-  Bi_outbuf.t -> guild -> unit
-  (** Output a JSON value of type {!guild}. *)
+val write_partial_user :
+  Bi_outbuf.t -> partial_user -> unit
+  (** Output a JSON value of type {!partial_user}. *)
 
-val string_of_guild :
-  ?len:int -> guild -> string
-  (** Serialize a value of type {!guild}
+val string_of_partial_user :
+  ?len:int -> partial_user -> string
+  (** Serialize a value of type {!partial_user}
       into a JSON string.
       @param len specifies the initial length
                  of the buffer used internally.
                  Default: 1024. *)
 
-val read_guild :
-  Yojson.Safe.lexer_state -> Lexing.lexbuf -> guild
-  (** Input JSON data of type {!guild}. *)
+val read_partial_user :
+  Yojson.Safe.lexer_state -> Lexing.lexbuf -> partial_user
+  (** Input JSON data of type {!partial_user}. *)
 
-val guild_of_string :
-  string -> guild
-  (** Deserialize JSON data of type {!guild}. *)
+val partial_user_of_string :
+  string -> partial_user
+  (** Deserialize JSON data of type {!partial_user}. *)
 
 val write_activity :
   Bi_outbuf.t -> activity -> unit

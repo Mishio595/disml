@@ -9,7 +9,7 @@ type role = Role_t.t
 
 type reaction = Reaction_t.t
 
-type member = Member_t.t
+type partial_member = Member_t.partial_member
 
 type embed = Embed_t.t
 
@@ -19,7 +19,7 @@ type t = Message_t.t = {
   id: snowflake;
   author: user;
   channel_id: snowflake;
-  member: member option;
+  member: partial_member option;
   guild_id: snowflake option;
   content: string;
   timestamp: string;
@@ -36,6 +36,8 @@ type t = Message_t.t = {
   webhook_id: snowflake;
   kind: int
 }
+
+type member = Member_t.t
 
 val write_user :
   Bi_outbuf.t -> user -> unit
@@ -117,25 +119,25 @@ val reaction_of_string :
   string -> reaction
   (** Deserialize JSON data of type {!reaction}. *)
 
-val write_member :
-  Bi_outbuf.t -> member -> unit
-  (** Output a JSON value of type {!member}. *)
+val write_partial_member :
+  Bi_outbuf.t -> partial_member -> unit
+  (** Output a JSON value of type {!partial_member}. *)
 
-val string_of_member :
-  ?len:int -> member -> string
-  (** Serialize a value of type {!member}
+val string_of_partial_member :
+  ?len:int -> partial_member -> string
+  (** Serialize a value of type {!partial_member}
       into a JSON string.
       @param len specifies the initial length
                  of the buffer used internally.
                  Default: 1024. *)
 
-val read_member :
-  Yojson.Safe.lexer_state -> Lexing.lexbuf -> member
-  (** Input JSON data of type {!member}. *)
+val read_partial_member :
+  Yojson.Safe.lexer_state -> Lexing.lexbuf -> partial_member
+  (** Input JSON data of type {!partial_member}. *)
 
-val member_of_string :
-  string -> member
-  (** Deserialize JSON data of type {!member}. *)
+val partial_member_of_string :
+  string -> partial_member
+  (** Deserialize JSON data of type {!partial_member}. *)
 
 val write_embed :
   Bi_outbuf.t -> embed -> unit
@@ -196,4 +198,24 @@ val read_t :
 val t_of_string :
   string -> t
   (** Deserialize JSON data of type {!t}. *)
+
+val write_member :
+  Bi_outbuf.t -> member -> unit
+  (** Output a JSON value of type {!member}. *)
+
+val string_of_member :
+  ?len:int -> member -> string
+  (** Serialize a value of type {!member}
+      into a JSON string.
+      @param len specifies the initial length
+                 of the buffer used internally.
+                 Default: 1024. *)
+
+val read_member :
+  Yojson.Safe.lexer_state -> Lexing.lexbuf -> member
+  (** Input JSON data of type {!member}. *)
+
+val member_of_string :
+  string -> member
+  (** Deserialize JSON data of type {!member}. *)
 

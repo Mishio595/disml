@@ -37,7 +37,10 @@ module Make(T : S.Token) = struct
 
         let request ?(body=`Null) m path =
             rl := Rl.update ~f:(function
-                | None -> Mvar.create ()
+                | None ->
+                    let r = Mvar.create () in
+                    Mvar.set r Rl.default;
+                    r
                 | Some r -> r
             ) !rl path;
             let limit = Rl.find_exn !rl path in

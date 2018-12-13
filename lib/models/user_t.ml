@@ -10,3 +10,5 @@ type t = {
   avatar: string option;
   bot: bool
 }
+
+type partial_user = { id: snowflake }

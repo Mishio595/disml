@@ -21,8 +21,9 @@ let rl_of_header h =
         Some { limit; remaining; reset; }
     | _ -> None
 
-let update = RouteMap.update
+let default = { limit = 1; remaining = 1; reset = 0; }
 let empty : t = RouteMap.empty
+let update = RouteMap.update
 let find = RouteMap.find
 let find_exn m s = match find m s with
     | Some r -> r

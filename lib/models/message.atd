@@ -1,6 +1,7 @@
 type snowflake <ocaml from="Snowflake" t="t"> = abstract
 type user <ocaml from="User" t="t"> = abstract
 type member <ocaml from="Member" t="t"> = abstract
+type partial_member <ocaml from="Member" t="partial_member"> = abstract
 type role <ocaml from="Role" t="t"> = abstract
 type attachment <ocaml from="Attachment" t="t"> = abstract
 type embed <ocaml from="Embed" t="t"> = abstract
@@ -10,7 +11,7 @@ type t = {
     id: snowflake;
     author: user;
     channel_id: snowflake;
-    ?member: member option;
+    ?member: partial_member option;
     ?guild_id: snowflake option;
     content: string;
     timestamp: string;

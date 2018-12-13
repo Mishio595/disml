@@ -1,13 +1,13 @@
+type snowflake <ocaml from="Snowflake" t="t"> = abstract
 type user <ocaml from="User" t="t"> = abstract
-type role <ocaml from="Role" t="t"> = abstract
+type partial_user <ocaml from="User" t="partial_user"> = abstract
 type activity <ocaml from="Activity" t="t"> = abstract
-type guild <ocaml from="Guild" t="t"> = abstract
 
 type t = {
-    user: user;
-    roles: role list;
+    user: partial_user;
+    roles: snowflake list;
     ?game: activity option;
-    guild: guild;
+    guild_id: snowflake;
     status: string;
     activities: activity list;
 }

@@ -3,17 +3,17 @@
 
 type user = User_t.t
 
-type role = Role_t.t
+type snowflake = Snowflake_t.t
 
-type guild = Guild_t.t
+type partial_user = User_t.partial_user
 
 type activity = Activity_t.t
 
 type t = Presence_t.t = {
-  user: user;
-  roles: role list;
+  user: partial_user;
+  roles: snowflake list;
   game: activity option;
-  guild: guild;
+  guild_id: snowflake;
   status: string;
   activities: activity list
 }
@@ -30,30 +30,30 @@ let read_user = (
 )
 let user_of_string s =
   read_user (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write_role = (
-  Role_j.write_t
+let write_snowflake = (
+  Snowflake_j.write_t
 )
-let string_of_role ?(len = 1024) x =
+let string_of_snowflake ?(len = 1024) x =
   let ob = Bi_outbuf.create len in
-  write_role ob x;
+  write_snowflake ob x;
   Bi_outbuf.contents ob
-let read_role = (
-  Role_j.read_t
+let read_snowflake = (
+  Snowflake_j.read_t
 )
-let role_of_string s =
-  read_role (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write_guild = (
-  Guild_j.write_t
+let snowflake_of_string s =
+  read_snowflake (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
+let write_partial_user = (
+  User_j.write_partial_user
 )
-let string_of_guild ?(len = 1024) x =
+let string_of_partial_user ?(len = 1024) x =
   let ob = Bi_outbuf.create len in
-  write_guild ob x;
+  write_partial_user ob x;
   Bi_outbuf.contents ob
-let read_guild = (
-  Guild_j.read_t
+let read_partial_user = (
+  User_j.read_partial_user
 )
-let guild_of_string s =
-  read_guild (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
+let partial_user_of_string s =
+  read_partial_user (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write_activity = (
   Activity_j.write_t
 )
@@ -141,7 +141,7 @@ let _2_of_string s =
   read__2 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write__1 = (
   Atdgen_runtime.Oj_run.write_list (
-    write_role
+    write_snowflake
   )
 )
 let string_of__1 ?(len = 1024) x =
@@ -150,7 +150,7 @@ let string_of__1 ?(len = 1024) x =
   Bi_outbuf.contents ob
 let read__1 = (
   Atdgen_runtime.Oj_run.read_list (
-    read_role
+    read_snowflake
   )
 )
 let _1_of_string s =
@@ -165,7 +165,7 @@ let write_t : _ -> t -> _ = (
       Bi_outbuf.add_char ob ',';
     Bi_outbuf.add_string ob "\"user\":";
     (
-      write_user
+      write_partial_user
     )
       ob x.user;
     if !is_first then
@@ -192,11 +192,11 @@ let write_t : _ -> t -> _ = (
       is_first := false
     else
       Bi_outbuf.add_char ob ',';
-    Bi_outbuf.add_string ob "\"guild\":";
+    Bi_outbuf.add_string ob "\"guild_id\":";
     (
-      write_guild
+      write_snowflake
     )
-      ob x.guild;
+      ob x.guild_id;
     if !is_first then
       is_first := false
     else
@@ -228,7 +228,7 @@ let read_t = (
     let field_user = ref (Obj.magic (Sys.opaque_identity 0.0)) in
     let field_roles = ref (Obj.magic (Sys.opaque_identity 0.0)) in
     let field_game = ref (None) in
-    let field_guild = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_guild_id = ref (Obj.magic (Sys.opaque_identity 0.0)) in
     let field_status = ref (Obj.magic (Sys.opaque_identity 0.0)) in
     let field_activities = ref (Obj.magic (Sys.opaque_identity 0.0)) in
     let bits0 = ref 0 in
@@ -264,30 +264,24 @@ let read_t = (
                     )
               )
             | 5 -> (
-                match String.unsafe_get s pos with
-                  | 'g' -> (
-                      if String.unsafe_get s (pos+1) = 'u' && String.unsafe_get s (pos+2) = 'i' && String.unsafe_get s (pos+3) = 'l' && String.unsafe_get s (pos+4) = 'd' then (
-                        3
-                      )
-                      else (
-                        -1
-                      )
-                    )
-                  | 'r' -> (
-                      if String.unsafe_get s (pos+1) = 'o' && String.unsafe_get s (pos+2) = 'l' && String.unsafe_get s (pos+3) = 'e' && String.unsafe_get s (pos+4) = 's' then (
-                        1
-                      )
-                      else (
-                        -1
-                      )
-                    )
-                  | _ -> (
-                      -1
-                    )
+                if String.unsafe_get s pos = 'r' && String.unsafe_get s (pos+1) = 'o' && String.unsafe_get s (pos+2) = 'l' && String.unsafe_get s (pos+3) = 'e' && String.unsafe_get s (pos+4) = 's' then (
+                  1
+                )
+                else (
+                  -1
+                )
               )
             | 6 -> (
                 if String.unsafe_get s pos = 's' && String.unsafe_get s (pos+1) = 't' && String.unsafe_get s (pos+2) = 'a' && String.unsafe_get s (pos+3) = 't' && String.unsafe_get s (pos+4) = 'u' && String.unsafe_get s (pos+5) = 's' then (
                   4
+                )
+                else (
+                  -1
+                )
+              )
+            | 8 -> (
+                if String.unsafe_get s pos = 'g' && String.unsafe_get s (pos+1) = 'u' && String.unsafe_get s (pos+2) = 'i' && String.unsafe_get s (pos+3) = 'l' && String.unsafe_get s (pos+4) = 'd' && String.unsafe_get s (pos+5) = '_' && String.unsafe_get s (pos+6) = 'i' && String.unsafe_get s (pos+7) = 'd' then (
+                  3
                 )
                 else (
                   -1
@@ -312,7 +306,7 @@ let read_t = (
           | 0 ->
             field_user := (
               (
-                read_user
+                read_partial_user
               ) p lb
             );
             bits0 := !bits0 lor 0x1;
@@ -334,9 +328,9 @@ let read_t = (
               );
             )
           | 3 ->
-            field_guild := (
+            field_guild_id := (
               (
-                read_guild
+                read_snowflake
               ) p lb
             );
             bits0 := !bits0 lor 0x4;
@@ -390,30 +384,24 @@ let read_t = (
                       )
                 )
               | 5 -> (
-                  match String.unsafe_get s pos with
-                    | 'g' -> (
-                        if String.unsafe_get s (pos+1) = 'u' && String.unsafe_get s (pos+2) = 'i' && String.unsafe_get s (pos+3) = 'l' && String.unsafe_get s (pos+4) = 'd' then (
-                          3
-                        )
-                        else (
-                          -1
-                        )
-                      )
-                    | 'r' -> (
-                        if String.unsafe_get s (pos+1) = 'o' && String.unsafe_get s (pos+2) = 'l' && String.unsafe_get s (pos+3) = 'e' && String.unsafe_get s (pos+4) = 's' then (
-                          1
-                        )
-                        else (
-                          -1
-                        )
-                      )
-                    | _ -> (
-                        -1
-                      )
+                  if String.unsafe_get s pos = 'r' && String.unsafe_get s (pos+1) = 'o' && String.unsafe_get s (pos+2) = 'l' && String.unsafe_get s (pos+3) = 'e' && String.unsafe_get s (pos+4) = 's' then (
+                    1
+                  )
+                  else (
+                    -1
+                  )
                 )
               | 6 -> (
                   if String.unsafe_get s pos = 's' && String.unsafe_get s (pos+1) = 't' && String.unsafe_get s (pos+2) = 'a' && String.unsafe_get s (pos+3) = 't' && String.unsafe_get s (pos+4) = 'u' && String.unsafe_get s (pos+5) = 's' then (
                     4
+                  )
+                  else (
+                    -1
+                  )
+                )
+              | 8 -> (
+                  if String.unsafe_get s pos = 'g' && String.unsafe_get s (pos+1) = 'u' && String.unsafe_get s (pos+2) = 'i' && String.unsafe_get s (pos+3) = 'l' && String.unsafe_get s (pos+4) = 'd' && String.unsafe_get s (pos+5) = '_' && String.unsafe_get s (pos+6) = 'i' && String.unsafe_get s (pos+7) = 'd' then (
+                    3
                   )
                   else (
                     -1
@@ -438,7 +426,7 @@ let read_t = (
             | 0 ->
               field_user := (
                 (
-                  read_user
+                  read_partial_user
                 ) p lb
               );
               bits0 := !bits0 lor 0x1;
@@ -460,9 +448,9 @@ let read_t = (
                 );
               )
             | 3 ->
-              field_guild := (
+              field_guild_id := (
                 (
-                  read_guild
+                  read_snowflake
                 ) p lb
               );
               bits0 := !bits0 lor 0x4;
@@ -487,13 +475,13 @@ let read_t = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x1f then Atdgen_runtime.Oj_run.missing_fields p [| !bits0 |] [| "user"; "roles"; "guild"; "status"; "activities" |];
+        if !bits0 <> 0x1f then Atdgen_runtime.Oj_run.missing_fields p [| !bits0 |] [| "user"; "roles"; "guild_id"; "status"; "activities" |];
         (
           {
             user = !field_user;
             roles = !field_roles;
             game = !field_game;
-            guild = !field_guild;
+            guild_id = !field_guild_id;
             status = !field_status;
             activities = !field_activities;
           }

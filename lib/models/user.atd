@@ -7,3 +7,7 @@ type t = {
     ?avatar: string option;
     ~bot <ocaml default="false">: bool;
 }
+
+type partial_user = {
+    id: snowflake;
+}

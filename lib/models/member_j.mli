@@ -6,7 +6,15 @@ type user = User_t.t
 type snowflake = Snowflake_t.t
 
 type t = Member_t.t = {
-  user: user;
+  nick: string option;
+  roles: snowflake list;
+  joined_at: string;
+  deaf: bool;
+  mute: bool;
+  user: user
+}
+
+type partial_member = Member_t.partial_member = {
   nick: string option;
   roles: snowflake list;
   joined_at: string;
@@ -73,4 +81,24 @@ val read_t :
 val t_of_string :
   string -> t
   (** Deserialize JSON data of type {!t}. *)
+
+val write_partial_member :
+  Bi_outbuf.t -> partial_member -> unit
+  (** Output a JSON value of type {!partial_member}. *)
+
+val string_of_partial_member :
+  ?len:int -> partial_member -> string
+  (** Serialize a value of type {!partial_member}
+      into a JSON string.
+      @param len specifies the initial length
+                 of the buffer used internally.
+                 Default: 1024. *)
+
+val read_partial_member :
+  Yojson.Safe.lexer_state -> Lexing.lexbuf -> partial_member
+  (** Input JSON data of type {!partial_member}. *)
+
+val partial_member_of_string :
+  string -> partial_member
+  (** Deserialize JSON data of type {!partial_member}. *)
 

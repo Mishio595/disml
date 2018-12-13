@@ -9,7 +9,7 @@ type role = Role_t.t
 
 type reaction = Reaction_t.t
 
-type member = Member_t.t
+type partial_member = Member_t.partial_member
 
 type embed = Embed_t.t
 
@@ -19,7 +19,7 @@ type t = Message_t.t = {
   id: snowflake;
   author: user;
   channel_id: snowflake;
-  member: member option;
+  member: partial_member option;
   guild_id: snowflake option;
   content: string;
   timestamp: string;
@@ -36,6 +36,8 @@ type t = Message_t.t = {
   webhook_id: snowflake;
   kind: int
 }
+
+type member = Member_t.t
 
 let write_user = (
   User_j.write_t
@@ -85,18 +87,18 @@ let read_reaction = (
 )
 let reaction_of_string s =
   read_reaction (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write_member = (
-  Member_j.write_t
+let write_partial_member = (
+  Member_j.write_partial_member
 )
-let string_of_member ?(len = 1024) x =
+let string_of_partial_member ?(len = 1024) x =
   let ob = Bi_outbuf.create len in
-  write_member ob x;
+  write_partial_member ob x;
   Bi_outbuf.contents ob
-let read_member = (
-  Member_j.read_t
+let read_partial_member = (
+  Member_j.read_partial_member
 )
-let member_of_string s =
-  read_member (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
+let partial_member_of_string s =
+  read_partial_member (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write_embed = (
   Embed_j.write_t
 )
@@ -317,7 +319,7 @@ let _2_of_string s =
   read__2 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write__1 = (
   Atdgen_runtime.Oj_run.write_option (
-    write_member
+    write_partial_member
   )
 )
 let string_of__1 ?(len = 1024) x =
@@ -337,7 +339,7 @@ let read__1 = (
             | "Some" ->
               Atdgen_runtime.Oj_run.read_until_field_value p lb;
               let x = (
-                  read_member
+                  read_partial_member
                 ) p lb
               in
               Yojson.Safe.read_space p lb;
@@ -360,7 +362,7 @@ let read__1 = (
               Yojson.Safe.read_comma p lb;
               Yojson.Safe.read_space p lb;
               let x = (
-                  read_member
+                  read_partial_member
                 ) p lb
               in
               Yojson.Safe.read_space p lb;
@@ -410,7 +412,7 @@ let write_t : _ -> t -> _ = (
         Bi_outbuf.add_char ob ',';
       Bi_outbuf.add_string ob "\"member\":";
       (
-        write_member
+        write_partial_member
       )
         ob x;
     );
@@ -810,7 +812,7 @@ let read_t = (
               field_member := (
                 Some (
                   (
-                    read_member
+                    read_partial_member
                   ) p lb
                 )
               );
@@ -1158,7 +1160,7 @@ let read_t = (
                 field_member := (
                   Some (
                     (
-                      read_member
+                      read_partial_member
                     ) p lb
                   )
                 );
@@ -1312,3 +1314,15 @@ let read_t = (
 )
 let t_of_string s =
   read_t (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
+let write_member = (
+  Member_j.write_t
+)
+let string_of_member ?(len = 1024) x =
+  let ob = Bi_outbuf.create len in
+  write_member ob x;
+  Bi_outbuf.contents ob
+let read_member = (
+  Member_j.read_t
+)
+let member_of_string s =
+  read_member (Yojson.Safe.init_lexer ()) (Lexing.from_string s)

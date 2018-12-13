@@ -1,29 +1,7 @@
 (* Auto-generated from "activity.atd" *)
 [@@@ocaml.warning "-27-32-35-39"]
 
-type snowflake = Snowflake_t.t
-
-type t = Activity_t.t = { id: snowflake }
-
-val write_snowflake :
-  Bi_outbuf.t -> snowflake -> unit
-  (** Output a JSON value of type {!snowflake}. *)
-
-val string_of_snowflake :
-  ?len:int -> snowflake -> string
-  (** Serialize a value of type {!snowflake}
-      into a JSON string.
-      @param len specifies the initial length
-                 of the buffer used internally.
-                 Default: 1024. *)
-
-val read_snowflake :
-  Yojson.Safe.lexer_state -> Lexing.lexbuf -> snowflake
-  (** Input JSON data of type {!snowflake}. *)
-
-val snowflake_of_string :
-  string -> snowflake
-  (** Deserialize JSON data of type {!snowflake}. *)
+type t = Activity_t.t = { name: string; kind: int; url: string option }
 
 val write_t :
   Bi_outbuf.t -> t -> unit

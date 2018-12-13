@@ -4,10 +4,6 @@ module type Token = sig
     val token : string
 end
 
-module type Client = sig
-    type context
-end
-
 module type Handler = sig
     val handle_event :
         'a ->
@@ -56,7 +52,7 @@ module type Dispatch = sig
     exception Invalid_event of string
 
     val event_of_string : contents:string -> string -> dispatch_event
-    val dispatch : ev:string -> string -> unit
+    val dispatch : ev: -> string -> unit
 end
 
 module type Http = sig

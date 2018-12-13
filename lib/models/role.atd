@@ -1,10 +1,12 @@
+type snowflake <ocaml from="Snowflake" t="t"> = abstract
+
 type t = {
-    id: Snowflake.t;
+    id: snowflake;
     name: string;
-    colour: int;
+    colour <json name="color">: int;
     hoist: bool;
     position: int;
     permissions: int;
     managed: bool;
     mentionable: bool;
-} [@@deriving yojson]
+}

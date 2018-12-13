@@ -8,34 +8,21 @@ module Make(T : S.Token)(H : S.Handler) = struct
     module Sharder = Sharder.Make(Http)(Dispatch)
 
     type t = {
-        sharder: Sharder.t Ivar.t;
+        sharder: Sharder.t;
         token: string;
     }
 
-    let init () =
-        {
-            sharder = Ivar.create ();
-            token;
-        }
-
-    let start ?count client =
+    let start ?count () =
         Sharder.start ?count ()
         >>| fun sharder ->
-        Ivar.fill_if_empty client.sharder sharder;
-        client
+        { sharder; token; }
 
     let set_status ~status client =
-        Ivar.read client.sharder
-        >>= fun sharder ->
-        Sharder.set_status ~status sharder
+        Sharder.set_status ~status client.sharder
 
     let set_status_with ~f client =
-        Ivar.read client.sharder
-        >>= fun sharder ->
-        Sharder.set_status_with ~f sharder
+        Sharder.set_status_with ~f client.sharder
 
     let request_guild_members ~guild ?query ?limit client =
-        Ivar.read client.sharder
-        >>= fun sharder ->
-        Sharder.request_guild_members ~guild ?query ?limit sharder
+        Sharder.request_guild_members ~guild ?query ?limit client.sharder
 end

@@ -1,0 +1,13 @@
+type user <ocaml from="User" t="t"> = abstract
+type role <ocaml from="Role" t="t"> = abstract
+type activity <ocaml from="Activity" t="t"> = abstract
+type guild <ocaml from="Guild" t="t"> = abstract
+
+type t = {
+    user: user;
+    roles: role list;
+    ?game: activity option;
+    guild: guild;
+    status: string;
+    activities: activity list;
+}

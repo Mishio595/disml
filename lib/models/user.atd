@@ -1,0 +1,9 @@
+type snowflake <ocaml from="Snowflake" t="t"> = abstract
+
+type t = {
+    id: snowflake;
+    username: string;
+    discriminator: string;
+    ?avatar: string option;
+    ~bot <ocaml default="false">: bool;
+}

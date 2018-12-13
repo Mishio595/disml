@@ -1,0 +1,5 @@
+type snowflake <ocaml from="Snowflake" t="t"> = abstract
+
+type t = {
+    id: snowflake;
+}

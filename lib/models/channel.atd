@@ -1,0 +1,19 @@
+type snowflake <ocaml from="Snowflake" t="t"> = abstract
+type user <ocaml from="User" t="t"> = abstract
+
+type t = {
+    id: snowflake;
+    kind <json name="type">: int;
+    ?guild_id: snowflake option;
+    ?position: int option;
+    ?name: string option;
+    ?topic: string option;
+    ?nsfw: bool option;
+    ?bitrate: int option;
+    ?user_limit: int option;
+    ?recipients: user list option;
+    ?icon: string option;
+    ?owner_id: snowflake option;
+    ?application_id: snowflake option;
+    ?parent_id: snowflake option;
+}

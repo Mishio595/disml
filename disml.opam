@@ -1,12 +1,15 @@
 opam-version: "2.0"
 name: "disml"
 version: "~dev"
-synopsis: "A Discord API wrapper"
+synopsis: ""An OCaml library for interfacing with the Discord API""
 maintainer: "Adelyn Breedlove <tenseiken595@gmail.com>"
 authors: "Adelyn Breedlove <tenseiken595@gmail.com>"
 license: "MIT"
 homepage: "https://gitlab.com/Mishio595/disml"
 bug-reports: "https://gitlab.com/Mishio595/disml/issues"
-build: [dune build disml]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+]
 install: [dune install disml]
 dev-repo: "git+https://gitlab.com/Mishio595/disml"

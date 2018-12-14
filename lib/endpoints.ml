@@ -1,96 +1,62 @@
+open Printf
+
 let gateway = "/gateway"
 let gateway_bot = "/gateway/bot"
-
-let channel channel_id = "/channels/"^channel_id
-let channel_messages channel_id = "/channels/"^channel_id^"/messages"
-
-let channel_message channel_id msg_id =
-    "/channels/"^channel_id^"/messages/"^msg_id
-
-let channel_reaction_me channel_id msg_id emoji =
-    "/channels/"^channel_id^"/messages/"^msg_id^"/reactions/"^emoji^"/@me"
-
-let channel_reaction channel_id msg_id emoji user_id =
-    "/channels/"^channel_id^"/messages/"^msg_id^"/reactions/"^emoji^"/"^user_id
-
-let channel_reactions_get channel_id msg_id emoji =
-    "/channels/"^channel_id^"/messages/"^msg_id^"/reactions/"^emoji
-
-let channel_reactions_delete channel_id msg_id =
-    "/channels/"^channel_id^"/messages/"^msg_id^"/reactions"
-
-let channel_bulk_delete channel_id = "/channels/"^channel_id
-
-let channel_permission channel_id overwrite_id =
-    "/channels/"^channel_id^"/permissions/"^overwrite_id
-
-let channel_permissions channel_id = "/channels"^channel_id^"/permissions"
+let channel = sprintf "/channels/%d"
+let channel_messages = sprintf "/channels/%d/messages"
+let channel_message = sprintf "/channels/%d/messages/%d"
+let channel_reaction_me = sprintf "/channels/%d/messages/%d/reactions/%s/@me"
+let channel_reaction = sprintf "/channels/%d/messages/%d/reactions/%s/%d"
+let channel_reactions_get = sprintf "/channels/%d/messages/%d/reactions/%s"
+let channel_reactions_delete = sprintf "/channels/%d/messages/%d/reactions"
+let channel_bulk_delete = sprintf "/channels/%d"
+let channel_permission = sprintf "/channels/%d/permissions/%d"
+let channel_permissions = sprintf "/channels/%d/permissions"
 let channels = "/channels"
-let channel_call_ring channel_id = "/channels/"^channel_id^"/call/ring"
-let channel_invites channel_id = "/channels/"^channel_id^"/invites"
-let channel_typing channel_id = "/channels/"^channel_id^"/typing"
-let channel_pins channel_id = "/channels/"^channel_id^"/pins"
-let channel_pin channel_id msg_id = "/channels/"^channel_id^"/pins/"^msg_id
-
+let channel_call_ring = sprintf "/channels/%d/call/ring"
+let channel_invites = sprintf "/channels/%d/invites"
+let channel_typing = sprintf "/channels/%d/typing"
+let channel_pins = sprintf "/channels/%d/pins"
+let channel_pin = sprintf "/channels/%d/pins/%d"
 let guilds = "/guilds"
-let guild guild_id = "/guilds/"^guild_id
-let guild_channels guild_id = "/guilds/"^guild_id^"/channels"
-let guild_members guild_id = "/guilds/"^guild_id^"/members"
-let guild_member guild_id user_id = "/guilds/"^guild_id^"/members/"^user_id
-
-let guild_member_role guild_id user_id role_id =
-    "/guilds/"^guild_id^"/members/"^user_id^"/roles/"^role_id
-
-let guild_bans guild_id = "/guilds/"^guild_id^"/bans"
-let guild_ban guild_id user_id = "/guilds/"^guild_id^"/bans"^user_id
-let guild_roles guild_id = "/guilds/"^guild_id^"/roles"
-let guild_role guild_id role_id = "/guilds/"^guild_id^"/roles"^role_id
-let guild_prune guild_id = "/guilds/"^guild_id^"/prune"
-let guild_voice_regions guild_id = "/guilds/"^guild_id^"/regions"
-let guild_invites guild_id = "/guilds/"^guild_id^"/invites"
-let guild_integrations guild_id = "/guilds/"^guild_id^"/integrations"
-
-let guild_integration guild_id integration_id =
-    "/guilds/"^guild_id^"/integrations/"^integration_id
-
-let guild_integration_sync guild_id integration_id =
-    "/guilds/"^guild_id^"/integrations/"^integration_id^"/sync"
-
-let guild_embed guild_id = "/guilds/"^guild_id^"/embed"
-let guild_emojis guild_id = "/guilds/"^guild_id^"/emojis"
-let guild_emoji guild_id emoji_id = "/guilds/"^guild_id^"/emojis/"^emoji_id
-
-let webhooks_guild guild_id = "/guilds/"^guild_id^"/webhooks"
-let webhooks_channel channel_id = "/channels/"^channel_id^"/webhooks"
-let webhook webhook_id = "/webhooks/"^webhook_id
-let webhook_token webhook_id token = "/webhooks/"^webhook_id^"/"^token
-
-let webhook_git webhook_id token =
-    "/webhooks/"^webhook_id^"/"^token^"/github"
-
-let webhook_slack webhook_id token =
-    "/webhooks/"^webhook_id^"/"^token^"/slack"
-
-let user user_id = "/users/"^user_id
-
+let guild = sprintf "/guilds/%d"
+let guild_channels = sprintf "/guilds/%d/channels"
+let guild_members = sprintf "/guilds/%d/members"
+let guild_member = sprintf "/guilds/%d/members/%d"
+let guild_member_role = sprintf "/guilds/%d/members/%d/roles/%d"
+let guild_bans = sprintf "/guilds/%d/bans"
+let guild_ban = sprintf "/guilds/%d/bans/%d"
+let guild_roles = sprintf "/guilds/%d/roles"
+let guild_role = sprintf "/guilds/%d/roles/%d"
+let guild_prune = sprintf "/guilds/%d/prune"
+let guild_voice_regions = sprintf "/guilds/%d/regions"
+let guild_invites = sprintf "/guilds/%d/invites"
+let guild_integrations = sprintf "/guilds/%d/integrations"
+let guild_integration = sprintf "/guilds/%d/integrations/%d"
+let guild_integration_sync = sprintf "/guilds/%d/integrations/%d/sync"
+let guild_embed = sprintf "/guilds/%d/embed"
+let guild_emojis = sprintf "/guilds/%d/emojis"
+let guild_emoji = sprintf "/guilds/%d/emojis/%d"
+let webhooks_guild = sprintf "/guilds/%d/webhooks"
+let webhooks_channel = sprintf "/channels/%d/webhooks"
+let webhook = sprintf "/webhooks/%d"
+let webhook_token = sprintf "/webhooks/%d/%s"
+let webhook_git = sprintf "/webhooks/%d/%s/github"
+let webhook_slack = sprintf "/webhooks/%d/%s/slack"
+let user = sprintf "/users/%d"
 let me = "/users/@me"
 let me_guilds = "/users/@me/guilds"
-let me_guild guild_id = "/users/@me/guilds/"^guild_id
+let me_guild = sprintf "/users/@me/guilds/%d"
 let me_channels = "/users/@me/channels"
 let me_connections = "/users/@me/connections"
-
-let invite code = "/invites/"^code
+let invite = sprintf "/invites/%s"
 let regions = "/voice/regions"
-
 let application_information = "/oauth2/applications/@me"
-
-let group_recipient group_id user_id = "/channels/"^group_id^"/recipients/"^user_id
-let guild_me_nick guild_id = "/guilds/"^guild_id^"/members/@me/nick"
-let guild_vanity_url guild_id = "/guilds/"^guild_id^"/vanity-url"
-let guild_audit_logs guild_id = "/guilds/"^guild_id^"/audit-logs"
-
-(* let cdn_avatar id avatar image_format = "/avatars/"^id^"/"^avatar^"."^image_format *)
-let cdn_embed_avatar image_name = "/embed/avatars/"^image_name^".png"
-let cdn_emoji id image_format = "/emojis/"^id^"."^image_format
-let cdn_icon id icon image_format = "/icons/"^id^"/"^icon^"."^image_format
-let cdn_avatar id splash image_format = "/splashes/"^id^"/"^splash^"."^image_format
+let group_recipient = sprintf "/channels/%d/recipients/%d"
+let guild_me_nick = sprintf "/guilds/%d/members/@me/nick"
+let guild_vanity_url = sprintf "/guilds/%d/vanity-url"
+let guild_audit_logs = sprintf "/guilds/%d/audit-logs"
+let cdn_embed_avatar = sprintf "/embed/avatars/%s.png"
+let cdn_emoji = sprintf "/emojis/%s.%s"
+let cdn_icon = sprintf "/icons/%d/%s.%s"
+let cdn_avatar = sprintf "/splashes/%d/%s.%s"

@@ -2,7 +2,6 @@ type snowflake <ocaml from="Snowflake" t="t"> = abstract
 type user <ocaml from="User" t="t"> = abstract
 type member <ocaml from="Member" t="t"> = abstract
 type partial_member <ocaml from="Member" t="partial_member"> = abstract
-type role <ocaml from="Role" t="t"> = abstract
 type attachment <ocaml from="Attachment" t="t"> = abstract
 type embed <ocaml from="Embed" t="t"> = abstract
 type reaction <ocaml from="Reaction" t="t"> = abstract
@@ -18,13 +17,13 @@ type t = {
     ?edited_timestamp: string option;
     tts: bool;
     mention_everyone: bool;
-    mentions: user list;
-    role_mentions: role list;
+    mentions: snowflake list;
+    ?role_mentions: snowflake list option;
     attachments: attachment list;
     embeds: embed list;
-    reactions: reaction list;
+    ?reactions: snowflake list option;
     ?nonce: snowflake option;
     pinned: bool;
-    webhook_id: snowflake;
+    ?webhook_id: snowflake option;
     kind <json name="type">: int;
 }

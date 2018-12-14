@@ -70,7 +70,6 @@ module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
             if t = "READY" then begin
                 Ivar.fill_if_empty shard.ready ()
             end;
-            print_endline @@ Yojson.Safe.pretty_to_string data;
             D.dispatch ~ev:t (Yojson.Safe.to_string data);
             return { shard with
                 seq = seq;

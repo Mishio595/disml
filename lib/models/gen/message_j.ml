@@ -5,10 +5,6 @@ type user = User_t.t
 
 type snowflake = Snowflake_t.t
 
-type role = Role_t.t
-
-type reaction = Reaction_t.t
-
 type partial_member = Member_t.partial_member
 
 type embed = Embed_t.t
@@ -26,16 +22,18 @@ type t = Message_t.t = {
   edited_timestamp: string option;
   tts: bool;
   mention_everyone: bool;
-  mentions: user list;
-  role_mentions: role list;
+  mentions: snowflake list;
+  role_mentions: snowflake list option;
   attachments: attachment list;
   embeds: embed list;
-  reactions: reaction list;
+  reactions: snowflake list option;
   nonce: snowflake option;
   pinned: bool;
-  webhook_id: snowflake;
+  webhook_id: snowflake option;
   kind: int
 }
+
+type reaction = Reaction_t.t
 
 type member = Member_t.t
 
@@ -63,30 +61,6 @@ let read_snowflake = (
 )
 let snowflake_of_string s =
   read_snowflake (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write_role = (
-  Role_j.write_t
-)
-let string_of_role ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
-  write_role ob x;
-  Bi_outbuf.contents ob
-let read_role = (
-  Role_j.read_t
-)
-let role_of_string s =
-  read_role (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write_reaction = (
-  Reaction_j.write_t
-)
-let string_of_reaction ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
-  write_reaction ob x;
-  Bi_outbuf.contents ob
-let read_reaction = (
-  Reaction_j.read_t
-)
-let reaction_of_string s =
-  read_reaction (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write_partial_member = (
   Member_j.write_partial_member
 )
@@ -123,22 +97,6 @@ let read_attachment = (
 )
 let attachment_of_string s =
   read_attachment (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write__8 = (
-  Atdgen_runtime.Oj_run.write_list (
-    write_reaction
-  )
-)
-let string_of__8 ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
-  write__8 ob x;
-  Bi_outbuf.contents ob
-let read__8 = (
-  Atdgen_runtime.Oj_run.read_list (
-    read_reaction
-  )
-)
-let _8_of_string s =
-  read__8 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write__7 = (
   Atdgen_runtime.Oj_run.write_list (
     write_embed
@@ -171,25 +129,9 @@ let read__6 = (
 )
 let _6_of_string s =
   read__6 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write__5 = (
-  Atdgen_runtime.Oj_run.write_list (
-    write_role
-  )
-)
-let string_of__5 ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
-  write__5 ob x;
-  Bi_outbuf.contents ob
-let read__5 = (
-  Atdgen_runtime.Oj_run.read_list (
-    read_role
-  )
-)
-let _5_of_string s =
-  read__5 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write__4 = (
   Atdgen_runtime.Oj_run.write_list (
-    write_user
+    write_snowflake
   )
 )
 let string_of__4 ?(len = 1024) x =
@@ -198,11 +140,68 @@ let string_of__4 ?(len = 1024) x =
   Bi_outbuf.contents ob
 let read__4 = (
   Atdgen_runtime.Oj_run.read_list (
-    read_user
+    read_snowflake
   )
 )
 let _4_of_string s =
   read__4 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
+let write__5 = (
+  Atdgen_runtime.Oj_run.write_option (
+    write__4
+  )
+)
+let string_of__5 ?(len = 1024) x =
+  let ob = Bi_outbuf.create len in
+  write__5 ob x;
+  Bi_outbuf.contents ob
+let read__5 = (
+  fun p lb ->
+    Yojson.Safe.read_space p lb;
+    match Yojson.Safe.start_any_variant p lb with
+      | `Edgy_bracket -> (
+          match Yojson.Safe.read_ident p lb with
+            | "None" ->
+              Yojson.Safe.read_space p lb;
+              Yojson.Safe.read_gt p lb;
+              (None : _ option)
+            | "Some" ->
+              Atdgen_runtime.Oj_run.read_until_field_value p lb;
+              let x = (
+                  read__4
+                ) p lb
+              in
+              Yojson.Safe.read_space p lb;
+              Yojson.Safe.read_gt p lb;
+              (Some x : _ option)
+            | x ->
+              Atdgen_runtime.Oj_run.invalid_variant_tag p x
+        )
+      | `Double_quote -> (
+          match Yojson.Safe.finish_string p lb with
+            | "None" ->
+              (None : _ option)
+            | x ->
+              Atdgen_runtime.Oj_run.invalid_variant_tag p x
+        )
+      | `Square_bracket -> (
+          match Atdgen_runtime.Oj_run.read_string p lb with
+            | "Some" ->
+              Yojson.Safe.read_space p lb;
+              Yojson.Safe.read_comma p lb;
+              Yojson.Safe.read_space p lb;
+              let x = (
+                  read__4
+                ) p lb
+              in
+              Yojson.Safe.read_space p lb;
+              Yojson.Safe.read_rbr p lb;
+              (Some x : _ option)
+            | x ->
+              Atdgen_runtime.Oj_run.invalid_variant_tag p x
+        )
+)
+let _5_of_string s =
+  read__5 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write__3 = (
   Atdgen_runtime.Oj_run.write_option (
     Yojson.Safe.write_string
@@ -483,15 +482,17 @@ let write_t : _ -> t -> _ = (
       write__4
     )
       ob x.mentions;
-    if !is_first then
-      is_first := false
-    else
-      Bi_outbuf.add_char ob ',';
-    Bi_outbuf.add_string ob "\"role_mentions\":";
-    (
-      write__5
-    )
-      ob x.role_mentions;
+    (match x.role_mentions with None -> () | Some x ->
+      if !is_first then
+        is_first := false
+      else
+        Bi_outbuf.add_char ob ',';
+      Bi_outbuf.add_string ob "\"role_mentions\":";
+      (
+        write__4
+      )
+        ob x;
+    );
     if !is_first then
       is_first := false
     else
@@ -510,15 +511,17 @@ let write_t : _ -> t -> _ = (
       write__7
     )
       ob x.embeds;
-    if !is_first then
-      is_first := false
-    else
-      Bi_outbuf.add_char ob ',';
-    Bi_outbuf.add_string ob "\"reactions\":";
-    (
-      write__8
-    )
-      ob x.reactions;
+    (match x.reactions with None -> () | Some x ->
+      if !is_first then
+        is_first := false
+      else
+        Bi_outbuf.add_char ob ',';
+      Bi_outbuf.add_string ob "\"reactions\":";
+      (
+        write__4
+      )
+        ob x;
+    );
     (match x.nonce with None -> () | Some x ->
       if !is_first then
         is_first := false
@@ -539,15 +542,17 @@ let write_t : _ -> t -> _ = (
       Yojson.Safe.write_bool
     )
       ob x.pinned;
-    if !is_first then
-      is_first := false
-    else
-      Bi_outbuf.add_char ob ',';
-    Bi_outbuf.add_string ob "\"webhook_id\":";
-    (
-      write_snowflake
-    )
-      ob x.webhook_id;
+    (match x.webhook_id with None -> () | Some x ->
+      if !is_first then
+        is_first := false
+      else
+        Bi_outbuf.add_char ob ',';
+      Bi_outbuf.add_string ob "\"webhook_id\":";
+      (
+        write_snowflake
+      )
+        ob x;
+    );
     if !is_first then
       is_first := false
     else
@@ -578,13 +583,13 @@ let read_t = (
     let field_tts = ref (Obj.magic (Sys.opaque_identity 0.0)) in
     let field_mention_everyone = ref (Obj.magic (Sys.opaque_identity 0.0)) in
     let field_mentions = ref (Obj.magic (Sys.opaque_identity 0.0)) in
-    let field_role_mentions = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_role_mentions = ref (None) in
     let field_attachments = ref (Obj.magic (Sys.opaque_identity 0.0)) in
     let field_embeds = ref (Obj.magic (Sys.opaque_identity 0.0)) in
-    let field_reactions = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_reactions = ref (None) in
     let field_nonce = ref (None) in
     let field_pinned = ref (Obj.magic (Sys.opaque_identity 0.0)) in
-    let field_webhook_id = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_webhook_id = ref (None) in
     let field_kind = ref (Obj.magic (Sys.opaque_identity 0.0)) in
     let bits0 = ref 0 in
     try
@@ -873,33 +878,39 @@ let read_t = (
             );
             bits0 := !bits0 lor 0x80;
           | 11 ->
-            field_role_mentions := (
-              (
-                read__5
-              ) p lb
-            );
-            bits0 := !bits0 lor 0x100;
+            if not (Yojson.Safe.read_null_if_possible p lb) then (
+              field_role_mentions := (
+                Some (
+                  (
+                    read__4
+                  ) p lb
+                )
+              );
+            )
           | 12 ->
             field_attachments := (
               (
                 read__6
               ) p lb
             );
-            bits0 := !bits0 lor 0x200;
+            bits0 := !bits0 lor 0x100;
           | 13 ->
             field_embeds := (
               (
                 read__7
               ) p lb
             );
-            bits0 := !bits0 lor 0x400;
+            bits0 := !bits0 lor 0x200;
           | 14 ->
-            field_reactions := (
-              (
-                read__8
-              ) p lb
-            );
-            bits0 := !bits0 lor 0x800;
+            if not (Yojson.Safe.read_null_if_possible p lb) then (
+              field_reactions := (
+                Some (
+                  (
+                    read__4
+                  ) p lb
+                )
+              );
+            )
           | 15 ->
             if not (Yojson.Safe.read_null_if_possible p lb) then (
               field_nonce := (
@@ -916,21 +927,24 @@ let read_t = (
                 Atdgen_runtime.Oj_run.read_bool
               ) p lb
             );
-            bits0 := !bits0 lor 0x1000;
+            bits0 := !bits0 lor 0x400;
           | 17 ->
-            field_webhook_id := (
-              (
-                read_snowflake
-              ) p lb
-            );
-            bits0 := !bits0 lor 0x2000;
+            if not (Yojson.Safe.read_null_if_possible p lb) then (
+              field_webhook_id := (
+                Some (
+                  (
+                    read_snowflake
+                  ) p lb
+                )
+              );
+            )
           | 18 ->
             field_kind := (
               (
                 Atdgen_runtime.Oj_run.read_int
               ) p lb
             );
-            bits0 := !bits0 lor 0x4000;
+            bits0 := !bits0 lor 0x800;
           | _ -> (
               Yojson.Safe.skip_json p lb
             )
@@ -1221,33 +1235,39 @@ let read_t = (
               );
               bits0 := !bits0 lor 0x80;
             | 11 ->
-              field_role_mentions := (
-                (
-                  read__5
-                ) p lb
-              );
-              bits0 := !bits0 lor 0x100;
+              if not (Yojson.Safe.read_null_if_possible p lb) then (
+                field_role_mentions := (
+                  Some (
+                    (
+                      read__4
+                    ) p lb
+                  )
+                );
+              )
             | 12 ->
               field_attachments := (
                 (
                   read__6
                 ) p lb
               );
-              bits0 := !bits0 lor 0x200;
+              bits0 := !bits0 lor 0x100;
             | 13 ->
               field_embeds := (
                 (
                   read__7
                 ) p lb
               );
-              bits0 := !bits0 lor 0x400;
+              bits0 := !bits0 lor 0x200;
             | 14 ->
-              field_reactions := (
-                (
-                  read__8
-                ) p lb
-              );
-              bits0 := !bits0 lor 0x800;
+              if not (Yojson.Safe.read_null_if_possible p lb) then (
+                field_reactions := (
+                  Some (
+                    (
+                      read__4
+                    ) p lb
+                  )
+                );
+              )
             | 15 ->
               if not (Yojson.Safe.read_null_if_possible p lb) then (
                 field_nonce := (
@@ -1264,21 +1284,24 @@ let read_t = (
                   Atdgen_runtime.Oj_run.read_bool
                 ) p lb
               );
-              bits0 := !bits0 lor 0x1000;
+              bits0 := !bits0 lor 0x400;
             | 17 ->
-              field_webhook_id := (
-                (
-                  read_snowflake
-                ) p lb
-              );
-              bits0 := !bits0 lor 0x2000;
+              if not (Yojson.Safe.read_null_if_possible p lb) then (
+                field_webhook_id := (
+                  Some (
+                    (
+                      read_snowflake
+                    ) p lb
+                  )
+                );
+              )
             | 18 ->
               field_kind := (
                 (
                   Atdgen_runtime.Oj_run.read_int
                 ) p lb
               );
-              bits0 := !bits0 lor 0x4000;
+              bits0 := !bits0 lor 0x800;
             | _ -> (
                 Yojson.Safe.skip_json p lb
               )
@@ -1286,7 +1309,7 @@ let read_t = (
       done;
       assert false;
     with Yojson.End_of_object -> (
-        if !bits0 <> 0x7fff then Atdgen_runtime.Oj_run.missing_fields p [| !bits0 |] [| "id"; "author"; "channel_id"; "content"; "timestamp"; "tts"; "mention_everyone"; "mentions"; "role_mentions"; "attachments"; "embeds"; "reactions"; "pinned"; "webhook_id"; "kind" |];
+        if !bits0 <> 0xfff then Atdgen_runtime.Oj_run.missing_fields p [| !bits0 |] [| "id"; "author"; "channel_id"; "content"; "timestamp"; "tts"; "mention_everyone"; "mentions"; "attachments"; "embeds"; "pinned"; "kind" |];
         (
           {
             id = !field_id;
@@ -1314,6 +1337,18 @@ let read_t = (
 )
 let t_of_string s =
   read_t (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
+let write_reaction = (
+  Reaction_j.write_t
+)
+let string_of_reaction ?(len = 1024) x =
+  let ob = Bi_outbuf.create len in
+  write_reaction ob x;
+  Bi_outbuf.contents ob
+let read_reaction = (
+  Reaction_j.read_t
+)
+let reaction_of_string s =
+  read_reaction (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write_member = (
   Member_j.write_t
 )

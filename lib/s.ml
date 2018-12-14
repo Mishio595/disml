@@ -4,7 +4,51 @@ module type Token = sig
     val token : string
 end
 
+module type Activity = sig end
+
+module type Attachment = sig end
+
+module type Ban = sig end
+
+module type Channel = sig end
+
+module type Embed = sig end
+
+module type Emoji = sig end
+
+module type Guild = sig end
+
+module type Member = sig end
+
+module type Message = sig
+  val reply : Message_t.t -> string -> Yojson.Safe.json Deferred.t
+end
+
+module type Presence = sig end
+
+module type Reaction = sig end
+
+module type Role = sig end
+
+module type Snowflake = sig end
+
+module type User = sig end
+
 module type Models = sig
+    module Activity : Activity
+    module Attachment : Attachment
+    module Ban : Ban
+    module Channel : Channel
+    module Embed : Embed
+    module Emoji : Emoji
+    module Guild : Guild
+    module Member : Member
+    module Message : Message
+    module Presence : Presence
+    module Reaction : Reaction
+    module Role : Role
+    module Snowflake : Snowflake
+    module User : User
 end
 
 module type Handler = sig

@@ -1,8 +1,12 @@
 module Make(Models : Disml.S.Models) = struct
-    (* open Core *)
+    open Core
     open Async
-    (* open Models *)
+    open Models
     open Disml.Event
+
+    let check_command (msg:Disml.Message_t.t) =
+        if String.is_prefix ~prefix:"!ping" msg.content then
+        Message.reply msg "Hello!" >>> ignore
 
     let handle_event = function
     | HELLO _ -> print_endline "Received HELLO" 
@@ -27,7 +31,7 @@ module Make(Models : Disml.S.Models) = struct
     | GUILD_ROLE_CREATE _ -> print_endline "Received GUILD_ROLE_CREATE" 
     | GUILD_ROLE_UPDATE _ -> print_endline "Received GUILD_ROLE_UPDATE" 
     | GUILD_ROLE_DELETE _ -> print_endline "Received GUILD_ROLE_DELETE" 
-    | MESSAGE_CREATE _ -> print_endline "Received MESSAGE_CREATE" 
+    | MESSAGE_CREATE msg -> check_command msg; print_endline "Received MESSAGE_CREATE" 
     | MESSAGE_UPDATE _ -> print_endline "Received MESSAGE_UPDATE" 
     | MESSAGE_DELETE _ -> print_endline "Received MESSAGE_DELETE" 
     | MESSAGE_BULK_DELETE _ -> print_endline "Received MESSAGE_BULK_DELETE" 

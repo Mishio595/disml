@@ -5,10 +5,6 @@ type user = User_t.t
 
 type snowflake = Snowflake_t.t
 
-type role = Role_t.t
-
-type reaction = Reaction_t.t
-
 type partial_member = Member_t.partial_member
 
 type embed = Embed_t.t
@@ -26,15 +22,17 @@ type t = {
   edited_timestamp: string option;
   tts: bool;
   mention_everyone: bool;
-  mentions: user list;
-  role_mentions: role list;
+  mentions: snowflake list;
+  role_mentions: snowflake list option;
   attachments: attachment list;
   embeds: embed list;
-  reactions: reaction list;
+  reactions: snowflake list option;
   nonce: snowflake option;
   pinned: bool;
-  webhook_id: snowflake;
+  webhook_id: snowflake option;
   kind: int
 }
+
+type reaction = Reaction_t.t
 
 type member = Member_t.t

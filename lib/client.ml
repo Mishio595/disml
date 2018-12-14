@@ -1,10 +1,12 @@
 open Async
 
-module Make(T : S.Token)(H : S.Handler) = struct
+module Make(T : S.Token)(H : S.Handler_f) = struct
     include T
 
     module Http = Http.Make(T)
-    module Dispatch = Dispatch.Make(H)
+    module Models = Models.Make(Http)
+    module Handler = H.Make(Models)
+    module Dispatch = Dispatch.Make(Handler)
     module Sharder = Sharder.Make(Http)(Dispatch)
 
     type t = {

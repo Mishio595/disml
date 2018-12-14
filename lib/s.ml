@@ -4,55 +4,21 @@ module type Token = sig
     val token : string
 end
 
+module type Models = sig
+end
+
 module type Handler = sig
     val handle_event :
-        'a ->
-        'b ->
+        Event.t ->
         unit
 end
 
+module type Handler_f = sig
+    module Make(Models : Models) : Handler
+end
+
 module type Dispatch = sig
-    type dispatch_event =
-    | HELLO of Yojson.Safe.json
-    | READY of Yojson.Safe.json
-    | RESUMED of Yojson.Safe.json
-    | INVALID_SESSION of Yojson.Safe.json
-    | CHANNEL_CREATE of Channel_t.t
-    | CHANNEL_UPDATE of Channel_t.t
-    | CHANNEL_DELETE of Channel_t.t
-    | CHANNEL_PINS_UPDATE of Yojson.Safe.json
-    | GUILD_CREATE of Guild_t.t
-    | GUILD_UPDATE of Guild_t.t
-    | GUILD_DELETE of Guild_t.t
-    | GUILD_BAN_ADD of Ban_t.t
-    | GUILD_BAN_REMOVE of Ban_t.t
-    | GUILD_EMOJIS_UPDATE of Yojson.Safe.json
-    | GUILD_INTEGRATIONS_UPDATE of Yojson.Safe.json
-    | GUILD_MEMBER_ADD of Member_t.t
-    | GUILD_MEMBER_REMOVE of Member_t.t
-    | GUILD_MEMBER_UPDATE of Member_t.t
-    | GUILD_MEMBERS_CHUNK of Member_t.t list
-    | GUILD_ROLE_CREATE of Role_t.t (* * Guild.t *)
-    | GUILD_ROLE_UPDATE of Role_t.t (* * Guild.t *)
-    | GUILD_ROLE_DELETE of Role_t.t (* * Guild.t *)
-    | MESSAGE_CREATE of Message_t.t
-    | MESSAGE_UPDATE of Message_t.t
-    | MESSAGE_DELETE of Message_t.t
-    | MESSAGE_BULK_DELETE of Message_t.t list
-    | MESSAGE_REACTION_ADD of (* Message.t * *) Reaction_t.t
-    | MESSAGE_REACTION_REMOVE of (* Message.t * *) Reaction_t.t
-    | MESSAGE_REACTION_REMOVE_ALL of (* Message.t * *) Reaction_t.t list
-    | PRESENCE_UPDATE of Presence_t.t
-    | TYPING_START of Yojson.Safe.json
-    | USER_UPDATE of Yojson.Safe.json
-    | VOICE_STATE_UPDATE of Yojson.Safe.json
-    | VOICE_SERVER_UPDATE of Yojson.Safe.json
-    | WEBHOOKS_UPDATE of Yojson.Safe.json
-
-    exception Invalid_event of string
-
-    val event_of_string : contents:string -> string -> dispatch_event
-    val dispatch : ev: -> string -> unit
+    val dispatch : ev:string -> string -> unit
 end
 
 module type Http = sig

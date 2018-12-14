@@ -1,5 +1,7 @@
 (library
 	(name disml)
+	(public_name disml)
+	(synopsis "An OCaml library for interfacing with the Discord API")
 	(modules
 		activity activity_t activity_j
 		attachment attachment_t attachment_j
@@ -27,7 +29,7 @@
 		sharder
 	)
 	(libraries core async_ssl cohttp-async yojson websocket-async zlib atdgen)
-	(preprocess (pps ppx_jane))
+	;(preprocess (pps ppx_jane))
 )
 
 ; Test executable

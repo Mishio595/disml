@@ -1,4 +1,5 @@
 module Make(H : S.Http) = struct
+    module Http = H
     module Activity = Activity.Make(H)
     module Attachment = Attachment.Make(H)
     module Ban = Ban.Make(H)

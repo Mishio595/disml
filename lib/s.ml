@@ -18,7 +18,17 @@ module type Emoji = sig end
 
 module type Guild = sig end
 
-module type Member = sig end
+module type Member = sig
+	(* val add_role : Member_t.t -> Role_t.t -> Yojson.Safe.json Deferred.t
+	val remove_role : Member_t.t -> Role_t.t -> Yojson.Safe.json Deferred.t
+	val ban : ?reason:string -> ?days:int -> Member_t.t -> Yojson.Safe.json Deferred.t
+	val ban : ?reason:string -> Member_t.t -> Yojson.Safe.json Deferred.t
+	val kick : ?reason:string -> Member_t.t -> Yojson.Safe.json Deferred.t
+	val mute : Member_t.t -> Yojson.Safe.json Deferred.t
+	val deafen : Member_t.t -> Yojson.Safe.json Deferred.t
+	val unmute : Member_t.t -> Yojson.Safe.json Deferred.t
+	val undeafen : Member_t.t -> Yojson.Safe.json Deferred.t *)
+end
 
 module type Message = sig
 	val add_reaction : Message_t.t -> Emoji_t.t -> Yojson.Safe.json Deferred.t
@@ -41,37 +51,6 @@ module type Role = sig end
 module type Snowflake = sig end
 
 module type User = sig end
-
-module type Models = sig
-    module Activity : Activity
-    module Attachment : Attachment
-    module Ban : Ban
-    module Channel : Channel
-    module Embed : Embed
-    module Emoji : Emoji
-    module Guild : Guild
-    module Member : Member
-    module Message : Message
-    module Presence : Presence
-    module Reaction : Reaction
-    module Role : Role
-    module Snowflake : Snowflake
-    module User : User
-end
-
-module type Handler = sig
-    val handle_event :
-        Event.t ->
-        unit
-end
-
-module type Handler_f = sig
-    module Make(Models : Models) : Handler
-end
-
-module type Dispatch = sig
-    val dispatch : ev:string -> string -> unit
-end
 
 module type Http = sig
     val token : string
@@ -231,6 +210,38 @@ module type Http = sig
       int -> string -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
     val get_audit_logs :
       int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+end
+
+module type Models = sig
+	module Http : Http
+    module Activity : Activity
+    module Attachment : Attachment
+    module Ban : Ban
+    module Channel : Channel
+    module Embed : Embed
+    module Emoji : Emoji
+    module Guild : Guild
+    module Member : Member
+    module Message : Message
+    module Presence : Presence
+    module Reaction : Reaction
+    module Role : Role
+    module Snowflake : Snowflake
+    module User : User
+end
+
+module type Handler = sig
+    val handle_event :
+        Event.t ->
+        unit
+end
+
+module type Handler_f = sig
+    module Make(Models : Models) : Handler
+end
+
+module type Dispatch = sig
+    val dispatch : ev:string -> string -> unit
 end
 
 module type Sharder = sig

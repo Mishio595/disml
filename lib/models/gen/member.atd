@@ -1,0 +1,15 @@
+type snowflake <ocaml from="Snowflake" t="t"> = abstract
+type user <ocaml from="User" t="t"> = abstract
+
+type partial_member = {
+    ?nick: string option;
+    roles: snowflake list;
+    joined_at: string;
+    deaf: bool;
+    mute: bool;
+}
+
+type t = {
+    inherit partial_member;
+    user: user;
+}

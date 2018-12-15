@@ -10,10 +10,11 @@ This is being actively developed and is definitely still in the early stages. Wh
 * Rudimentary gateway support
 * Automatic sharding
 * Event dispatch to a user-defined consumer
+* Automatic reconnection of dropped gateway connections
+* Automatic rate limit handling
 
 #### What is not implemented?
-* Abstractions for Discord Objects (Message, Guild, Channel, etc)
-* Automatic reconnection of dropped gateway connections
+* Abstractions for Discord Objects (Message, Guild, Channel, etc) (**IN PROGRESS!**)
 * Voice
 * Cache
 

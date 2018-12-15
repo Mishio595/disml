@@ -1,0 +1,5 @@
+type t = {
+    name: string;
+    kind <json name="type">: int;
+    ?url: string option;
+}

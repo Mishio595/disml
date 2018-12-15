@@ -1,0 +1,12 @@
+type snowflake <ocaml from="Snowflake" t="t"> = abstract
+type user <ocaml from="User" t="t"> = abstract
+
+type t = {
+    ?id: snowflake option;
+    name: string;
+    ?roles: snowflake list option;
+    ?user: user option;
+    ?require_colons: bool option;
+    ?managed: bool option;
+    ?animated: bool option;
+}

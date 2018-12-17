@@ -1,7 +1,7 @@
 type snowflake <ocaml from="Snowflake" t="t"> = abstract
 type user <ocaml from="User" t="t"> = abstract
 type member <ocaml from="Member" t="t"> = abstract
-type role <ocaml from="Role" t="t"> = abstract
+type role <ocaml from="Role" t="role"> = abstract
 type channel <ocaml from="Channel" t="t"> = abstract
 type emoji <ocaml from="Emoji" t="t"> = abstract
 

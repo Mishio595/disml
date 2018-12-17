@@ -62,7 +62,11 @@ module Make(Http : S.Http) = struct
              m |> Yojson.Safe.to_string |> Member_j.t_of_string
 
     let get_prune_count ~days guild = Http.guild_prune_count guild.id days
-    let get_role ~id guild = List.find ~f:(fun r -> r.id = id) guild.roles
+
+    let get_role ~id guild =
+        let role = List.find ~f:(fun r -> r.id = id) guild.roles in
+        Option.(role >>| fun role -> Role.wrap { role; id=guild.id; })
+    
     let get_webhooks guild = Http.get_guild_webhooks guild.id
 
     let kick_user ~id ?reason guild =

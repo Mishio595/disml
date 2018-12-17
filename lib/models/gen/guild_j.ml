@@ -5,7 +5,7 @@ type user = User_t.t
 
 type snowflake = Snowflake_t.t
 
-type role = Role_t.t
+type role = Role_t.role
 
 type member = Member_t.t
 
@@ -67,14 +67,14 @@ let read_snowflake = (
 let snowflake_of_string s =
   read_snowflake (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write_role = (
-  Role_j.write_t
+  Role_j.write_role
 )
 let string_of_role ?(len = 1024) x =
   let ob = Bi_outbuf.create len in
   write_role ob x;
   Bi_outbuf.contents ob
 let read_role = (
-  Role_j.read_t
+  Role_j.read_role
 )
 let role_of_string s =
   read_role (Yojson.Safe.init_lexer ()) (Lexing.from_string s)

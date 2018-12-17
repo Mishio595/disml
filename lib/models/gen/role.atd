@@ -19,4 +19,4 @@ type role_update = {
 type t = {
     inherit role;
     guild_id: snowflake;
-}
+ }

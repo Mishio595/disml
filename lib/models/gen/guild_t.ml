@@ -5,7 +5,7 @@ type user = User_t.t
 
 type snowflake = Snowflake_t.t
 
-type role = Role_t.t
+type role = Role_t.role
 
 type member = Member_t.t
 

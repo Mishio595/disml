@@ -19,27 +19,27 @@ module type Emoji = sig end
 module type Guild = sig end
 
 module type Member = sig
-	(* val add_role : Member_t.t -> Role_t.t -> Yojson.Safe.json Deferred.t
-	val remove_role : Member_t.t -> Role_t.t -> Yojson.Safe.json Deferred.t
-	val ban : ?reason:string -> ?days:int -> Member_t.t -> Yojson.Safe.json Deferred.t
-	val ban : ?reason:string -> Member_t.t -> Yojson.Safe.json Deferred.t
-	val kick : ?reason:string -> Member_t.t -> Yojson.Safe.json Deferred.t
-	val mute : Member_t.t -> Yojson.Safe.json Deferred.t
-	val deafen : Member_t.t -> Yojson.Safe.json Deferred.t
-	val unmute : Member_t.t -> Yojson.Safe.json Deferred.t
-	val undeafen : Member_t.t -> Yojson.Safe.json Deferred.t *)
+    (* val add_role : Member_t.t -> Role_t.t -> Yojson.Safe.json Deferred.t
+    val remove_role : Member_t.t -> Role_t.t -> Yojson.Safe.json Deferred.t
+    val ban : ?reason:string -> ?days:int -> Member_t.t -> Yojson.Safe.json Deferred.t
+    val ban : ?reason:string -> Member_t.t -> Yojson.Safe.json Deferred.t
+    val kick : ?reason:string -> Member_t.t -> Yojson.Safe.json Deferred.t
+    val mute : Member_t.t -> Yojson.Safe.json Deferred.t
+    val deafen : Member_t.t -> Yojson.Safe.json Deferred.t
+    val unmute : Member_t.t -> Yojson.Safe.json Deferred.t
+    val undeafen : Member_t.t -> Yojson.Safe.json Deferred.t *)
 end
 
 module type Message = sig
-	val add_reaction : Message_t.t -> Emoji_t.t -> Yojson.Safe.json Deferred.t
-	val remove_reaction : Message_t.t -> Emoji_t.t -> User_t.t -> Yojson.Safe.json Deferred.t
-	val clear_reactions : Message_t.t -> Yojson.Safe.json Deferred.t
-	val delete : Message_t.t -> Yojson.Safe.json Deferred.t
-	val pin : Message_t.t -> Yojson.Safe.json Deferred.t
-	val unpin : Message_t.t -> Yojson.Safe.json Deferred.t
-	val reply : Message_t.t -> string -> Yojson.Safe.json Deferred.t
-	val set_content : Message_t.t -> string -> Yojson.Safe.json Deferred.t
-	val set_embed : Message_t.t -> Embed_t.t -> Yojson.Safe.json Deferred.t
+    val add_reaction : Message_t.t -> Emoji_t.t -> Yojson.Safe.json Deferred.t
+    val remove_reaction : Message_t.t -> Emoji_t.t -> User_t.t -> Yojson.Safe.json Deferred.t
+    val clear_reactions : Message_t.t -> Yojson.Safe.json Deferred.t
+    val delete : Message_t.t -> Yojson.Safe.json Deferred.t
+    val pin : Message_t.t -> Yojson.Safe.json Deferred.t
+    val unpin : Message_t.t -> Yojson.Safe.json Deferred.t
+    val reply : Message_t.t -> string -> Yojson.Safe.json Deferred.t
+    val set_content : Message_t.t -> string -> Yojson.Safe.json Deferred.t
+    val set_embed : Message_t.t -> Embed_t.t -> Yojson.Safe.json Deferred.t
 end
 
 module type Presence = sig end

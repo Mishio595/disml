@@ -288,6 +288,10 @@ module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
     let start ?count () =
         let module J = Yojson.Safe.Util in
         H.get_gateway_bot () >>= fun data ->
+        let data = match data with
+        | Ok d -> Yojson.Safe.from_string d
+        | Error e -> Error.raise e
+        in
         let url = J.(member "url" data |> to_string) in
         let count = match count with
         | Some c -> c

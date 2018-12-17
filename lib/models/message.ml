@@ -1,4 +1,5 @@
 module Make(Http : S.Http) = struct
+    open Async
     open Message_t
 
     let add_reaction msg (emoji:Emoji_t.t) =

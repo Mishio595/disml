@@ -48,18 +48,18 @@ module Make(Http : S.Http) = struct
 
     let get_channel ~id guild =
         match List.find ~f:(fun c -> c.id = id) guild.channels with
-        | Some c -> return c
+        | Some c -> Deferred.Or_error.return c
         | None -> Http.get_channel id >>| fun c ->
-            c |> Yojson.Safe.to_string |> Channel_j.t_of_string
+            Result.(c >>| Channel_j.t_of_string)
     
     let get_emoji ~id guild = Http.get_emoji guild.id id
     let get_invites guild = Http.get_guild_invites guild.id
 
     let get_member ~id guild =
         match List.find ~f:(fun m -> m.user.id = id) guild.members with
-        | Some m -> return m
+        | Some m -> Deferred.Or_error.return m
         | None -> Http.get_member guild.id id >>| fun m ->
-             m |> Yojson.Safe.to_string |> Member_j.t_of_string
+             Result.(m >>| Member_j.t_of_string)
 
     let get_prune_count ~days guild = Http.guild_prune_count guild.id days
 

@@ -6,7 +6,7 @@ type snowflake = Snowflake_t.t
 type t = {
   id: snowflake;
   username: string;
-  discriminator: string;
+  discriminator: int;
   avatar: string option;
   bot: bool
 }

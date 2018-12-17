@@ -11,5 +11,19 @@ type t = {
   position: int;
   permissions: int;
   managed: bool;
+  mentionable: bool;
+  guild_id: snowflake
+}
+
+type role = {
+  id: snowflake;
+  name: string;
+  colour: int;
+  hoist: bool;
+  position: int;
+  permissions: int;
+  managed: bool;
   mentionable: bool
 }
+
+type role_update = { role: role; id: snowflake }

@@ -1,13 +1,13 @@
 type snowflake <ocaml from="Snowflake" t="t"> = abstract
 
-type t = {
-    id: snowflake;
-    username: string;
-    discriminator: string;
-    ?avatar: string option;
-    ~bot <ocaml default="false">: bool;
-}
-
 type partial_user = {
     id: snowflake;
+}
+
+type t = {
+    inherit partial_user;
+    username: string;
+    discriminator: int <json repr="string">;
+    ?avatar: string option;
+    ~bot <ocaml default="false">: bool;
 }

@@ -16,7 +16,39 @@ module type Embed = sig end
 
 module type Emoji = sig end
 
-module type Guild = sig end
+module type Guild = sig
+    val ban_user : id:Snowflake_t.t -> ?reason:string -> ?days:int -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val create_emoji : name:string -> image:string -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val create_role :
+        name:string ->
+        ?colour:int ->
+        ?permissions:int ->
+        ?hoist:bool ->
+        ?mentionable:bool ->
+        Guild_t.t ->
+        Yojson.Safe.json Deferred.t
+    val create_channel : mode:[ `Text | `Voice | `Category ] -> name:string -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val delete : Guild_t.t -> Yojson.Safe.json Deferred.t
+    val get_ban : id:Snowflake_t.t -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val get_bans : Guild_t.t -> Yojson.Safe.json Deferred.t
+    val get_channel : id:Snowflake_t.t -> Guild_t.t -> Channel_t.t Deferred.t
+    val get_emoji : id:Snowflake_t.t -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val get_invites : Guild_t.t -> Yojson.Safe.json Deferred.t
+    val get_member : id:Snowflake_t.t -> Guild_t.t -> Member_t.t Deferred.t
+    val get_prune_count : days:int -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val get_role : id:Snowflake_t.t -> Guild_t.t -> Role_t.t option
+    val get_webhooks : Guild_t.t -> Yojson.Safe.json Deferred.t
+    val kick_user : id:Snowflake_t.t -> ?reason:string -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val leave : Guild_t.t -> Yojson.Safe.json Deferred.t
+    val list_voice_regions : Guild_t.t -> Yojson.Safe.json Deferred.t
+    val prune : days:int -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val request_members : Guild_t.t -> Yojson.Safe.json Deferred.t
+    val set_afk_channel : id:Snowflake_t.t -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val set_afk_timeout : timeout:int -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val set_name : name:string -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val set_icon : icon:string -> Guild_t.t -> Yojson.Safe.json Deferred.t
+    val unban_user : id:Snowflake_t.t -> ?reason:string -> Guild_t.t -> Yojson.Safe.json Deferred.t
+end
 
 module type Member = sig
     (* val add_role : Member_t.t -> Role_t.t -> Yojson.Safe.json Deferred.t
@@ -46,11 +78,29 @@ module type Presence = sig end
 
 module type Reaction = sig end
 
-module type Role = sig end
+module type Role = sig
+    val allow_mention : Role_t.t -> Yojson.Safe.json Deferred.t
+    val delete : Role_t.t -> Yojson.Safe.json Deferred.t
+    val disallow_mention : Role_t.t -> Yojson.Safe.json Deferred.t
+    val hoist : Role_t.t -> Yojson.Safe.json Deferred.t
+    val set_colour : colour:int -> Role_t.t -> Yojson.Safe.json Deferred.t
+    val set_name : name:string -> Role_t.t -> Yojson.Safe.json Deferred.t
+    val unhoist : Role_t.t -> Yojson.Safe.json Deferred.t
+end
 
-module type Snowflake = sig end
+module type Snowflake = sig
+    val timestamp : Snowflake_t.t -> int
+    val timestamp_iso : Snowflake_t.t -> string
+end
 
-module type User = sig end
+module type User = sig
+    val tag : User_t.t -> string
+    val mention : User_t.t -> string
+    val default_avatar : User_t.t -> string
+    val face : User_t.t -> string
+    (* val private_channel : User_t.t -> Channel_t.t *)
+    (* val send : User_t.t -> Yojson.Safe.json Deferred.t *)
+end
 
 module type Http = sig
     val token : string
@@ -138,7 +188,7 @@ module type Http = sig
       int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
     val edit_member :
       int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val remove_member : int -> int -> Yojson.Safe.json Conduit_async.io
+    val remove_member : int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
     val change_nickname :
       int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
     val add_member_role :
@@ -149,7 +199,7 @@ module type Http = sig
     val get_ban : int -> int -> Yojson.Safe.json Conduit_async.io
     val guild_ban_add :
       int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val guild_ban_remove : int -> int -> Yojson.Safe.json Conduit_async.io
+    val guild_ban_remove : int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
     val get_roles : int -> Yojson.Safe.json Conduit_async.io
     val guild_role_add :
       int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
@@ -158,9 +208,9 @@ module type Http = sig
     val guild_role_edit :
       int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
     val guild_role_remove : int -> int -> Yojson.Safe.json Conduit_async.io
-    val guild_prune_count : int -> Yojson.Safe.json Conduit_async.io
+    val guild_prune_count : int -> int -> Yojson.Safe.json Conduit_async.io
     val guild_prune_start :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> int -> Yojson.Safe.json Conduit_async.io
     val get_guild_voice_regions : int -> Yojson.Safe.json Conduit_async.io
     val get_guild_invites : int -> Yojson.Safe.json Conduit_async.io
     val get_integrations : int -> Yojson.Safe.json Conduit_async.io

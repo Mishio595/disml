@@ -1,4 +1,5 @@
 module Make(T : S.Token) = struct
+    open Core
     open Async
     open Cohttp
     include T
@@ -187,8 +188,8 @@ module Make(T : S.Token) = struct
     let edit_member guild_id user_id body =
         Base.request ~body `PATCH (Endpoints.guild_member guild_id user_id)
 
-    let remove_member guild_id user_id =
-        Base.request `DELETE (Endpoints.guild_member guild_id user_id)
+    let remove_member guild_id user_id body =
+        Base.request ~body `DELETE (Endpoints.guild_member guild_id user_id)
 
     let change_nickname guild_id body =
         Base.request ~body `PATCH (Endpoints.guild_me_nick guild_id)
@@ -208,8 +209,8 @@ module Make(T : S.Token) = struct
     let guild_ban_add guild_id user_id body =
         Base.request ~body `PUT (Endpoints.guild_ban guild_id user_id)
 
-    let guild_ban_remove guild_id user_id =
-        Base.request `DELETE (Endpoints.guild_ban guild_id user_id)
+    let guild_ban_remove guild_id user_id body =
+        Base.request ~body `DELETE (Endpoints.guild_ban guild_id user_id)
 
     let get_roles guild_id =
         Base.request `GET (Endpoints.guild_roles guild_id)
@@ -226,11 +227,11 @@ module Make(T : S.Token) = struct
     let guild_role_remove guild_id role_id =
         Base.request `DELETE (Endpoints.guild_role guild_id role_id)
 
-    let guild_prune_count guild_id =
-        Base.request `GET (Endpoints.guild_prune guild_id)
+    let guild_prune_count guild_id days =
+        Base.request `GET ((Endpoints.guild_prune guild_id) ^ "?days=" ^ Int.to_string days)
 
-    let guild_prune_start guild_id body =
-        Base.request ~body `POST (Endpoints.guild_prune guild_id)
+    let guild_prune_start guild_id days =
+        Base.request `POST ((Endpoints.guild_prune guild_id) ^ "?days=" ^ Int.to_string days)
 
     let get_guild_voice_regions guild_id =
         Base.request `GET (Endpoints.guild_voice_regions guild_id)

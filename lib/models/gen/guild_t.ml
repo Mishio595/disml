@@ -38,6 +38,6 @@ type t = {
   large: bool option;
   unavailable: bool option;
   member_count: int option;
-  members: member list option;
-  channels: channel list option
+  members: member list;
+  channels: channel list
 }

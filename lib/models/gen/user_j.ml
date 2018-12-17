@@ -6,7 +6,7 @@ type snowflake = Snowflake_t.t
 type t = User_t.t = {
   id: snowflake;
   username: string;
-  discriminator: string;
+  discriminator: int;
   avatar: string option;
   bot: bool
 }
@@ -110,7 +110,7 @@ let write_t : _ -> t -> _ = (
       Bi_outbuf.add_char ob ',';
     Bi_outbuf.add_string ob "\"discriminator\":";
     (
-      Yojson.Safe.write_string
+      Yojson.Safe.write_int
     )
       ob x.discriminator;
     (match x.avatar with None -> () | Some x ->
@@ -225,7 +225,7 @@ let read_t = (
           | 2 ->
             field_discriminator := (
               (
-                Atdgen_runtime.Oj_run.read_string
+                Atdgen_runtime.Oj_run.read_int
               ) p lb
             );
             bits0 := !bits0 lor 0x4;
@@ -325,7 +325,7 @@ let read_t = (
             | 2 ->
               field_discriminator := (
                 (
-                  Atdgen_runtime.Oj_run.read_string
+                  Atdgen_runtime.Oj_run.read_int
                 ) p lb
               );
               bits0 := !bits0 lor 0x4;

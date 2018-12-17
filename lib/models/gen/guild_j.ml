@@ -38,8 +38,8 @@ type t = Guild_t.t = {
   large: bool option;
   unavailable: bool option;
   member_count: int option;
-  members: member list option;
-  channels: channel list option
+  members: member list;
+  channels: channel list
 }
 
 let write_user = (
@@ -406,82 +406,9 @@ let read__2 = (
 )
 let _2_of_string s =
   read__2 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write__11 = (
+let write__10 = (
   Atdgen_runtime.Oj_run.write_list (
     write_channel
-  )
-)
-let string_of__11 ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
-  write__11 ob x;
-  Bi_outbuf.contents ob
-let read__11 = (
-  Atdgen_runtime.Oj_run.read_list (
-    read_channel
-  )
-)
-let _11_of_string s =
-  read__11 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write__12 = (
-  Atdgen_runtime.Oj_run.write_option (
-    write__11
-  )
-)
-let string_of__12 ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
-  write__12 ob x;
-  Bi_outbuf.contents ob
-let read__12 = (
-  fun p lb ->
-    Yojson.Safe.read_space p lb;
-    match Yojson.Safe.start_any_variant p lb with
-      | `Edgy_bracket -> (
-          match Yojson.Safe.read_ident p lb with
-            | "None" ->
-              Yojson.Safe.read_space p lb;
-              Yojson.Safe.read_gt p lb;
-              (None : _ option)
-            | "Some" ->
-              Atdgen_runtime.Oj_run.read_until_field_value p lb;
-              let x = (
-                  read__11
-                ) p lb
-              in
-              Yojson.Safe.read_space p lb;
-              Yojson.Safe.read_gt p lb;
-              (Some x : _ option)
-            | x ->
-              Atdgen_runtime.Oj_run.invalid_variant_tag p x
-        )
-      | `Double_quote -> (
-          match Yojson.Safe.finish_string p lb with
-            | "None" ->
-              (None : _ option)
-            | x ->
-              Atdgen_runtime.Oj_run.invalid_variant_tag p x
-        )
-      | `Square_bracket -> (
-          match Atdgen_runtime.Oj_run.read_string p lb with
-            | "Some" ->
-              Yojson.Safe.read_space p lb;
-              Yojson.Safe.read_comma p lb;
-              Yojson.Safe.read_space p lb;
-              let x = (
-                  read__11
-                ) p lb
-              in
-              Yojson.Safe.read_space p lb;
-              Yojson.Safe.read_rbr p lb;
-              (Some x : _ option)
-            | x ->
-              Atdgen_runtime.Oj_run.invalid_variant_tag p x
-        )
-)
-let _12_of_string s =
-  read__12 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
-let write__10 = (
-  Atdgen_runtime.Oj_run.write_option (
-    write__9
   )
 )
 let string_of__10 ?(len = 1024) x =
@@ -489,50 +416,9 @@ let string_of__10 ?(len = 1024) x =
   write__10 ob x;
   Bi_outbuf.contents ob
 let read__10 = (
-  fun p lb ->
-    Yojson.Safe.read_space p lb;
-    match Yojson.Safe.start_any_variant p lb with
-      | `Edgy_bracket -> (
-          match Yojson.Safe.read_ident p lb with
-            | "None" ->
-              Yojson.Safe.read_space p lb;
-              Yojson.Safe.read_gt p lb;
-              (None : _ option)
-            | "Some" ->
-              Atdgen_runtime.Oj_run.read_until_field_value p lb;
-              let x = (
-                  read__9
-                ) p lb
-              in
-              Yojson.Safe.read_space p lb;
-              Yojson.Safe.read_gt p lb;
-              (Some x : _ option)
-            | x ->
-              Atdgen_runtime.Oj_run.invalid_variant_tag p x
-        )
-      | `Double_quote -> (
-          match Yojson.Safe.finish_string p lb with
-            | "None" ->
-              (None : _ option)
-            | x ->
-              Atdgen_runtime.Oj_run.invalid_variant_tag p x
-        )
-      | `Square_bracket -> (
-          match Atdgen_runtime.Oj_run.read_string p lb with
-            | "Some" ->
-              Yojson.Safe.read_space p lb;
-              Yojson.Safe.read_comma p lb;
-              Yojson.Safe.read_space p lb;
-              let x = (
-                  read__9
-                ) p lb
-              in
-              Yojson.Safe.read_space p lb;
-              Yojson.Safe.read_rbr p lb;
-              (Some x : _ option)
-            | x ->
-              Atdgen_runtime.Oj_run.invalid_variant_tag p x
-        )
+  Atdgen_runtime.Oj_run.read_list (
+    read_channel
+  )
 )
 let _10_of_string s =
   read__10 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
@@ -837,7 +723,7 @@ let write_t : _ -> t -> _ = (
       )
         ob x;
     );
-    (match x.members with None -> () | Some x ->
+    if x.members <> [] then (
       if !is_first then
         is_first := false
       else
@@ -846,18 +732,18 @@ let write_t : _ -> t -> _ = (
       (
         write__9
       )
-        ob x;
+        ob x.members;
     );
-    (match x.channels with None -> () | Some x ->
+    if x.channels <> [] then (
       if !is_first then
         is_first := false
       else
         Bi_outbuf.add_char ob ',';
       Bi_outbuf.add_string ob "\"channels\":";
       (
-        write__11
+        write__10
       )
-        ob x;
+        ob x.channels;
     );
     Bi_outbuf.add_char ob '}';
 )
@@ -893,8 +779,8 @@ let read_t = (
     let field_large = ref (None) in
     let field_unavailable = ref (None) in
     let field_member_count = ref (None) in
-    let field_members = ref (None) in
-    let field_channels = ref (None) in
+    let field_members = ref ([]) in
+    let field_channels = ref ([]) in
     let bits0 = ref 0 in
     try
       Yojson.Safe.read_space p lb;
@@ -1381,21 +1267,17 @@ let read_t = (
           | 24 ->
             if not (Yojson.Safe.read_null_if_possible p lb) then (
               field_members := (
-                Some (
-                  (
-                    read__9
-                  ) p lb
-                )
+                (
+                  read__9
+                ) p lb
               );
             )
           | 25 ->
             if not (Yojson.Safe.read_null_if_possible p lb) then (
               field_channels := (
-                Some (
-                  (
-                    read__11
-                  ) p lb
-                )
+                (
+                  read__10
+                ) p lb
               );
             )
           | _ -> (
@@ -1887,21 +1769,17 @@ let read_t = (
             | 24 ->
               if not (Yojson.Safe.read_null_if_possible p lb) then (
                 field_members := (
-                  Some (
-                    (
-                      read__9
-                    ) p lb
-                  )
+                  (
+                    read__9
+                  ) p lb
                 );
               )
             | 25 ->
               if not (Yojson.Safe.read_null_if_possible p lb) then (
                 field_channels := (
-                  Some (
-                    (
-                      read__11
-                    ) p lb
-                  )
+                  (
+                    read__10
+                  ) p lb
                 );
               )
             | _ -> (

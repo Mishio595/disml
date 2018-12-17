@@ -1,6 +1,6 @@
 type snowflake <ocaml from="Snowflake" t="t"> = abstract
 
-type t = {
+type role = {
     id: snowflake;
     name: string;
     colour <json name="color">: int;
@@ -9,4 +9,14 @@ type t = {
     permissions: int;
     managed: bool;
     mentionable: bool;
+}
+
+type role_update = {
+    role: role;
+    id: snowflake;
+}
+
+type t = {
+    inherit role;
+    guild_id: snowflake;
 }

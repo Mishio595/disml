@@ -1,6 +1,8 @@
 module Make(Http : S.Http) = struct
     open Core
     open User_t
+    
+    type t = User_t.t
 
     let tag user =
         Printf.sprintf "%s#%d" user.username user.discriminator

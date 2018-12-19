@@ -39,6 +39,12 @@ type t =
 
 exception Invalid_event of string
 
+let wrap_role Role_t.{ id; role; } =
+        let open Role_t in
+        let guild_id = id in
+        let {id;name;colour;hoist;position;permissions;managed;mentionable} = role in
+        {id;name;colour;hoist;position;permissions;managed;mentionable;guild_id}
+
 let event_of_string ~contents t = match t with
     | "HELLO" -> HELLO (Yojson.Safe.from_string contents)
     | "READY" -> READY (Yojson.Safe.from_string contents)
@@ -59,9 +65,9 @@ let event_of_string ~contents t = match t with
     | "GUILD_MEMBER_REMOVE" -> GUILD_MEMBER_REMOVE (Member_j.t_of_string contents)
     | "GUILD_MEMBER_UPDATE" -> GUILD_MEMBER_UPDATE (Member_j.t_of_string contents)
     | "GUILD_MEMBERS_CHUNK" -> GUILD_MEMBERS_CHUNK (Yojson.Safe.(from_string contents |> Util.to_list) |> List.map ~f:(fun m -> Yojson.Safe.to_string m |> Member_j.t_of_string))
-    | "GUILD_ROLE_CREATE" -> GUILD_ROLE_CREATE (Role_j.t_of_string contents)
-    | "GUILD_ROLE_UPDATE" -> GUILD_ROLE_UPDATE (Role_j.t_of_string contents)
-    | "GUILD_ROLE_DELETE" -> GUILD_ROLE_DELETE (Role_j.t_of_string contents)
+    | "GUILD_ROLE_CREATE" -> GUILD_ROLE_CREATE (Role_j.role_update_of_string contents |> wrap_role)
+    | "GUILD_ROLE_UPDATE" -> GUILD_ROLE_UPDATE (Role_j.role_update_of_string contents |> wrap_role)
+    | "GUILD_ROLE_DELETE" -> GUILD_ROLE_DELETE (Role_j.role_update_of_string contents |> wrap_role)
     | "MESSAGE_CREATE" -> MESSAGE_CREATE (Message_j.t_of_string contents)
     | "MESSAGE_UPDATE" -> MESSAGE_UPDATE (Message_j.t_of_string contents)
     | "MESSAGE_DELETE" -> MESSAGE_DELETE (Message_j.t_of_string contents)

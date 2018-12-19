@@ -3,6 +3,8 @@ module Make(Http : S.Http) = struct
     open Async
     open Guild_t
 
+    type t = Guild_t.t
+
     let ban_user ~id ?(reason="") ?(days=0) guild =
         Http.guild_ban_add guild.id id (`Assoc [
             ("delete-message-days", `Int days);
@@ -65,7 +67,7 @@ module Make(Http : S.Http) = struct
 
     let get_role ~id guild =
         let role = List.find ~f:(fun r -> r.id = id) guild.roles in
-        Option.(role >>| fun role -> Role.wrap { role; id=guild.id; })
+        Option.(role >>| fun role -> Event.wrap_role { role; id=guild.id; })
     
     let get_webhooks guild = Http.get_guild_webhooks guild.id
 

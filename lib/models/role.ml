@@ -1,11 +1,8 @@
-open Role_t
-
-let wrap { id; role; } =
-        let guild_id = id in
-        let {id;name;colour;hoist;position;permissions;managed;mentionable} = role in
-        {id;name;colour;hoist;position;permissions;managed;mentionable;guild_id}
-
 module Make(Http : S.Http) = struct
+    open Role_t
+
+    type t = Role_t.t
+
     let edit_role ~body role = Http.guild_role_edit role.guild_id role.id body
 
     let allow_mention role =

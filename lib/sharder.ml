@@ -66,10 +66,10 @@ module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
             let seq = J.(member "s" payload |> to_int) in
             let t = J.(member "t" payload |> to_string) in
             let data = J.member "d" payload in
-            let session = J.(member "session_id" data |> to_string_option) in
-            if t = "READY" then begin
-                Ivar.fill_if_empty shard.ready ()
-            end;
+            let session = if t = "READY" then begin
+                Ivar.fill_if_empty shard.ready ();
+                J.(member "session_id" data |> to_string_option)
+            end else None in
             D.dispatch ~ev:t (Yojson.Safe.to_string data);
             return { shard with
                 seq = seq;

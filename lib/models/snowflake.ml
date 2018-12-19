@@ -1,6 +1,8 @@
 module Make(Http : S.Http) = struct
     open Core
 
+    type t = Snowflake_t.t
+
     let timestamp snowflake =
         let offset = (snowflake lsr 22) / 1000 in
         1_420_070_400 + offset

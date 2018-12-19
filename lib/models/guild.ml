@@ -35,7 +35,7 @@ module Make(Http : S.Http) = struct
         in Http.guild_role_add guild.id (`Assoc payload)
          >>| Result.map ~f:(fun r ->
             Role_j.role_of_string r 
-            |> Event.wrap_role_with_id ~guild_id:guild.id)
+            |> Event.wrap_role ~guild_id:guild.id)
     
     let create_channel ~mode ~name guild =
         let kind = match mode with
@@ -87,7 +87,7 @@ module Make(Http : S.Http) = struct
     (* TODO add HTTP fallback *)
     let get_role ~id guild =
         let role = List.find ~f:(fun r -> r.id = id) guild.roles in
-        Option.(role >>| Event.wrap_role_with_id ~guild_id:guild.id)
+        Option.(role >>| Event.wrap_role ~guild_id:guild.id)
     
     (* TODO add webhook abstraction? *)
     let get_webhooks guild =

@@ -13,7 +13,7 @@ type role = {
 
 type role_update = {
     role: role;
-    id <json name="guild_id">: snowflake;
+    guild_id: snowflake;
 }
 
 type t = {

@@ -9,7 +9,17 @@ type partial_member = {
     mute: bool;
 }
 
-type t = {
+type member = {
     inherit partial_member;
     user: user;
+}
+
+type member_update = {
+    guild_id <json name="id">: snowflake;
+    member: member;
+}
+
+type t = {
+    inherit member;
+    guild_id: snowflake;
 }

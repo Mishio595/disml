@@ -11,5 +11,5 @@ build: [
   ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
 ]
-install: [dune install disml]
+install: []
 dev-repo: "git+https://gitlab.com/Mishio595/disml"

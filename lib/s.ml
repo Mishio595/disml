@@ -4,19 +4,37 @@ module type Token = sig
     val token : string
 end
 
-module type Activity = sig end
+module type Activity = sig
+    type t = Activity_t.t
+end
 
-module type Attachment = sig end
+module type Attachment = sig
+    type t = Attachment_t.t
+end
 
-module type Ban = sig end
+module type Ban = sig
+    type t = Ban_t.t
+end
 
-module type Channel = sig end
+module type Channel = sig
+    type t = Channel_t.t
+end
 
-module type Embed = sig end
+module type Embed = sig
+    type footer = Embed_t.footer
+    type image = Embed_t.image
+    type video = Embed_t.video
+    type provider = Embed_t.provider
+    type field = Embed_t.field
+    type t = Embed_t.t
+end
 
-module type Emoji = sig end
+module type Emoji = sig
+    type t = Emoji_t.t
+end
 
 module type Guild = sig
+    type t = Guild_t.t
     val ban_user : id:Snowflake_t.t -> ?reason:string -> ?days:int -> Guild_t.t -> string Deferred.Or_error.t
     val create_emoji : name:string -> image:string -> Guild_t.t -> string Deferred.Or_error.t
     val create_role :
@@ -51,6 +69,7 @@ module type Guild = sig
 end
 
 module type Member = sig
+    type t = Member_t.t
     (* val add_role : Member_t.t -> Role_t.t -> string Deferred.Or_error.t
     val remove_role : Member_t.t -> Role_t.t -> string Deferred.Or_error.t
     val ban : ?reason:string -> ?days:int -> Member_t.t -> string Deferred.Or_error.t
@@ -63,6 +82,7 @@ module type Member = sig
 end
 
 module type Message = sig
+    type t = Message_t.t
     val add_reaction : Message_t.t -> Emoji_t.t -> string Deferred.Or_error.t
     val remove_reaction : Message_t.t -> Emoji_t.t -> User_t.t -> string Deferred.Or_error.t
     val clear_reactions : Message_t.t -> string Deferred.Or_error.t
@@ -74,11 +94,20 @@ module type Message = sig
     val set_embed : Message_t.t -> Embed_t.t -> string Deferred.Or_error.t
 end
 
-module type Presence = sig end
+module type Presence = sig
+    type t = Presence_t.t
+end
 
-module type Reaction = sig end
+module type Reaction = sig
+    type t = Reaction_t.t
+    (* val delete : Reaction_t.t -> string Deferred.Or_error.t
+    val get_users : Reaction_t.t -> int -> User_t.t list Deferred.Or_error.t
+    val get_users_after : Reaction_t.t -> Snowflake_t.t -> int -> User_t.t list Deferred.Or_error.t
+    val get_users_before : Reaction_t.t -> Snowflake_t.t -> int -> User_t.t list Deferred.Or_error.t *)
+end
 
 module type Role = sig
+    type t = Role_t.t
     val allow_mention : Role_t.t -> string Deferred.Or_error.t
     val delete : Role_t.t -> string Deferred.Or_error.t
     val disallow_mention : Role_t.t -> string Deferred.Or_error.t
@@ -89,11 +118,13 @@ module type Role = sig
 end
 
 module type Snowflake = sig
+    type t = Snowflake_t.t
     val timestamp : Snowflake_t.t -> int
     val timestamp_iso : Snowflake_t.t -> string
 end
 
 module type User = sig
+    type t = User_t.t
     val tag : User_t.t -> string
     val mention : User_t.t -> string
     val default_avatar : User_t.t -> string

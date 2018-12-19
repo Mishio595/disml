@@ -35,8 +35,8 @@ end
 
 module type Guild = sig
     type t = Guild_t.t
-    val ban_user : id:Snowflake_t.t -> ?reason:string -> ?days:int -> Guild_t.t -> string Deferred.Or_error.t
-    val create_emoji : name:string -> image:string -> Guild_t.t -> string Deferred.Or_error.t
+    val ban_user : id:Snowflake_t.t -> ?reason:string -> ?days:int -> Guild_t.t -> unit Deferred.Or_error.t
+    val create_emoji : name:string -> image:string -> Guild_t.t -> Emoji_t.t Deferred.Or_error.t
     val create_role :
         name:string ->
         ?colour:int ->
@@ -44,28 +44,28 @@ module type Guild = sig
         ?hoist:bool ->
         ?mentionable:bool ->
         Guild_t.t ->
-        string Deferred.Or_error.t
-    val create_channel : mode:[ `Text | `Voice | `Category ] -> name:string -> Guild_t.t -> string Deferred.Or_error.t
-    val delete : Guild_t.t -> string Deferred.Or_error.t
-    val get_ban : id:Snowflake_t.t -> Guild_t.t -> string Deferred.Or_error.t
-    val get_bans : Guild_t.t -> string Deferred.Or_error.t
+        Role_t.t Deferred.Or_error.t
+    val create_channel : mode:[ `Text | `Voice | `Category ] -> name:string -> Guild_t.t -> Channel_t.t Deferred.Or_error.t
+    val delete : Guild_t.t -> unit Deferred.Or_error.t
+    val get_ban : id:Snowflake_t.t -> Guild_t.t -> Ban_t.t Deferred.Or_error.t
+    val get_bans : Guild_t.t -> Ban_t.t list Deferred.Or_error.t
     val get_channel : id:Snowflake_t.t -> Guild_t.t -> Channel_t.t Deferred.Or_error.t
-    val get_emoji : id:Snowflake_t.t -> Guild_t.t -> string Deferred.Or_error.t
+    val get_emoji : id:Snowflake_t.t -> Guild_t.t -> Emoji_t.t Deferred.Or_error.t
     val get_invites : Guild_t.t -> string Deferred.Or_error.t
     val get_member : id:Snowflake_t.t -> Guild_t.t -> Member_t.t Deferred.Or_error.t
-    val get_prune_count : days:int -> Guild_t.t -> string Deferred.Or_error.t
+    val get_prune_count : days:int -> Guild_t.t -> int Deferred.Or_error.t
     val get_role : id:Snowflake_t.t -> Guild_t.t -> Role_t.t option
     val get_webhooks : Guild_t.t -> string Deferred.Or_error.t
-    val kick_user : id:Snowflake_t.t -> ?reason:string -> Guild_t.t -> string Deferred.Or_error.t
+    val kick_user : id:Snowflake_t.t -> ?reason:string -> Guild_t.t -> unit Deferred.Or_error.t
     val leave : Guild_t.t -> string Deferred.Or_error.t
     val list_voice_regions : Guild_t.t -> string Deferred.Or_error.t
-    val prune : days:int -> Guild_t.t -> string Deferred.Or_error.t
-    val request_members : Guild_t.t -> string Deferred.Or_error.t
-    val set_afk_channel : id:Snowflake_t.t -> Guild_t.t -> string Deferred.Or_error.t
-    val set_afk_timeout : timeout:int -> Guild_t.t -> string Deferred.Or_error.t
-    val set_name : name:string -> Guild_t.t -> string Deferred.Or_error.t
-    val set_icon : icon:string -> Guild_t.t -> string Deferred.Or_error.t
-    val unban_user : id:Snowflake_t.t -> ?reason:string -> Guild_t.t -> string Deferred.Or_error.t
+    val prune : days:int -> Guild_t.t -> int Deferred.Or_error.t
+    val request_members : Guild_t.t -> Member_t.t list Deferred.Or_error.t
+    val set_afk_channel : id:Snowflake_t.t -> Guild_t.t -> Guild_t.t Deferred.Or_error.t
+    val set_afk_timeout : timeout:int -> Guild_t.t -> Guild_t.t Deferred.Or_error.t
+    val set_name : name:string -> Guild_t.t -> Guild_t.t Deferred.Or_error.t
+    val set_icon : icon:string -> Guild_t.t -> Guild_t.t Deferred.Or_error.t
+    val unban_user : id:Snowflake_t.t -> ?reason:string -> Guild_t.t -> unit Deferred.Or_error.t
 end
 
 module type Member = sig

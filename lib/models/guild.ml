@@ -47,7 +47,7 @@ module Make(Http : S.Http) = struct
             ("type", `Int kind);
         ]) >>| Result.map ~f:Channel_j.t_of_string
     
-    let delete guild =
+    let delete guild = 
         Http.delete_guild guild.id >>| Result.map ~f:ignore
 
     let get_ban ~id guild =
@@ -63,8 +63,8 @@ module Make(Http : S.Http) = struct
 
     let get_channel ~id guild =
         match List.find ~f:(fun c -> c.id = id) guild.channels with
-        | Some c -> Deferred.Or_error.return c
-        | None -> Http.get_channel id >>| Result.map ~f:Channel_j.t_of_string
+        | Some c -> Channel_j.(string_of_channel_wrapper c |> t_of_string) |> Deferred.Or_error.return
+        | None -> Http.get_channel id >>| Result.map ~f:Event.wrap_channel
     
     let get_emoji ~id guild =
         Http.get_emoji guild.id id >>| Result.map ~f:Emoji_j.t_of_string
@@ -76,7 +76,7 @@ module Make(Http : S.Http) = struct
     let get_member ~id guild =
         match List.find ~f:(fun m -> m.user.id = id) guild.members with
         | Some m -> Deferred.Or_error.return m
-        | None -> Http.get_member guild.id id >>| Result.map ~f:Member_j.t_of_string
+        | None -> Http.get_member guild.id id >>| Result.map ~f:Member_j.member_of_string
 
     let get_prune_count ~days guild =
         Http.guild_prune_count guild.id days >>| Result.map ~f:(fun prune ->

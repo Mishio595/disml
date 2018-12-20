@@ -49,14 +49,24 @@ let wrap_member ~guild_id member =
     let {nick;roles;joined_at;deaf;mute;user} = member in
     {nick;roles;joined_at;deaf;mute;user;guild_id}
 
+let wrap_channel s : Channel_t.t =
+    let module J = Yojson.Safe in
+    match J.(from_string s |> Util.member "kind" |> Util.to_int) with
+    | 0 -> `GuildText (Channel_j.guild_text_of_string s)
+    | 1 -> `Private (Channel_j.dm_of_string s)
+    | 2 -> `GuildVoice (Channel_j.guild_voice_of_string s)
+    | 3 -> `Group (Channel_j.group_of_string s)
+    | 4 -> `Category (Channel_j.category_of_string s)
+    | _ -> raise (Invalid_event s)
+
 let event_of_string ~contents t = match t with
     | "HELLO" -> HELLO (Yojson.Safe.from_string contents)
     | "READY" -> READY (Yojson.Safe.from_string contents)
     | "RESUMED" -> RESUMED (Yojson.Safe.from_string contents)
     | "INVALID_SESSION" -> INVALID_SESSION (Yojson.Safe.from_string contents)
-    | "CHANNEL_CREATE" -> CHANNEL_CREATE (Channel_j.t_of_string contents)
-    | "CHANNEL_UPDATE" -> CHANNEL_UPDATE (Channel_j.t_of_string contents)
-    | "CHANNEL_DELETE" -> CHANNEL_DELETE (Channel_j.t_of_string contents)
+    | "CHANNEL_CREATE" -> CHANNEL_CREATE (wrap_channel contents)
+    | "CHANNEL_UPDATE" -> CHANNEL_UPDATE (wrap_channel contents)
+    | "CHANNEL_DELETE" -> CHANNEL_DELETE (wrap_channel contents)
     | "CHANNEL_PINS_UPDATE" -> CHANNEL_PINS_UPDATE (Yojson.Safe.from_string contents)
     | "GUILD_CREATE" -> GUILD_CREATE (Guild_j.t_of_string contents)
     | "GUILD_UPDATE" -> GUILD_UPDATE (Guild_j.t_of_string contents)

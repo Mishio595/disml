@@ -52,7 +52,7 @@ module type Guild = sig
     val get_channel : id:Snowflake_t.t -> Guild_t.t -> Channel_t.t Deferred.Or_error.t
     val get_emoji : id:Snowflake_t.t -> Guild_t.t -> Emoji_t.t Deferred.Or_error.t
     val get_invites : Guild_t.t -> string Deferred.Or_error.t
-    val get_member : id:Snowflake_t.t -> Guild_t.t -> Member_t.t Deferred.Or_error.t
+    val get_member : id:Snowflake_t.t -> Guild_t.t -> Member_t.member Deferred.Or_error.t
     val get_prune_count : days:int -> Guild_t.t -> int Deferred.Or_error.t
     val get_role : id:Snowflake_t.t -> Guild_t.t -> Role_t.t option
     val get_webhooks : Guild_t.t -> string Deferred.Or_error.t

@@ -6,7 +6,22 @@ module Make(Models : Disml.S.Models) = struct
 
     let check_command (msg:Disml.Message_t.t) =
         if String.is_prefix ~prefix:"!ping" msg.content then
-        Message.reply msg "Hello!" >>> ignore
+            Message.reply msg "Pong!" >>> ignore
+        else if String.is_prefix ~prefix:"!spam" msg.content then
+            List.range 0 20
+            |> List.iter ~f:(fun i -> Message.reply msg (string_of_int i) >>> ignore)
+        else if String.is_prefix ~prefix:"!list" msg.content then
+            let count = String.chop_prefix_exn ~prefix:"!list" msg.content |> String.strip |> Int.of_string in
+            let list = List.range 0 count
+            |> List.sexp_of_t Int.sexp_of_t
+            |> Sexp.to_string_hum in
+            Message.reply msg list >>> ignore
+        else if String.is_prefix ~prefix:"!fold" msg.content then
+            let count = String.chop_prefix_exn ~prefix:"!fold" msg.content |> String.strip |> Int.of_string in
+            let list = List.range 0 count
+            |> List.fold ~init:0 ~f:(+)
+            |> Int.to_string in
+            Message.reply msg list >>> ignore
 
     let handle_event = function
     | HELLO _ -> print_endline "Received HELLO" 

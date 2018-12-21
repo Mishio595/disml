@@ -1,8 +1,8 @@
 type snowflake <ocaml from="Snowflake" t="t"> = abstract
 type user <ocaml from="User" t="t"> = abstract
-type member <ocaml from="Member" t="t"> = abstract
-type role <ocaml from="Role" t="t"> = abstract
-type channel <ocaml from="Channel" t="t"> = abstract
+type member <ocaml from="Member" t="member"> = abstract
+type role <ocaml from="Role" t="role"> = abstract
+type channel <ocaml from="Channel" t="channel_wrapper"> = abstract
 type emoji <ocaml from="Emoji" t="t"> = abstract
 
 
@@ -28,9 +28,9 @@ type t = {
     ?widget_enabled: bool option;
     ?widget_channel: channel option;
     ?system_channel: channel option;
-    ?large: bool option;
-    ?unavailable: bool option;
+    ~large: bool;
+    ~unavailable: bool;
     ?member_count: int option;
-    ?members: member list option;
-    ?channels: channel list option;
+    ~members: member list;
+    ~channels: channel list;
 }

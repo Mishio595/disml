@@ -4,53 +4,153 @@ module type Token = sig
     val token : string
 end
 
-module type Activity = sig end
+module type Activity = sig
+    type t = Activity_t.t
+end
 
-module type Attachment = sig end
+module type Attachment = sig
+    type t = Attachment_t.t
+end
 
-module type Ban = sig end
+module type Ban = sig
+    type t = Ban_t.t
+end
 
-module type Channel = sig end
+module type Channel = sig
+    type t = Channel_t.t
+    val say : content:string -> Channel_t.t -> Message_t.t Deferred.Or_error.t
+    val send_message :
+        ?embed:Yojson.Safe.json ->
+        ?content:string ->
+        ?file:string ->
+        ?tts:bool ->
+        Channel_t.t ->
+        Message_t.t Deferred.Or_error.t
+    val delete : Channel_t.t -> unit Deferred.Or_error.t
+    val get_message : id:Snowflake_t.t -> Channel_t.t -> Message_t.t Deferred.Or_error.t
+    val get_messages :
+        ?mode:[ `Before | `After | `Around ] ->
+        ?id:Snowflake_t.t ->
+        ?limit:int ->
+        Channel_t.t ->
+        Message_t.t list Deferred.Or_error.t
+    val broadcast_typing : Channel_t.t -> unit Deferred.Or_error.t
+    val get_pins : Channel_t.t -> Message_t.t list Deferred.Or_error.t
+    (* TODO more things related to guild channels *)
+end
 
-module type Embed = sig end
+module type Embed = sig
+    type footer = Embed_t.footer
+    type image = Embed_t.image
+    type video = Embed_t.video
+    type provider = Embed_t.provider
+    type field = Embed_t.field
+    type t = Embed_t.t
+end
 
-module type Emoji = sig end
+module type Emoji = sig
+    type t = Emoji_t.t
+end
 
-module type Guild = sig end
+module type Guild = sig
+    type t = Guild_t.t
+    val ban_user : id:Snowflake_t.t -> ?reason:string -> ?days:int -> Guild_t.t -> unit Deferred.Or_error.t
+    val create_emoji : name:string -> image:string -> Guild_t.t -> Emoji_t.t Deferred.Or_error.t
+    val create_role :
+        name:string ->
+        ?colour:int ->
+        ?permissions:int ->
+        ?hoist:bool ->
+        ?mentionable:bool ->
+        Guild_t.t ->
+        Role_t.t Deferred.Or_error.t
+    val create_channel : mode:[ `Text | `Voice | `Category ] -> name:string -> Guild_t.t -> Channel_t.t Deferred.Or_error.t
+    val delete : Guild_t.t -> unit Deferred.Or_error.t
+    val get_ban : id:Snowflake_t.t -> Guild_t.t -> Ban_t.t Deferred.Or_error.t
+    val get_bans : Guild_t.t -> Ban_t.t list Deferred.Or_error.t
+    val get_channel : id:Snowflake_t.t -> Guild_t.t -> Channel_t.t Deferred.Or_error.t
+    val get_emoji : id:Snowflake_t.t -> Guild_t.t -> Emoji_t.t Deferred.Or_error.t
+    val get_invites : Guild_t.t -> string Deferred.Or_error.t
+    val get_member : id:Snowflake_t.t -> Guild_t.t -> Member_t.member Deferred.Or_error.t
+    val get_prune_count : days:int -> Guild_t.t -> int Deferred.Or_error.t
+    val get_role : id:Snowflake_t.t -> Guild_t.t -> Role_t.t option
+    val get_webhooks : Guild_t.t -> string Deferred.Or_error.t
+    val kick_user : id:Snowflake_t.t -> ?reason:string -> Guild_t.t -> unit Deferred.Or_error.t
+    val leave : Guild_t.t -> string Deferred.Or_error.t
+    val list_voice_regions : Guild_t.t -> string Deferred.Or_error.t
+    val prune : days:int -> Guild_t.t -> int Deferred.Or_error.t
+    val request_members : Guild_t.t -> Member_t.t list Deferred.Or_error.t
+    val set_afk_channel : id:Snowflake_t.t -> Guild_t.t -> Guild_t.t Deferred.Or_error.t
+    val set_afk_timeout : timeout:int -> Guild_t.t -> Guild_t.t Deferred.Or_error.t
+    val set_name : name:string -> Guild_t.t -> Guild_t.t Deferred.Or_error.t
+    val set_icon : icon:string -> Guild_t.t -> Guild_t.t Deferred.Or_error.t
+    val unban_user : id:Snowflake_t.t -> ?reason:string -> Guild_t.t -> unit Deferred.Or_error.t
+end
 
 module type Member = sig
-	(* val add_role : Member_t.t -> Role_t.t -> Yojson.Safe.json Deferred.t
-	val remove_role : Member_t.t -> Role_t.t -> Yojson.Safe.json Deferred.t
-	val ban : ?reason:string -> ?days:int -> Member_t.t -> Yojson.Safe.json Deferred.t
-	val ban : ?reason:string -> Member_t.t -> Yojson.Safe.json Deferred.t
-	val kick : ?reason:string -> Member_t.t -> Yojson.Safe.json Deferred.t
-	val mute : Member_t.t -> Yojson.Safe.json Deferred.t
-	val deafen : Member_t.t -> Yojson.Safe.json Deferred.t
-	val unmute : Member_t.t -> Yojson.Safe.json Deferred.t
-	val undeafen : Member_t.t -> Yojson.Safe.json Deferred.t *)
+    type t = Member_t.t
+    (* val add_role : Member_t.t -> Role_t.t -> string Deferred.Or_error.t
+    val remove_role : Member_t.t -> Role_t.t -> string Deferred.Or_error.t
+    val ban : ?reason:string -> ?days:int -> Member_t.t -> string Deferred.Or_error.t
+    val ban : ?reason:string -> Member_t.t -> string Deferred.Or_error.t
+    val kick : ?reason:string -> Member_t.t -> string Deferred.Or_error.t
+    val mute : Member_t.t -> string Deferred.Or_error.t
+    val deafen : Member_t.t -> string Deferred.Or_error.t
+    val unmute : Member_t.t -> string Deferred.Or_error.t
+    val undeafen : Member_t.t -> string Deferred.Or_error.t *)
 end
 
 module type Message = sig
-	val add_reaction : Message_t.t -> Emoji_t.t -> Yojson.Safe.json Deferred.t
-	val remove_reaction : Message_t.t -> Emoji_t.t -> User_t.t -> Yojson.Safe.json Deferred.t
-	val clear_reactions : Message_t.t -> Yojson.Safe.json Deferred.t
-	val delete : Message_t.t -> Yojson.Safe.json Deferred.t
-	val pin : Message_t.t -> Yojson.Safe.json Deferred.t
-	val unpin : Message_t.t -> Yojson.Safe.json Deferred.t
-	val reply : Message_t.t -> string -> Yojson.Safe.json Deferred.t
-	val set_content : Message_t.t -> string -> Yojson.Safe.json Deferred.t
-	val set_embed : Message_t.t -> Embed_t.t -> Yojson.Safe.json Deferred.t
+    type t = Message_t.t
+    val add_reaction : Message_t.t -> Emoji_t.t -> string Deferred.Or_error.t
+    val remove_reaction : Message_t.t -> Emoji_t.t -> User_t.t -> string Deferred.Or_error.t
+    val clear_reactions : Message_t.t -> string Deferred.Or_error.t
+    val delete : Message_t.t -> string Deferred.Or_error.t
+    val pin : Message_t.t -> string Deferred.Or_error.t
+    val unpin : Message_t.t -> string Deferred.Or_error.t
+    val reply : Message_t.t -> string -> string Deferred.Or_error.t
+    val set_content : Message_t.t -> string -> string Deferred.Or_error.t
+    val set_embed : Message_t.t -> Embed_t.t -> string Deferred.Or_error.t
 end
 
-module type Presence = sig end
+module type Presence = sig
+    type t = Presence_t.t
+end
 
-module type Reaction = sig end
+module type Reaction = sig
+    type t = Reaction_t.t
+    (* val delete : Reaction_t.t -> string Deferred.Or_error.t
+    val get_users : Reaction_t.t -> int -> User_t.t list Deferred.Or_error.t
+    val get_users_after : Reaction_t.t -> Snowflake_t.t -> int -> User_t.t list Deferred.Or_error.t
+    val get_users_before : Reaction_t.t -> Snowflake_t.t -> int -> User_t.t list Deferred.Or_error.t *)
+end
 
-module type Role = sig end
+module type Role = sig
+    type t = Role_t.t
+    val allow_mention : Role_t.t -> string Deferred.Or_error.t
+    val delete : Role_t.t -> string Deferred.Or_error.t
+    val disallow_mention : Role_t.t -> string Deferred.Or_error.t
+    val hoist : Role_t.t -> string Deferred.Or_error.t
+    val set_colour : colour:int -> Role_t.t -> string Deferred.Or_error.t
+    val set_name : name:string -> Role_t.t -> string Deferred.Or_error.t
+    val unhoist : Role_t.t -> string Deferred.Or_error.t
+end
 
-module type Snowflake = sig end
+module type Snowflake = sig
+    type t = Snowflake_t.t
+    val timestamp : Snowflake_t.t -> int
+    val timestamp_iso : Snowflake_t.t -> string
+end
 
-module type User = sig end
+module type User = sig
+    type t = User_t.t
+    val tag : User_t.t -> string
+    val mention : User_t.t -> string
+    val default_avatar : User_t.t -> string
+    val face : User_t.t -> string
+    (* val private_channel : User_t.t -> Channel_t.t *)
+    (* val send : User_t.t -> string Deferred.Or_error.t *)
+end
 
 module type Http = sig
     val token : string
@@ -67,149 +167,176 @@ module type Http = sig
         val process_response :
             string ->
             Cohttp_async.Response.t * Cohttp_async.Body.t ->
-            Yojson.Safe.json Deferred.t
+            string Deferred.Or_error.t
 
         val request :
             ?body:Yojson.Safe.json ->
             [> `DELETE | `GET | `PATCH | `POST | `PUT ] ->
             string ->
-            Yojson.Safe.json Deferred.t
+            string Deferred.Or_error.t
     end
 
     (* Auto-generated signatures *)
-    val get_gateway : unit -> Yojson.Safe.json Conduit_async.io
-    val get_gateway_bot : unit -> Yojson.Safe.json Conduit_async.io
-    val get_channel : int -> Yojson.Safe.json Conduit_async.io
+    val get_gateway : unit -> string Core.Or_error.t Conduit_async.io
+    val get_gateway_bot : unit -> string Core.Or_error.t Conduit_async.io
+    val get_channel : int -> string Core.Or_error.t Conduit_async.io
     val modify_channel :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val delete_channel : int -> Yojson.Safe.json Conduit_async.io
-    val get_messages : int -> Yojson.Safe.json Conduit_async.io
-    val get_message : int -> int -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val delete_channel : int -> string Core.Or_error.t Conduit_async.io
+    val get_messages : int -> int -> string * int -> string Core.Or_error.t Conduit_async.io
+    val get_message : int -> int -> string Core.Or_error.t Conduit_async.io
     val create_message :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val create_reaction :
-      int -> int -> string -> Yojson.Safe.json Conduit_async.io
+      int -> int -> string -> string Core.Or_error.t Conduit_async.io
     val delete_own_reaction :
-      int -> int -> string -> Yojson.Safe.json Conduit_async.io
+      int -> int -> string -> string Core.Or_error.t Conduit_async.io
     val delete_reaction :
-      int -> int -> string -> int -> Yojson.Safe.json Conduit_async.io
+      int -> int -> string -> int -> string Core.Or_error.t Conduit_async.io
     val get_reactions :
-      int -> int -> string -> Yojson.Safe.json Conduit_async.io
-    val delete_reactions : int -> int -> Yojson.Safe.json Conduit_async.io
+      int -> int -> string -> string Core.Or_error.t Conduit_async.io
+    val delete_reactions :
+      int -> int -> string Core.Or_error.t Conduit_async.io
     val edit_message :
-      int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val delete_message : int -> int -> Yojson.Safe.json Conduit_async.io
+      int ->
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val delete_message :
+      int -> int -> string Core.Or_error.t Conduit_async.io
     val bulk_delete :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val edit_channel_permissions :
-      int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val get_channel_invites : int -> Yojson.Safe.json Conduit_async.io
+      int ->
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val get_channel_invites : int -> string Core.Or_error.t Conduit_async.io
     val create_channel_invite :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val delete_channel_permission :
-      int -> int -> Yojson.Safe.json Conduit_async.io
-    val broadcast_typing : int -> Yojson.Safe.json Conduit_async.io
-    val get_pinned_messages : int -> Yojson.Safe.json Conduit_async.io
-    val pin_message : int -> int -> Yojson.Safe.json Conduit_async.io
-    val unpin_message : int -> int -> Yojson.Safe.json Conduit_async.io
-    val group_recipient_add : int -> int -> Yojson.Safe.json Conduit_async.io
+      int -> int -> string Core.Or_error.t Conduit_async.io
+    val broadcast_typing : int -> string Core.Or_error.t Conduit_async.io
+    val get_pinned_messages : int -> string Core.Or_error.t Conduit_async.io
+    val pin_message : int -> int -> string Core.Or_error.t Conduit_async.io
+    val unpin_message : int -> int -> string Core.Or_error.t Conduit_async.io
+    val group_recipient_add :
+      int -> int -> string Core.Or_error.t Conduit_async.io
     val group_recipient_remove :
-      int -> int -> Yojson.Safe.json Conduit_async.io
-    val get_emojis : int -> Yojson.Safe.json Conduit_async.io
-    val get_emoji : int -> int -> Yojson.Safe.json Conduit_async.io
+      int -> int -> string Core.Or_error.t Conduit_async.io
+    val get_emojis : int -> string Core.Or_error.t Conduit_async.io
+    val get_emoji : int -> int -> string Core.Or_error.t Conduit_async.io
     val create_emoji :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val edit_emoji :
-      int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val delete_emoji : int -> int -> Yojson.Safe.json Conduit_async.io
-    val create_guild : Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val get_guild : int -> Yojson.Safe.json Conduit_async.io
+      int ->
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val delete_emoji : int -> int -> string Core.Or_error.t Conduit_async.io
+    val create_guild :
+      Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val get_guild : int -> string Core.Or_error.t Conduit_async.io
     val edit_guild :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val delete_guild : int -> Yojson.Safe.json Conduit_async.io
-    val get_guild_channels : int -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val delete_guild : int -> string Core.Or_error.t Conduit_async.io
+    val get_guild_channels : int -> string Core.Or_error.t Conduit_async.io
     val create_guild_channel :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val modify_guild_channel_positions :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val get_member : int -> int -> Yojson.Safe.json Conduit_async.io
-    val get_members : int -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val get_member : int -> int -> string Core.Or_error.t Conduit_async.io
+    val get_members : int -> string Core.Or_error.t Conduit_async.io
     val add_member :
-      int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int ->
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val edit_member :
-      int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val remove_member : int -> int -> Yojson.Safe.json Conduit_async.io
+      int ->
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val remove_member :
+      int ->
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val change_nickname :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val add_member_role :
-      int -> int -> int -> Yojson.Safe.json Conduit_async.io
+      int -> int -> int -> string Core.Or_error.t Conduit_async.io
     val remove_member_role :
-      int -> int -> int -> Yojson.Safe.json Conduit_async.io
-    val get_bans : int -> Yojson.Safe.json Conduit_async.io
-    val get_ban : int -> int -> Yojson.Safe.json Conduit_async.io
+      int -> int -> int -> string Core.Or_error.t Conduit_async.io
+    val get_bans : int -> string Core.Or_error.t Conduit_async.io
+    val get_ban : int -> int -> string Core.Or_error.t Conduit_async.io
     val guild_ban_add :
-      int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val guild_ban_remove : int -> int -> Yojson.Safe.json Conduit_async.io
-    val get_roles : int -> Yojson.Safe.json Conduit_async.io
+      int ->
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val guild_ban_remove :
+      int ->
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val get_roles : int -> string Core.Or_error.t Conduit_async.io
     val guild_role_add :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val guild_roles_edit :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val guild_role_edit :
-      int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val guild_role_remove : int -> int -> Yojson.Safe.json Conduit_async.io
-    val guild_prune_count : int -> Yojson.Safe.json Conduit_async.io
+      int ->
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val guild_role_remove :
+      int -> int -> string Core.Or_error.t Conduit_async.io
+    val guild_prune_count :
+      int -> int -> string Core.Or_error.t Conduit_async.io
     val guild_prune_start :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val get_guild_voice_regions : int -> Yojson.Safe.json Conduit_async.io
-    val get_guild_invites : int -> Yojson.Safe.json Conduit_async.io
-    val get_integrations : int -> Yojson.Safe.json Conduit_async.io
+      int -> int -> string Core.Or_error.t Conduit_async.io
+    val get_guild_voice_regions :
+      int -> string Core.Or_error.t Conduit_async.io
+    val get_guild_invites : int -> string Core.Or_error.t Conduit_async.io
+    val get_integrations : int -> string Core.Or_error.t Conduit_async.io
     val add_integration :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val edit_integration :
-      int -> int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val delete_integration : int -> int -> Yojson.Safe.json Conduit_async.io
-    val sync_integration : int -> int -> Yojson.Safe.json Conduit_async.io
-    val get_guild_embed : int -> Yojson.Safe.json Conduit_async.io
+      int ->
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val delete_integration :
+      int -> int -> string Core.Or_error.t Conduit_async.io
+    val sync_integration :
+      int -> int -> string Core.Or_error.t Conduit_async.io
+    val get_guild_embed : int -> string Core.Or_error.t Conduit_async.io
     val edit_guild_embed :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val get_vanity_url : int -> Yojson.Safe.json Conduit_async.io
-    val get_invite : string -> Yojson.Safe.json Conduit_async.io
-    val delete_invite : string -> Yojson.Safe.json Conduit_async.io
-    val get_current_user : unit -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val get_vanity_url : int -> string Core.Or_error.t Conduit_async.io
+    val get_invite : string -> string Core.Or_error.t Conduit_async.io
+    val delete_invite : string -> string Core.Or_error.t Conduit_async.io
+    val get_current_user : unit -> string Core.Or_error.t Conduit_async.io
     val edit_current_user :
-      Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val get_guilds : unit -> Yojson.Safe.json Conduit_async.io
-    val leave_guild : int -> Yojson.Safe.json Conduit_async.io
-    val get_private_channels : unit -> Yojson.Safe.json Conduit_async.io
-    val create_dm : Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val get_guilds : unit -> string Core.Or_error.t Conduit_async.io
+    val leave_guild : int -> string Core.Or_error.t Conduit_async.io
+    val get_private_channels :
+      unit -> string Core.Or_error.t Conduit_async.io
+    val create_dm :
+      Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val create_group_dm :
-      Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val get_connections : unit -> Yojson.Safe.json Conduit_async.io
-    val get_user : int -> Yojson.Safe.json Conduit_async.io
-    val get_voice_regions : unit -> Yojson.Safe.json Conduit_async.io
+      Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val get_connections : unit -> string Core.Or_error.t Conduit_async.io
+    val get_user : int -> string Core.Or_error.t Conduit_async.io
+    val get_voice_regions : unit -> string Core.Or_error.t Conduit_async.io
     val create_webhook :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val get_channel_webhooks : int -> Yojson.Safe.json Conduit_async.io
-    val get_guild_webhooks : int -> Yojson.Safe.json Conduit_async.io
-    val get_webhook : int -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val get_channel_webhooks : int -> string Core.Or_error.t Conduit_async.io
+    val get_guild_webhooks : int -> string Core.Or_error.t Conduit_async.io
+    val get_webhook : int -> string Core.Or_error.t Conduit_async.io
     val get_webhook_with_token :
-      int -> string -> Yojson.Safe.json Conduit_async.io
+      int -> string -> string Core.Or_error.t Conduit_async.io
     val edit_webhook :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val edit_webhook_with_token :
-      int -> string -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
-    val delete_webhook : int -> Yojson.Safe.json Conduit_async.io
+      int ->
+      string -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
+    val delete_webhook : int -> string Core.Or_error.t Conduit_async.io
     val delete_webhook_with_token :
-      int -> string -> Yojson.Safe.json Conduit_async.io
+      int -> string -> string Core.Or_error.t Conduit_async.io
     val execute_webhook :
-      int -> string -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int ->
+      string -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val execute_slack_webhook :
-      int -> string -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int ->
+      string -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val execute_git_webhook :
-      int -> string -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int ->
+      string -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val get_audit_logs :
-      int -> Yojson.Safe.json -> Yojson.Safe.json Conduit_async.io
+      int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
 end
 
 module type Models = sig

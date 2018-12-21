@@ -66,10 +66,10 @@ module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
             let seq = J.(member "s" payload |> to_int) in
             let t = J.(member "t" payload |> to_string) in
             let data = J.member "d" payload in
-            let session = J.(member "session_id" data |> to_string_option) in
-            if t = "READY" then begin
-                Ivar.fill_if_empty shard.ready ()
-            end;
+            let session = if t = "READY" then begin
+                Ivar.fill_if_empty shard.ready ();
+                J.(member "session_id" data |> to_string_option)
+            end else None in
             D.dispatch ~ev:t (Yojson.Safe.to_string data);
             return { shard with
                 seq = seq;
@@ -288,6 +288,10 @@ module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
     let start ?count () =
         let module J = Yojson.Safe.Util in
         H.get_gateway_bot () >>= fun data ->
+        let data = match data with
+        | Ok d -> Yojson.Safe.from_string d
+        | Error e -> Error.raise e
+        in
         let url = J.(member "url" data |> to_string) in
         let count = match count with
         | Some c -> c

@@ -1,0 +1,139 @@
+(rule
+	(targets activity_t.ml activity_t.mli)
+	(deps activity.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets activity_j.ml activity_j.mli)
+	(deps activity.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets attachment_t.ml attachment_t.mli)
+	(deps attachment.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets attachment_j.ml attachment_j.mli)
+	(deps attachment.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets ban_t.ml ban_t.mli)
+	(deps ban.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets ban_j.ml ban_j.mli)
+	(deps ban.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets channel_t.ml channel_t.mli)
+	(deps channel.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets channel_j.ml channel_j.mli)
+	(deps channel.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets embed_t.ml embed_t.mli)
+	(deps embed.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets embed_j.ml embed_j.mli)
+	(deps embed.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets emoji_t.ml emoji_t.mli)
+	(deps emoji.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets emoji_j.ml emoji_j.mli)
+	(deps emoji.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets guild_t.ml guild_t.mli)
+	(deps guild.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets guild_j.ml guild_j.mli)
+	(deps guild.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets member_t.ml member_t.mli)
+	(deps member.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets member_j.ml member_j.mli)
+	(deps member.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets message_t.ml message_t.mli)
+	(deps message.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets message_j.ml message_j.mli)
+	(deps message.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets presence_t.ml presence_t.mli)
+	(deps presence.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets presence_j.ml presence_j.mli)
+	(deps presence.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets reaction_t.ml reaction_t.mli)
+	(deps reaction.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets reaction_j.ml reaction_j.mli)
+	(deps reaction.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets role_t.ml role_t.mli)
+	(deps role.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets role_j.ml role_j.mli)
+	(deps role.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets snowflake_t.ml snowflake_t.mli)
+	(deps snowflake.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets snowflake_j.ml snowflake_j.mli)
+	(deps snowflake.atd)
+	(action (run atdgen -j %{deps})))
+(rule
+	(targets user_t.ml user_t.mli)
+	(deps user.atd)
+	(action (run atdgen -t %{deps})))
+(rule
+	(targets user_j.ml user_j.mli)
+	(deps user.atd)
+	(action (run atdgen -j %{deps})))
+
+(library
+	(name disml)
+	(public_name disml)
+	(synopsis "An OCaml library for interfacing with the Discord API")
+	(modules
+		activity_t activity_j
+		attachment_t attachment_j
+		ban_t ban_j
+		channel_t channel_j
+		embed_t embed_j
+		emoji_t emoji_j
+		guild_t guild_j
+		member_t member_j
+		message_t message_j
+		presence_t presence_j
+		reaction_t reaction_j
+		role_t role_j
+		snowflake_t snowflake_j
+		user_t user_j
+		activity attachment ban channel embed emoji guild member message presence reaction role snowflake user client dispatch endpoints event http models opcode rl s sharder
+	)
+	(libraries core async_ssl cohttp-async yojson websocket-async zlib atdgen)
+	(preprocess (pps ppx_jane))
+)
+
+(include_subdirs unqualified)

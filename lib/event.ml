@@ -75,7 +75,7 @@ let event_of_string ~contents t = match t with
     | "GUILD_BAN_REMOVE" -> GUILD_BAN_REMOVE (Ban_j.t_of_string contents)
     | "GUILD_EMOJIS_UPDATE" -> GUILD_EMOJIS_UPDATE (Yojson.Safe.from_string contents)
     | "GUILD_INTEGRATIONS_UPDATE" -> GUILD_INTEGRATIONS_UPDATE (Yojson.Safe.from_string contents)
-    | "GUILD_MEMBER_ADD" -> GUILD_MEMBER_ADD (let Member_t.{guild_id;member} = Member_j.member_update_of_string contents in wrap_member ~guild_id member)
+    | "GUILD_MEMBER_ADD" -> GUILD_MEMBER_ADD (Member_j.t_of_string contents)
     | "GUILD_MEMBER_REMOVE" -> GUILD_MEMBER_REMOVE (let Member_t.{guild_id;member} = Member_j.member_update_of_string contents in wrap_member ~guild_id member)
     | "GUILD_MEMBER_UPDATE" -> GUILD_MEMBER_UPDATE (let Member_t.{guild_id;member} = Member_j.member_update_of_string contents in wrap_member ~guild_id member)
     | "GUILD_MEMBERS_CHUNK" -> GUILD_MEMBERS_CHUNK (Yojson.Safe.(from_string contents |> Util.to_list) |> List.map ~f:(fun m -> Yojson.Safe.to_string m |> Member_j.t_of_string))

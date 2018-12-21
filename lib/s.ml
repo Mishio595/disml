@@ -18,6 +18,25 @@ end
 
 module type Channel = sig
     type t = Channel_t.t
+    val say : content:string -> Channel_t.t -> Message_t.t Deferred.Or_error.t
+    val send_message :
+        ?embed:Yojson.Safe.json ->
+        ?content:string ->
+        ?file:string ->
+        ?tts:bool ->
+        Channel_t.t ->
+        Message_t.t Deferred.Or_error.t
+    val delete : Channel_t.t -> unit Deferred.Or_error.t
+    val get_message : id:Snowflake_t.t -> Channel_t.t -> Message_t.t Deferred.Or_error.t
+    val get_messages :
+        ?mode:[ `Before | `After | `Around ] ->
+        ?id:Snowflake_t.t ->
+        ?limit:int ->
+        Channel_t.t ->
+        Message_t.t list Deferred.Or_error.t
+    val broadcast_typing : Channel_t.t -> unit Deferred.Or_error.t
+    val get_pins : Channel_t.t -> Message_t.t list Deferred.Or_error.t
+    (* TODO more things related to guild channels *)
 end
 
 module type Embed = sig
@@ -164,7 +183,7 @@ module type Http = sig
     val modify_channel :
       int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io
     val delete_channel : int -> string Core.Or_error.t Conduit_async.io
-    val get_messages : int -> string Core.Or_error.t Conduit_async.io
+    val get_messages : int -> int -> string * int -> string Core.Or_error.t Conduit_async.io
     val get_message : int -> int -> string Core.Or_error.t Conduit_async.io
     val create_message :
       int -> Yojson.Safe.json -> string Core.Or_error.t Conduit_async.io

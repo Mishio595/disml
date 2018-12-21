@@ -82,8 +82,8 @@ module Make(T : S.Token) = struct
     let delete_channel channel_id =
         Base.request `DELETE (Endpoints.channel channel_id)
 
-    let get_messages channel_id =
-        Base.request `GET (Endpoints.channel_messages channel_id)
+    let get_messages channel_id limit (kind, id) =
+        Base.request `GET (Printf.sprintf "%s?%s=%d&limit=%d" (Endpoints.channel_messages channel_id) kind id limit)
 
     let get_message channel_id message_id =
         Base.request `GET (Endpoints.channel_message channel_id message_id)

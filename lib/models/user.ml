@@ -3,13 +3,13 @@ module Make(Http : S.Http) = struct
     include User_t
 
     let tag user =
-        Printf.sprintf "%s#%d" user.username user.discriminator
+        Printf.sprintf "%s#%s" user.username user.discriminator
 
     let mention user =
         Printf.sprintf "<@%d>" user.id
 
     let default_avatar user =
-        let avatar = user.discriminator % 5 in
+        let avatar = Int.of_string user.discriminator % 5 in
         Endpoints.cdn_default_avatar avatar
 
     let face user = match user.avatar with

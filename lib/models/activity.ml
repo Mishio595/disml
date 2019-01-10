@@ -2,4 +2,4 @@ type t = {
     name: string;
     kind: int [@key "type"];
     url: string [@default ""];
-} [@@deriving yojson]
+} [@@deriving yojson { strict = false}]

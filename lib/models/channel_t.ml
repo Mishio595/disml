@@ -10,43 +10,43 @@ type group = {
     name: string option [@default None];
     owner_id: Snowflake.t;
     recipients: User_t.t list [@default []];
-} [@@deriving yojson]
+} [@@deriving yojson { strict = false}]
 
 type dm = {
     id: Snowflake.t;
     last_message_id: Snowflake.t option [@default None];
     last_pin_timestamp: string option [@default None];
-} [@@deriving yojson]
+} [@@deriving yojson { strict = false}]
 
 type guild_text = {
     id: Snowflake.t;
     last_message_id: Snowflake.t option [@default None];
     last_pin_timestamp: string option [@default None];
     category_id: Snowflake.t option [@default None][@key "parent_id"];
-    guild_id: Snowflake.t;
+    guild_id: Snowflake.t option [@default None];
     name: string;
     position: int;
     topic: string option [@default None];
     nsfw: bool;
     slow_mode_timeout: int option [@default None];
-} [@@deriving yojson]
+} [@@deriving yojson { strict = false}]
 
 type guild_voice = {
     id: Snowflake.t;
     category_id: Snowflake.t option [@default None][@key "parent_id"];
-    guild_id: Snowflake.t;
+    guild_id: Snowflake.t option [@default None];
     name: string;
     position: int;
     user_limit: int [@default -1];
     bitrate: int option [@default None];
-} [@@deriving yojson]
+} [@@deriving yojson { strict = false}]
 
 type category = {
     id: Snowflake.t;
-    guild_id: Snowflake.t;
+    guild_id: Snowflake.t option [@default None];
     position: int;
     name: string;
-} [@@deriving yojson]
+} [@@deriving yojson { strict = false}]
 
 type t =
 | Group of group
@@ -54,7 +54,7 @@ type t =
 | GuildText of guild_text
 | GuildVoice of guild_voice
 | Category of category
-[@@deriving yojson]
+[@@deriving yojson { strict = false}]
 
 type channel_wrapper = {
     id: Snowflake.t;
@@ -74,17 +74,15 @@ type channel_wrapper = {
     application_id: Snowflake.t option [@default None];
     category_id: Snowflake.t option [@default None][@key "parent_id"];
     last_pin_timestamp: string option [@default None];
-} [@@deriving yojson]
+} [@@deriving yojson { strict = false}]
 
 let unwrap_as_guild_text {id;guild_id;position;name;topic;nsfw;last_message_id;slow_mode_timeout;category_id;last_pin_timestamp;_} =
-    let guild_id = Option.value_exn guild_id in
     let position = Option.value_exn position in
     let name = Option.value_exn name in
-    let nsfw = Option.value_exn nsfw in
+    let nsfw = Option.value ~default:false nsfw in
     { id; guild_id; position; name; topic; nsfw; last_message_id; slow_mode_timeout; category_id; last_pin_timestamp }
 
 let unwrap_as_guild_voice {id;guild_id;position;name;bitrate;user_limit;category_id;_} =
-    let guild_id = Option.value_exn guild_id in
     let position = Option.value_exn position in
     let name = Option.value_exn name in
     let user_limit = Option.value ~default:(-1) user_limit in
@@ -99,7 +97,6 @@ let unwrap_as_group {id;name;last_message_id;recipients;icon;owner_id;last_pin_t
     { id; name; last_message_id; recipients; icon; owner_id; last_pin_timestamp; }
 
 let unwrap_as_category {id;guild_id;position;name;_} =
-    let guild_id = Option.value_exn guild_id in
     let position = Option.value_exn position in
     let name = Option.value_exn name in
     { id; guild_id; position; name; }

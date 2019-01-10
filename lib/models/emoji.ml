@@ -6,4 +6,4 @@ type t = {
     require_colons: bool option [@default None];
     managed: bool option [@default None];
     animated: bool option [@default None];
-} [@@deriving yojson]
+} [@@deriving yojson { strict = false}]

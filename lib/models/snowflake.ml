@@ -1,6 +1,14 @@
 open Core
 
-type t = int [@@deriving yojson]
+type t = int
+
+let of_yojson_exn d = Yojson.Safe.Util.to_string d |> Int.of_string |> Ok
+
+let of_yojson d =
+    try of_yojson_exn d
+    with Yojson.Safe.Util.Type_error (why,_) -> Error why
+
+let to_yojson s : Yojson.Safe.json = `String (Int.to_string s)
 
 let timestamp snowflake =
     let offset = (snowflake lsr 22) / 1000 in

@@ -5,4 +5,4 @@ type t = {
     guild_id: Snowflake.t;
     status: string;
     activities: Activity.t list;
-} [@@deriving yojson]
+} [@@deriving yojson { strict = false}]

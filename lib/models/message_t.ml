@@ -18,4 +18,4 @@ type t = {
     pinned: bool;
     webhook_id: Snowflake.t option [@default None];
     kind: int [@key "type"];
-} [@@deriving yojson]
+} [@@deriving yojson { strict = false}]

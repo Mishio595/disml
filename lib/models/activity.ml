@@ -1,3 +1,5 @@
-module Make(Http : S.Http) = struct
-    type t = Activity_t.t
-end
+type t = {
+    name: string;
+    kind: int [@key "type"];
+    url: string [@default ""];
+} [@@deriving yojson]

@@ -4,7 +4,7 @@ module Make(Models : Disml.S.Models) = struct
     open Models
     open Disml.Event
 
-    let check_command (msg:Disml.Message_t.t) =
+    let check_command (msg:Message.t) =
         if String.is_prefix ~prefix:"!ping" msg.content then
             Message.reply msg "Pong!" >>> ignore
         else if String.is_prefix ~prefix:"!spam" msg.content then

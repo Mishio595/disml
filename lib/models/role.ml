@@ -1,13 +1,13 @@
 module Make(Http : S.Http) = struct
-    open Role_t
-
+    type role = Role_t.role
+    type role_update = Role_t.role_update
     type t = Role_t.t
 
     let edit_role ~body (role:t) = Http.guild_role_edit role.guild_id role.id body
 
     let allow_mention role =
         edit_role ~body:(`Assoc [("mentionable", `Bool true)]) role
-    
+
     let delete (role:t) = Http.guild_role_remove role.guild_id role.id
 
     let disallow_mention role =

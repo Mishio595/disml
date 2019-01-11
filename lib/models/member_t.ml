@@ -15,9 +15,16 @@ type member = {
     user: User_t.t;
 } [@@deriving yojson { strict = false}]
 
+type member_wrapper = {
+    guild_id: Snowflake.t;
+    user: User_t.t;
+} [@@deriving yojson { strict = false }]
+
 type member_update = {
-    guild_id: Snowflake.t [@key "id"];
-    member: member;
+    guild_id: Snowflake.t;
+    roles: Snowflake.t list [@default []];
+    user: User_t.t;
+    nick: string option [@default None];
 } [@@deriving yojson { strict = false}]
 
 type t = {

@@ -1,3 +1,8 @@
+type partial_emoji = {
+    id: Snowflake.t option [@default None];
+    name: string;
+} [@@deriving yojson { strict = false }]
+
 type t = {
     id: Snowflake.t option [@default None];
     name: string;

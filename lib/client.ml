@@ -1,7 +1,5 @@
-open Async
-
 module Make(T : S.Token)(H : S.Handler_f) = struct
-    include T
+    open Async
 
     module Http = Http.Make(T)
     module Models = Models.Make(Http)
@@ -13,6 +11,8 @@ module Make(T : S.Token)(H : S.Handler_f) = struct
         sharder: Sharder.t;
         token: string;
     }
+
+    let token = T.token
 
     let start ?count () =
         Sharder.start ?count ()

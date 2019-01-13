@@ -1,1 +1,0 @@
-module Make(H : S.Handler) : S.Dispatch

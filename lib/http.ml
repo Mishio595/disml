@@ -2,7 +2,8 @@ module Make(T : S.Token) = struct
     open Core
     open Async
     open Cohttp
-    include T
+
+    let token = T.token
 
     module Base = struct
         exception Invalid_Method
@@ -35,11 +36,10 @@ module Make(T : S.Token) = struct
             | None -> raise Bad_response_headers)
             >>= fun () ->
             match resp |> Response.status |> Code.code_of_status with
-            | 200 -> body |> Cohttp_async.Body.to_string >>= Deferred.Or_error.return
+            | 200 -> body |> Cohttp_async.Body.to_string >>| Yojson.Safe.from_string >>= Deferred.Or_error.return
             | code ->
                 body |> Cohttp_async.Body.to_string >>= fun body ->
                 Deferred.Or_error.errorf "Unsuccessful response received: %d - %s" code body
-
 
         let request ?(body=`Null) m path =
             rl := Rl.update ~f:(function

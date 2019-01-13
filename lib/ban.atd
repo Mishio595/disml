@@ -1,6 +1,0 @@
-type user <ocaml from="User" t="t"> = abstract
-
-type t = {
-    ?reason: string option;
-    user: user;
-}

@@ -1,4 +1,4 @@
-module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
+module Make(H : S.Http)(D : S.Dispatch) = struct
     open Async
     open Core
     open Websocket_async
@@ -21,13 +21,9 @@ module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
 
         type 'a t = {
             mutable state: 'a;
-            mutable binds: ('a -> unit) list;
         }
 
         let identify_lock = Mutex.create ()
-
-        let bind ~f t =
-            t.binds <- f :: t.binds
 
         let parse (frame:[`Ok of Frame.t | `Eof]) =
             match frame with
@@ -70,7 +66,7 @@ module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
                 Ivar.fill_if_empty shard.ready ();
                 J.(member "session_id" data |> to_string_option)
             end else None in
-            D.dispatch ~ev:t (Yojson.Safe.to_string data);
+            D.dispatch ~ev:t data;
             return { shard with
                 seq = seq;
                 session = session;
@@ -289,7 +285,7 @@ module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
         let module J = Yojson.Safe.Util in
         H.get_gateway_bot () >>= fun data ->
         let data = match data with
-        | Ok d -> Yojson.Safe.from_string d
+        | Ok d -> d
         | Error e -> Error.raise e
         in
         let url = J.(member "url" data |> to_string) in
@@ -312,7 +308,6 @@ module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
                 >>| fun s -> (t.state <- s; t)
             end)
             >>= fun t ->
-            List.iter ~f:(fun f -> f t.state) t.binds;
             ev_loop t
         in
         let rec gen_shards l a =
@@ -321,7 +316,7 @@ module Make(H : S.Http)(D : S.Dispatch) : S.Sharder = struct
             | (id, total) ->
                 Shard.create ~url ~shards:(id, total) ()
                 >>= fun shard ->
-                let t = Shard.{ state = shard; binds = []; } in
+                let t = Shard.{ state = shard; } in
                 ev_loop t >>> ignore;
                 gen_shards (id+1, total) (t :: a)
         in

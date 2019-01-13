@@ -1,1 +1,0 @@
-module Make(H : S.Http)(D : S.Dispatch) : S.Sharder

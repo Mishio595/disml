@@ -1,6 +1,6 @@
 open Core
 
-type t = int
+type t = Int.t [@@deriving sexp]
 
 let of_yojson_exn d = Yojson.Safe.Util.to_string d |> Int.of_string
 

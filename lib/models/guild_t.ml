@@ -27,7 +27,7 @@ type pre = {
     member_count: int option [@default None];
     members: Member_t.member list;
     channels: Channel_t.channel_wrapper list;
-} [@@deriving yojson { strict = false }]
+} [@@deriving sexp, yojson { strict = false }]
 
 type t = {
     id: Snowflake.t;
@@ -56,7 +56,7 @@ type t = {
     member_count: int option [@default None];
     members: Member_t.t list;
     channels: Channel_t.t list;
-} [@@deriving yojson { strict = false }]
+} [@@deriving sexp, yojson { strict = false }]
 
 let wrap ({id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel;system_channel;large;unavailable;member_count;members;channels}:pre) =
     let roles = List.map ~f:(Role_t.wrap ~guild_id:id) roles in

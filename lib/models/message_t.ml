@@ -1,3 +1,5 @@
+open Core
+
 type message_update = {
     id: Snowflake.t;
     author: User_t.t option [@default None];
@@ -18,7 +20,7 @@ type message_update = {
     pinned: bool option [@default None];
     webhook_id: Snowflake.t option [@default None];
     kind: int option [@default None][@key "type"];
-} [@@deriving yojson { strict = false}]
+} [@@deriving sexp, yojson { strict = false}]
 
 type t = {
     id: Snowflake.t;
@@ -40,4 +42,4 @@ type t = {
     pinned: bool;
     webhook_id: Snowflake.t option [@default None];
     kind: int [@key "type"];
-} [@@deriving yojson { strict = false}]
+} [@@deriving sexp, yojson { strict = false}]

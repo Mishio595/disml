@@ -1,3 +1,5 @@
+open Core
+
 type t = {
     id: Snowflake.t;
     filename: string;
@@ -6,4 +8,4 @@ type t = {
     proxy_url: string;
     height: int [@default -1];
     width: int [@default -1];
-} [@@deriving yojson { strict = false}]
+} [@@deriving sexp, yojson { strict = false}]

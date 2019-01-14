@@ -1,4 +1,4 @@
-module Make(T : S.Token) = struct
+module Make(T : S.ClientOptions) = struct
     open Core
     open Async
     open Cohttp

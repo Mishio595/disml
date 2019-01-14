@@ -1,4 +1,4 @@
-module Make(T : S.Token)(H : S.Handler_f) = struct
+module Make(T : S.ClientOptions)(H : S.Handler_f) = struct
     open Async
 
     module Http = Http.Make(T)

@@ -1,6 +1,7 @@
 open Async
 
-type t = Message_t.t
+include module type of Message_t
+
 val add_reaction : t -> Emoji.t -> Yojson.Safe.json Deferred.Or_error.t
 val remove_reaction : t -> Emoji.t -> User_t.t -> Yojson.Safe.json Deferred.Or_error.t
 val clear_reactions : t -> Yojson.Safe.json Deferred.Or_error.t

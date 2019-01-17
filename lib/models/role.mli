@@ -1,6 +1,7 @@
 open Async
 
-type t = Role_t.t
+include module type of Role_t
+
 val allow_mention : t -> Yojson.Safe.json Deferred.Or_error.t
 val delete : t -> Yojson.Safe.json Deferred.Or_error.t
 val disallow_mention : t -> Yojson.Safe.json Deferred.Or_error.t

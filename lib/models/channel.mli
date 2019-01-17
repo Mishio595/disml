@@ -1,6 +1,6 @@
 open Async
+include module type of Channel_t
 
-type t = Channel_t.t
 val say : content:string -> t -> Message_t.t Deferred.Or_error.t
 val send_message :
     ?embed:Yojson.Safe.json ->

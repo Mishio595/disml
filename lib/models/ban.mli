@@ -1,1 +1,1 @@
-type t = Ban_t.t
+include module type of Ban_t

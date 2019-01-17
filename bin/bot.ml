@@ -8,7 +8,11 @@ let check_command (msg:Message.t) =
     | [] -> "", []
     in match cmd with
     | "!ping" ->
-        Message.reply msg "Pong!" >>> ignore
+        Message.reply msg "Pong!" >>= begin fun msg ->
+        let msg = match msg with Ok m -> m | Error e -> Error.raise e in
+        let diff = Time.diff (Time.now ()) (Time.of_string msg.timestamp) in
+        Message.set_content msg (Printf.sprintf "Pong! `%d ms`" (Time.Span.to_ms diff |> Float.to_int))
+        end >>> ignore
     | "spam" ->
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
         List.range 0 count

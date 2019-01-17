@@ -2,12 +2,12 @@ open Async
 
 include module type of Message_t
 
-val add_reaction : t -> Emoji.t -> Yojson.Safe.json Deferred.Or_error.t
-val remove_reaction : t -> Emoji.t -> User_t.t -> Yojson.Safe.json Deferred.Or_error.t
-val clear_reactions : t -> Yojson.Safe.json Deferred.Or_error.t
-val delete : t -> Yojson.Safe.json Deferred.Or_error.t
-val pin : t -> Yojson.Safe.json Deferred.Or_error.t
-val unpin : t -> Yojson.Safe.json Deferred.Or_error.t
-val reply : t -> string -> Yojson.Safe.json Deferred.Or_error.t
-val set_content : t -> string -> Yojson.Safe.json Deferred.Or_error.t
-val set_embed : t -> Embed.t -> Yojson.Safe.json Deferred.Or_error.t
+val add_reaction : t -> Emoji.t -> unit Deferred.Or_error.t
+val remove_reaction : t -> Emoji.t -> User_t.t -> unit Deferred.Or_error.t
+val clear_reactions : t -> unit Deferred.Or_error.t
+val delete : t -> unit Deferred.Or_error.t
+val pin : t -> unit Deferred.Or_error.t
+val unpin : t -> unit Deferred.Or_error.t
+val reply : t -> string -> t Deferred.Or_error.t
+val set_content : t -> string -> t Deferred.Or_error.t
+val set_embed : t -> Embed.t -> t Deferred.Or_error.t

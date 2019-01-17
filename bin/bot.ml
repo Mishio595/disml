@@ -7,8 +7,7 @@ let main () =
     | Some t -> t
     | None -> failwith "No token in env"
     in
-    Client.create token;
-    Client.start ()
+    Client.start token
     >>> fun client ->
     Clock.every
     (Time.Span.create ~sec:60 ())

@@ -5,10 +5,8 @@ type t = {
     token: string;
 }
 
-let create token =
-    Config.token := token
-
-let start ?count () =
+let start ?count token =
+    Config.token := token;
     Sharder.start ?count ()
     >>| fun sharder ->
     { sharder; token = !Config.token; }

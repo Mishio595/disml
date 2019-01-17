@@ -1,5 +1,5 @@
 (executable
 	(name bot)
-	(modules bot handler)
+	(modules bot)
 	(libraries core async_ssl disml)
 )

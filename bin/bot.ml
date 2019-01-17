@@ -8,13 +8,8 @@ let main () =
     | None -> failwith "No token in env"
     in
     Client.start token
-    >>> fun client ->
-    Clock.every
-    (Time.Span.create ~sec:60 ())
-    (fun () ->
-        print_endline "Setting status";
-        Client.set_status ~status:(`String "Hello!") client
-        >>> ignore)
+    >>> ignore
 
 let _ =
+    Client.message_create := (fun msg -> print_endline msg.content);
     Scheduler.go_main ~main ()

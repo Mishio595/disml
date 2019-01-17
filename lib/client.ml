@@ -1,4 +1,5 @@
 open Async
+include Config
 
 type t = {
     sharder: Sharder.t;

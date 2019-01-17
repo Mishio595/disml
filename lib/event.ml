@@ -22,9 +22,9 @@ type t =
 | GUILD_MEMBER_REMOVE of Member_t.member_wrapper
 | GUILD_MEMBER_UPDATE of Member_t.member_update
 | GUILD_MEMBERS_CHUNK of Member_t.t list
-| GUILD_ROLE_CREATE of Role_t.t (* * Guild_t.t *)
-| GUILD_ROLE_UPDATE of Role_t.t (* * Guild_t.t *)
-| GUILD_ROLE_DELETE of Role_t.t (* * Guild_t.t *)
+| GUILD_ROLE_CREATE of Role_t.t
+| GUILD_ROLE_UPDATE of Role_t.t
+| GUILD_ROLE_DELETE of Role_t.t
 | MESSAGE_CREATE of Message_t.t
 | MESSAGE_UPDATE of Message_t.message_update
 | MESSAGE_DELETE of Snowflake.t * Snowflake.t
@@ -77,10 +77,47 @@ let event_of_yojson ~contents t = match t with
     | "WEBHOOKS_UPDATE" -> WEBHOOKS_UPDATE contents
     | s -> raise @@ Invalid_event s
 
-let dispatch ~ev contents =
+let dispatch ev = match ev with
+| HELLO d -> !Config.hello d
+| READY d -> !Config.ready d
+| RESUMED d -> !Config.resumed d
+| INVALID_SESSION d -> !Config.invalid_session d
+| CHANNEL_CREATE d -> !Config.channel_create d
+| CHANNEL_UPDATE d -> !Config.channel_update d
+| CHANNEL_DELETE d -> !Config.channel_delete d
+| CHANNEL_PINS_UPDATE d -> !Config.channel_pins_update d
+| GUILD_CREATE d -> !Config.guild_create d
+| GUILD_UPDATE d -> !Config.guild_update d
+| GUILD_DELETE d -> !Config.guild_delete d
+| GUILD_BAN_ADD d -> !Config.member_ban d
+| GUILD_BAN_REMOVE d -> !Config.member_unban d
+| GUILD_EMOJIS_UPDATE d -> !Config.guild_emojis_update d
+| GUILD_INTEGRATIONS_UPDATE d -> !Config.integrations_update d
+| GUILD_MEMBER_ADD d -> !Config.member_join d
+| GUILD_MEMBER_REMOVE d -> !Config.member_leave d
+| GUILD_MEMBER_UPDATE d -> !Config.member_update d
+| GUILD_MEMBERS_CHUNK d -> !Config.members_chunk d
+| GUILD_ROLE_CREATE d -> !Config.role_create d
+| GUILD_ROLE_UPDATE d -> !Config.role_update d
+| GUILD_ROLE_DELETE d -> !Config.role_delete d
+| MESSAGE_CREATE d -> !Config.message_create d
+| MESSAGE_UPDATE d -> !Config.message_update d
+| MESSAGE_DELETE (d,e) -> !Config.message_delete d e
+| MESSAGE_BULK_DELETE d -> !Config.message_bulk_delete d
+| MESSAGE_REACTION_ADD d -> !Config.reaction_add d
+| MESSAGE_REACTION_REMOVE d -> !Config.reaction_remove d
+| MESSAGE_REACTION_REMOVE_ALL d -> !Config.reaction_bulk_remove d
+| PRESENCE_UPDATE d -> !Config.presence_update d
+| TYPING_START d -> !Config.typing_start d
+| USER_UPDATE d -> !Config.user_update d
+| VOICE_STATE_UPDATE d -> !Config.voice_state_update d
+| VOICE_SERVER_UPDATE d -> !Config.voice_server_update d
+| WEBHOOKS_UPDATE d -> !Config.webhooks_update d
+
+let handle_event ~ev contents =
     (* Printf.printf "Dispatching %s\n%!" ev; *)
     (* print_endline (Yojson.Safe.prettify contents); *)
     try
         event_of_yojson ~contents ev
-        |> ignore; (* TODO make this point to the new hanler *)
+        |> dispatch
     with Invalid_event ev -> Printf.printf "Unknown event: %s%!" ev

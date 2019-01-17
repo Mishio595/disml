@@ -63,7 +63,7 @@ module Shard = struct
             Ivar.fill_if_empty shard.ready ();
             J.(member "session_id" data |> to_string_option)
         end else None in
-        Event.dispatch ~ev:t data;
+        Event.handle_event ~ev:t data;
         return { shard with
             seq = seq;
             session = session;

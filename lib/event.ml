@@ -76,3 +76,11 @@ let event_of_yojson ~contents t = match t with
     | "VOICE_SERVER_UPDATE" -> VOICE_SERVER_UPDATE contents
     | "WEBHOOKS_UPDATE" -> WEBHOOKS_UPDATE contents
     | s -> raise @@ Invalid_event s
+
+let dispatch ~ev contents =
+    (* Printf.printf "Dispatching %s\n%!" ev; *)
+    (* print_endline (Yojson.Safe.prettify contents); *)
+    try
+        event_of_yojson ~contents ev
+        |> ignore; (* TODO make this point to the new hanler *)
+    with Invalid_event ev -> Printf.printf "Unknown event: %s%!" ev

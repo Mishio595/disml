@@ -32,8 +32,5 @@ depends: [
 build: [
   ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
-]
-build-doc: [
-  ["dune" "subst"] {pinned}
-  ["dune" "build" "-p" "@doc" "-j" jobs]
+  ["dune" "build" "-p" "@doc" "-j" jobs] {with-doc}
 ]

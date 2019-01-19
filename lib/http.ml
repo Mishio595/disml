@@ -22,7 +22,7 @@ module Base = struct
         let h = Header.init () in
         Header.add_list h [
             "User-Agent", "Dis.ml v0.1.0";
-            "Authorization", ("Bot " ^ !Config.token);
+            "Authorization", ("Bot " ^ !Client_options.token);
             "Content-Type", "application/json";
         ]
 

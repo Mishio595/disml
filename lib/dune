@@ -17,7 +17,7 @@
 		role role_t
 		snowflake
 		user user_t
-		client config endpoints event http opcode rl sharder
+		client client_options dispatch endpoints event http opcode rl sharder
 	)
 	(libraries core async_ssl cohttp-async yojson websocket-async zlib ppx_deriving_yojson.runtime)
 	(preprocess (pps ppx_jane ppx_deriving_yojson))

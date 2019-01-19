@@ -1,5 +1,6 @@
 open Async
-include Config
+include Client_options
+include Dispatch
 
 type t = {
     sharder: Sharder.t;
@@ -7,10 +8,10 @@ type t = {
 }
 
 let start ?count token =
-    Config.token := token;
+    Client_options.token := token;
     Sharder.start ?count ()
     >>| fun sharder ->
-    { sharder; token = !Config.token; }
+    { sharder; token; }
 
 let set_status ~status client =
     Sharder.set_status ~status client.sharder

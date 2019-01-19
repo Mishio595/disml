@@ -1,5 +1,3 @@
-let token = ref ""
-
 let hello = ref (fun (_:Yojson.Safe.json) -> ())
 let ready = ref (fun (_:Yojson.Safe.json) -> ())
 let resumed = ref (fun (_:Yojson.Safe.json) -> ())

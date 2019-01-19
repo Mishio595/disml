@@ -136,7 +136,7 @@ module Shard = struct
         | None -> begin
             Mutex.lock identify_lock;
             let payload = `Assoc [
-                ("token", `String !Config.token);
+                ("token", `String !Client_options.token);
                 ("properties", `Assoc [
                     ("$os", `String Sys.os_type);
                     ("$device", `String "dis.ml");
@@ -155,7 +155,7 @@ module Shard = struct
         end
         | Some s ->
             let payload = `Assoc [
-                ("token", `String !Config.token);
+                ("token", `String !Client_options.token);
                 ("session_id", `String s);
                 ("seq", `Int shard.seq)
             ] in

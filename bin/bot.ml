@@ -29,6 +29,9 @@ let check_command (msg:Message.t) =
         |> List.fold ~init:0 ~f:(+)
         |> Int.to_string in
         Message.reply msg list >>> ignore
+    | "!embed" ->
+        let embed = { Embed.default with description = Some "Hello World!" } in
+        Message.reply_with ~embed msg >>> ignore
     | _ -> ()
 
 let main () =

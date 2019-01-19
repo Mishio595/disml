@@ -1,3 +1,22 @@
+(** Used to store dispatch callbacks. Each event can only have one callback registered at a time.
+    These should be accessed through their re-export in {!Client}.
+    {3 Examples}
+    [Client.ready := (fun _ -> print_endline "Shard is Ready!")]
+
+    [Client.guild_create := (fun guild -> print_endline guild.name)]
+
+    {[
+        open Core
+        open Disml
+
+        let check_command (msg : Message.t) =
+            if String.is_prefix ~prefix:"!ping" msg.content then
+                Message.reply msg "Pong!" >>> ignore
+        
+        Client.message_create := check_command
+    ]}
+*)
+
 (** Dispatched when connecting to the gateway, most users will have no use for this. *)
 val hello : (Yojson.Safe.json -> unit) ref
 

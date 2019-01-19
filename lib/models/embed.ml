@@ -52,3 +52,19 @@ type t = {
     author: author option [@default None];
     fields: field list [@default []];
 } [@@deriving sexp, yojson { strict = false }]
+
+let default = {
+    title = None;
+    kind = None;
+    description = None;
+    url = None;
+    timestamp = None;
+    colour = None;
+    footer = None;
+    image = None;
+    thumbnail = None;
+    video = None;
+    provider = None;
+    author = None;
+    fields = [];
+}

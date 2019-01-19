@@ -78,41 +78,41 @@ let event_of_yojson ~contents t = match t with
     | s -> raise @@ Invalid_event s
 
 let dispatch ev = match ev with
-| HELLO d -> !Dispatch.hello d
-| READY d -> !Dispatch.ready d
-| RESUMED d -> !Dispatch.resumed d
-| INVALID_SESSION d -> !Dispatch.invalid_session d
-| CHANNEL_CREATE d -> !Dispatch.channel_create d
-| CHANNEL_UPDATE d -> !Dispatch.channel_update d
-| CHANNEL_DELETE d -> !Dispatch.channel_delete d
-| CHANNEL_PINS_UPDATE d -> !Dispatch.channel_pins_update d
-| GUILD_CREATE d -> !Dispatch.guild_create d
-| GUILD_UPDATE d -> !Dispatch.guild_update d
-| GUILD_DELETE d -> !Dispatch.guild_delete d
-| GUILD_BAN_ADD d -> !Dispatch.member_ban d
-| GUILD_BAN_REMOVE d -> !Dispatch.member_unban d
-| GUILD_EMOJIS_UPDATE d -> !Dispatch.guild_emojis_update d
-| GUILD_INTEGRATIONS_UPDATE d -> !Dispatch.integrations_update d
-| GUILD_MEMBER_ADD d -> !Dispatch.member_join d
-| GUILD_MEMBER_REMOVE d -> !Dispatch.member_leave d
-| GUILD_MEMBER_UPDATE d -> !Dispatch.member_update d
-| GUILD_MEMBERS_CHUNK d -> !Dispatch.members_chunk d
-| GUILD_ROLE_CREATE d -> !Dispatch.role_create d
-| GUILD_ROLE_UPDATE d -> !Dispatch.role_update d
-| GUILD_ROLE_DELETE d -> !Dispatch.role_delete d
-| MESSAGE_CREATE d -> !Dispatch.message_create d
-| MESSAGE_UPDATE d -> !Dispatch.message_update d
-| MESSAGE_DELETE (d,e) -> !Dispatch.message_delete d e
-| MESSAGE_BULK_DELETE d -> !Dispatch.message_bulk_delete d
-| MESSAGE_REACTION_ADD d -> !Dispatch.reaction_add d
-| MESSAGE_REACTION_REMOVE d -> !Dispatch.reaction_remove d
-| MESSAGE_REACTION_REMOVE_ALL d -> !Dispatch.reaction_bulk_remove d
-| PRESENCE_UPDATE d -> !Dispatch.presence_update d
-| TYPING_START d -> !Dispatch.typing_start d
-| USER_UPDATE d -> !Dispatch.user_update d
-| VOICE_STATE_UPDATE d -> !Dispatch.voice_state_update d
-| VOICE_SERVER_UPDATE d -> !Dispatch.voice_server_update d
-| WEBHOOKS_UPDATE d -> !Dispatch.webhooks_update d
+    | HELLO d -> !Dispatch.hello d
+    | READY d -> !Dispatch.ready d
+    | RESUMED d -> !Dispatch.resumed d
+    | INVALID_SESSION d -> !Dispatch.invalid_session d
+    | CHANNEL_CREATE d -> !Dispatch.channel_create d
+    | CHANNEL_UPDATE d -> !Dispatch.channel_update d
+    | CHANNEL_DELETE d -> !Dispatch.channel_delete d
+    | CHANNEL_PINS_UPDATE d -> !Dispatch.channel_pins_update d
+    | GUILD_CREATE d -> !Dispatch.guild_create d
+    | GUILD_UPDATE d -> !Dispatch.guild_update d
+    | GUILD_DELETE d -> !Dispatch.guild_delete d
+    | GUILD_BAN_ADD d -> !Dispatch.member_ban d
+    | GUILD_BAN_REMOVE d -> !Dispatch.member_unban d
+    | GUILD_EMOJIS_UPDATE d -> !Dispatch.guild_emojis_update d
+    | GUILD_INTEGRATIONS_UPDATE d -> !Dispatch.integrations_update d
+    | GUILD_MEMBER_ADD d -> !Dispatch.member_join d
+    | GUILD_MEMBER_REMOVE d -> !Dispatch.member_leave d
+    | GUILD_MEMBER_UPDATE d -> !Dispatch.member_update d
+    | GUILD_MEMBERS_CHUNK d -> !Dispatch.members_chunk d
+    | GUILD_ROLE_CREATE d -> !Dispatch.role_create d
+    | GUILD_ROLE_UPDATE d -> !Dispatch.role_update d
+    | GUILD_ROLE_DELETE d -> !Dispatch.role_delete d
+    | MESSAGE_CREATE d -> !Dispatch.message_create d
+    | MESSAGE_UPDATE d -> !Dispatch.message_update d
+    | MESSAGE_DELETE (d,e) -> !Dispatch.message_delete d e
+    | MESSAGE_BULK_DELETE d -> !Dispatch.message_bulk_delete d
+    | MESSAGE_REACTION_ADD d -> !Dispatch.reaction_add d
+    | MESSAGE_REACTION_REMOVE d -> !Dispatch.reaction_remove d
+    | MESSAGE_REACTION_REMOVE_ALL d -> !Dispatch.reaction_bulk_remove d
+    | PRESENCE_UPDATE d -> !Dispatch.presence_update d
+    | TYPING_START d -> !Dispatch.typing_start d
+    | USER_UPDATE d -> !Dispatch.user_update d
+    | VOICE_STATE_UPDATE d -> !Dispatch.voice_state_update d
+    | VOICE_SERVER_UPDATE d -> !Dispatch.voice_server_update d
+    | WEBHOOKS_UPDATE d -> !Dispatch.webhooks_update d
 
 let handle_event ~ev contents =
     (* Printf.printf "Dispatching %s\n%!" ev; *)
@@ -120,4 +120,4 @@ let handle_event ~ev contents =
     try
         event_of_yojson ~contents ev
         |> dispatch
-    with Invalid_event ev -> Printf.printf "Unknown event: %s%!" ev
+    with Invalid_event ev -> Printf.printf "Unknown event: %s\n%!" ev

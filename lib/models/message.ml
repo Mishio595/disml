@@ -39,6 +39,26 @@ let reply msg cont =
     Http.create_message msg.channel_id rep
     >>| Result.map ~f:Message_t.of_yojson_exn
 
+let reply_with ?embed ?content ?file ?(tts=false) msg =
+    let embed = match embed with
+    | Some e -> Embed.to_yojson e
+    | None -> `Null in
+    let content = match content with
+    | Some c -> `String c
+    | None -> `Null in
+    let file = match file with
+    | Some f -> `String f
+    | None -> `Null in
+    let () = match embed, content with
+    | `Null, `Null -> raise Channel.Invalid_message
+    | _ -> () in
+    Http.create_message (msg.channel_id) (`Assoc [
+        ("embed", embed);
+        ("content", content);
+        ("file", file);
+        ("tts", `Bool tts);
+    ]) >>| Result.map ~f:Message_t.of_yojson_exn
+
 let set_content msg cont =
     to_yojson { msg with content = cont; }
     |> Http.edit_message msg.channel_id msg.id

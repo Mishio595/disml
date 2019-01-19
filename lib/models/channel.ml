@@ -11,7 +11,7 @@ let say ~content ch =
 
 let send_message ?embed ?content ?file ?(tts=false) ch =
     let embed = match embed with
-    | Some e -> e
+    | Some e -> Embed.to_yojson e
     | None -> `Null in
     let content = match content with
     | Some c -> `String c

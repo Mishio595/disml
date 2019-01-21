@@ -1,5 +1,9 @@
+(** Barebones of event dispatching. Most users will have no reason to look here. *)
+
+(** Used internally when received an unknown event. Is caught and logged. *)
 exception Invalid_event of string
 
+(** Event dispatch type wrapper. Used internally. *)
 type t =
 | HELLO of Yojson.Safe.json
 | READY of Yojson.Safe.json
@@ -37,8 +41,11 @@ type t =
 | VOICE_SERVER_UPDATE of Yojson.Safe.json
 | WEBHOOKS_UPDATE of Yojson.Safe.json
 
+(** Used to convert an event string and payload into a t wrapper type. *)
 val event_of_yojson : contents:Yojson.Safe.json -> string -> t
 
+(** Sends the event to the registered handler. *)
 val dispatch : t -> unit
 
+(** Wrapper to other functions. This is called from the shards. *)
 val handle_event : ev:string -> Yojson.Safe.json -> unit

@@ -59,7 +59,7 @@ let main () =
     | Some t -> t
     | None -> failwith "No token in env"
     in
-    Client.start token
+    Client.start ~count:5 token
     >>> ignore
 
 let _ =

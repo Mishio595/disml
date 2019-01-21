@@ -10,13 +10,10 @@ let of_yojson d =
 
 let to_yojson s : Yojson.Safe.json = `String (Int.to_string s)
 
-let timestamp snowflake =
-    let offset = (snowflake lsr 22) / 1000 in
-    1_420_070_400 + offset
+let timestamp snowflake = (snowflake lsr 22) + 1_420_070_400_000
 
 let timestamp_iso snowflake =
-    let t = timestamp snowflake in
-    Date.(
-        of_time ~zone:Time.Zone.utc
-        Time.(of_span_since_epoch @@ Span.of_int_sec t)
-    |> format) "%FT%T+00:00"
+    let t = timestamp snowflake |> float_of_int in
+    Time.(Span.of_ms t
+    |> of_span_since_epoch
+    |> to_string_iso8601_basic ~zone:Zone.utc)

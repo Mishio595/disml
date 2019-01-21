@@ -69,6 +69,37 @@ let default = {
     fields = [];
 }
 
+let default_footer = {
+    text = "";
+    icon_url = None;
+    proxy_icon_url = None;
+}
+
+let default_image = {
+    url = None;
+    proxy_url = None;
+    height = None;
+    width = None;
+}
+
+let default_video = {
+    url = None;
+    width = None;
+    height = None;
+}
+
+let default_provider = {
+    name = None;
+    url = None;
+}
+
+let default_author = {
+    name = None;
+    url = None;
+    icon_url = None;
+    proxy_icon_url = None;
+}
+
 let title v e = { e with title = Some v }
 let description v e = { e with description = Some v }
 let url v e = { e with url = Some v }

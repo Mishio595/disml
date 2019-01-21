@@ -30,11 +30,23 @@ let check_command (msg:Message.t) =
         |> Int.to_string in
         Message.reply msg list >>> ignore
     | "!embed" ->
+        let image_url = "https://images-ext-1.discordapp.net/external/46n5KQDNg1K4-UybFifnLsIVJkmIutfBG5zO_vpU5Zk/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/345316276098433025/17ccdc992814cc6e21a9e7d743a30e37.webp" in
         let embed = Embed.(default
             |> title "Foo"
             |> description "Bar"
+            |> url "https://gitlab.com/Mishio595/disml"
+            |> timestamp Time.(now () |> to_string_iso8601_basic ~zone:Time.Zone.utc)
             |> colour 0xff
-            |> field { name = "field"; value = "test"; inline = true; }
+            |> footer { Embed.default_footer with text = "boop" }
+            |> image { Embed.default_image with url = Some image_url }
+            |> thumbnail { Embed.default_image with url = Some image_url }
+            |> author { Embed.default_author with
+                name = Some "Adelyn";
+                url = Some "https://gitlab.com/Mishio595/disml";
+                icon_url = Some image_url }
+            |> field { name = "field 1"; value = "test"; inline = true; }
+            |> field { name = "field 2"; value = "test"; inline = true; }
+            |> field { name = "field 3"; value = "test"; inline = true; }
         ) in
         Message.reply_with ~embed msg >>> ignore
     | _ -> ()

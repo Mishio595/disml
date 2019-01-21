@@ -30,7 +30,12 @@ let check_command (msg:Message.t) =
         |> Int.to_string in
         Message.reply msg list >>> ignore
     | "!embed" ->
-        let embed = { Embed.default with description = Some "Hello World!" } in
+        let embed = Embed.(default
+            |> title "Foo"
+            |> description "Bar"
+            |> colour 0xff
+            |> field { name = "field"; value = "test"; inline = true; }
+        ) in
         Message.reply_with ~embed msg >>> ignore
     | _ -> ()
 

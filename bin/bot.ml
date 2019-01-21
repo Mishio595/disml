@@ -52,6 +52,9 @@ let check_command (msg:Message.t) =
     | _ -> ()
 
 let main () =
+    Logs.set_reporter (Logs_fmt.reporter ());
+    Logs.set_level ~all:true (Some Logs.Debug);
+    Client.message_create := check_command;
     let token = match Sys.getenv "DISCORD_TOKEN" with
     | Some t -> t
     | None -> failwith "No token in env"
@@ -60,5 +63,4 @@ let main () =
     >>> ignore
 
 let _ =
-    Client.message_create := check_command;
     Scheduler.go_main ~main ()

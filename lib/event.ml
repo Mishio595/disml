@@ -120,4 +120,4 @@ let handle_event ~ev contents =
     try
         event_of_yojson ~contents ev
         |> dispatch
-    with Invalid_event ev -> Printf.printf "Unknown event: %s\n%!" ev
+    with Invalid_event ev -> Logs.debug (fun m -> m "Unknown event: %s" ev);

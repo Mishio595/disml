@@ -33,7 +33,7 @@ module Shard = struct
         | `Eof -> None
 
     let push_frame ?payload ~ev shard =
-        print_endline @@ "Pushing frame. OP: " ^ Opcode.to_string @@ ev;
+        Logs.debug (fun m -> m "Pushing frame with Opcode: %s" (Opcode.to_string ev));
         let content = match payload with
         | None -> ""
         | Some p ->

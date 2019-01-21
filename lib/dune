@@ -19,7 +19,7 @@
 		user user_t
 		client client_options dispatch endpoints event http opcode rl sharder
 	)
-	(libraries core async_ssl cohttp-async yojson websocket-async zlib ppx_deriving_yojson.runtime)
+	(libraries core async_ssl cohttp-async logs yojson websocket-async zlib ppx_deriving_yojson.runtime)
 	(preprocess (pps ppx_jane ppx_deriving_yojson))
 )
 

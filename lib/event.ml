@@ -115,8 +115,6 @@ let dispatch ev = match ev with
     | WEBHOOKS_UPDATE d -> !Dispatch.webhooks_update d
 
 let handle_event ~ev contents =
-    (* Printf.printf "Dispatching %s\n%!" ev; *)
-    (* print_endline (Yojson.Safe.prettify contents); *)
     try
         event_of_yojson ~contents ev
         |> dispatch

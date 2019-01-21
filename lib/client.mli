@@ -6,7 +6,6 @@ include module type of Dispatch
 (** Type of the Client, it isn't recommended to access the fields directly. *)
 type t = {
     sharder: Sharder.t;
-    token: string;
 }
 
 (** Start the Client. This begins shard connections to Discord and event handlers should be registered prior to calling this.

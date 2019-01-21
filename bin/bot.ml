@@ -2,6 +2,8 @@ open Async
 open Core
 open Disml
 
+let client = Ivar.create ()
+
 let check_command (msg:Message.t) =
     let cmd, rest = match String.split ~on:' ' msg.content with
     | hd::tl -> hd, tl
@@ -49,18 +51,27 @@ let check_command (msg:Message.t) =
             |> field ("field 1", "test", true)
         ) in
         Message.reply_with ~embed msg >>> ignore
+    | "!status" ->
+        let status = List.fold ~init:"" ~f:(^) rest in
+        Ivar.read client >>> fun client ->
+        Client.set_status ~status:(`String status) client
+        >>> ignore
     | _ -> ()
 
-let main () =
+let setup_logger () =
     Logs.set_reporter (Logs_fmt.reporter ());
-    Logs.set_level ~all:true (Some Logs.Debug);
+    Logs.set_level ~all:true (Some Logs.Debug)
+
+let main () =
+    setup_logger ();
     Client.message_create := check_command;
     let token = match Sys.getenv "DISCORD_TOKEN" with
     | Some t -> t
     | None -> failwith "No token in env"
     in
     Client.start token
-    >>> ignore
+    >>> fun c ->
+    Ivar.fill client c
 
 let _ =
     Scheduler.go_main ~main ()

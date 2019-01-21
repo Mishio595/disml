@@ -4,14 +4,13 @@ include Dispatch
 
 type t = {
     sharder: Sharder.t;
-    token: string;
 }
 
 let start ?count token =
     Client_options.token := token;
     Sharder.start ?count ()
     >>| fun sharder ->
-    { sharder; token; }
+    { sharder; }
 
 let set_status ~status client =
     Sharder.set_status ~status client.sharder

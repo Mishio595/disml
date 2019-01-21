@@ -37,16 +37,16 @@ let check_command (msg:Message.t) =
             |> url "https://gitlab.com/Mishio595/disml"
             |> timestamp Time.(now () |> to_string_iso8601_basic ~zone:Time.Zone.utc)
             |> colour 0xff
-            |> footer { Embed.default_footer with text = "boop" }
-            |> image { Embed.default_image with url = Some image_url }
-            |> thumbnail { Embed.default_image with url = Some image_url }
-            |> author { Embed.default_author with
-                name = Some "Adelyn";
-                url = Some "https://gitlab.com/Mishio595/disml";
-                icon_url = Some image_url }
-            |> field { name = "field 1"; value = "test"; inline = true; }
-            |> field { name = "field 2"; value = "test"; inline = true; }
-            |> field { name = "field 3"; value = "test"; inline = true; }
+            |> footer (fun f -> footer_text "boop" f)
+            |> image image_url
+            |> thumbnail image_url
+            |> author (fun a -> a
+                |> author_name "Adelyn"
+                |> author_icon image_url
+                |> author_url "https://gitlab.com/Mishio595/disml")
+            |> field ("field 1", "test", true)
+            |> field ("field 2", "test", true)
+            |> field ("field 3", "test", true)
         ) in
         Message.reply_with ~embed msg >>> ignore
     | _ -> ()

@@ -34,7 +34,7 @@ type author = {
 type field = {
     name: string;
     value: string;
-    inline: bool [@default true];
+    inline: bool [@default false];
 } [@@deriving sexp, yojson]
 
 type t = {
@@ -106,9 +106,16 @@ let url v e = { e with url = Some v }
 let timestamp v e = { e with timestamp = Some v }
 let colour v e = { e with colour = Some v }
 let color v e = { e with colour = Some v }
-let footer v e = { e with footer = Some v }
-let image v e = { e with image = Some v }
-let thumbnail v e = { e with thumbnail = Some v }
-let author v e = { e with author = Some v }
-let field v e = { e with fields = v::e.fields }
-let fields v e = { e with fields = v }
+let footer f e = { e with footer = Some (f default_footer) }
+let image v e = { e with image = Some { default_image with url = Some v } }
+let thumbnail v e = { e with thumbnail = Some { default_image with url = Some v } }
+let author f e = { e with author = Some (f default_author) }
+let field (name, value, inline) e = { e with fields = { name; value; inline; }::e.fields }
+let fields l e = { e with fields = List.map ~f:(fun (name, value, inline) -> { name; value; inline; }) l }
+
+let footer_text v f : footer = { f with text = v }
+let footer_icon v f : footer = { f with icon_url = Some v }
+
+let author_name v a : author = { a with name = Some v }
+let author_url v a : author = { a with url = Some v }
+let author_icon v a : author = { a with icon_url = Some v }

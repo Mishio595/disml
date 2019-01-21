@@ -52,10 +52,11 @@ let check_command (msg:Message.t) =
         ) in
         Message.reply_with ~embed msg >>> ignore
     | "!status" ->
-        let status = List.fold ~init:"" ~f:(^) rest in
+        let status = List.fold ~init:"" ~f:(fun a v -> a ^ " " ^ v) rest in
         Ivar.read client >>> fun client ->
         Client.set_status ~status:(`String status) client
-        >>> ignore
+        >>> fun _ ->
+        Message.reply msg "Updated status" >>> ignore
     | _ -> ()
 
 let setup_logger () =

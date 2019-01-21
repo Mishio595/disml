@@ -44,9 +44,9 @@ let check_command (msg:Message.t) =
                 |> author_name "Adelyn"
                 |> author_icon image_url
                 |> author_url "https://gitlab.com/Mishio595/disml")
-            |> field ("field 1", "test", true)
-            |> field ("field 2", "test", true)
             |> field ("field 3", "test", true)
+            |> field ("field 2", "test", true)
+            |> field ("field 1", "test", true)
         ) in
         Message.reply_with ~embed msg >>> ignore
     | _ -> ()

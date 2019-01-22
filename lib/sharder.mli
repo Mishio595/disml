@@ -27,6 +27,7 @@ module Shard : sig
         url: string; (** The websocket URL in use. *)
         id: int * int; (** A tuple as expected by Discord. First element is the current shard index, second element is the total shard count. *)
     }
+    
     (** Wrapper around an internal state, used to wrap {!shard}. *)
     type 'a t = {
         mutable state: 'a;

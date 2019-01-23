@@ -2,8 +2,12 @@
 
 This is a library for creating bots on [Discord](https://discordapp.com/). Dis.ml uses JaneStreet's Async and Core libs and I highly recommend having a solid understanding of both of these before using this library.
 
+Docs can currently be found at https://mishio595.github.io/disml/index.html.
+They are currently very much a WIP and are not necessarily up to date.
+It is advised to install `odoc` and run `dune build @doc` in the project root dir to get the most up-to-date docs. This will build them to `_build/default/_doc/`.
+
 ## State of the project
-The dev branch is fully capable of creating a simple bot at this point in time.
+Latest changes are on master
 
 #### What is implemented?
 * The full Discord REST API
@@ -14,7 +18,7 @@ The dev branch is fully capable of creating a simple bot at this point in time.
 * Automatic rate limit handling
 
 #### What is not implemented?
-* Abstractions for Discord Objects (Message, Guild, Channel, etc) (**IN PROGRESS!**)
+* Abstractions for Discord Objects (Message, Guild, Channel, etc) (**Mostly Completed**)
 * Voice
 * Cache
 

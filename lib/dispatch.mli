@@ -30,31 +30,31 @@ val resumed : (Yojson.Safe.json -> unit) ref
 val invalid_session : (Yojson.Safe.json -> unit) ref
 
 (** Dispatched when a channel is created which is visible to the bot. *)
-val channel_create : (Channel_t.t -> unit) ref
+val channel_create : (Channel.t -> unit) ref
 
 (** Dispatched when a channel visible to the bot is changed. *)
-val channel_update : (Channel_t.t -> unit) ref
+val channel_update : (Channel.t -> unit) ref
 
 (** Dispatched when a channel visible to the bot is deleted. *)
-val channel_delete : (Channel_t.t -> unit) ref
+val channel_delete : (Channel.t -> unit) ref
 
 (** Dispatched when messages are pinned or unpinned from a a channel. *)
 val channel_pins_update : (Yojson.Safe.json -> unit) ref
 
 (** Dispatched when the bot joins a guild, and during startup. *)
-val guild_create : (Guild_t.t -> unit) ref
+val guild_create : (Guild.t -> unit) ref
 
 (** Dispatched when a guild the bot is in is edited. *)
-val guild_update : (Guild_t.t -> unit) ref
+val guild_update : (Guild.t -> unit) ref
 
 (** Dispatched when the bot is removed from a guild. *)
-val guild_delete : (Guild_t.t -> unit) ref
+val guild_delete : (Guild.t -> unit) ref
 
 (** Dispatched when a member is banned. *)
-val member_ban : (Ban_t.t -> unit) ref
+val member_ban : (Ban.t -> unit) ref
 
 (** Dispatched when a member is unbanned. *)
-val member_unban : (Ban_t.t -> unit) ref
+val member_unban : (Ban.t -> unit) ref
 
 (** Dispatched when emojis are added or removed from a guild. *)
 val guild_emojis_update : (Yojson.Safe.json -> unit) ref
@@ -63,31 +63,31 @@ val guild_emojis_update : (Yojson.Safe.json -> unit) ref
 val integrations_update : (Yojson.Safe.json -> unit) ref
 
 (** Dispatched when a member joins a guild. *)
-val member_join : (Member_t.t -> unit) ref
+val member_join : (Member.t -> unit) ref
 
 (** Dispatched when a member leaves a guild. Is Dispatched alongside {!Client.member_ban} when a user is banned. *)
-val member_leave : (Member_t.member_wrapper -> unit) ref
+val member_leave : (Member.member_wrapper -> unit) ref
 
 (** Dispatched when a member object is updated. *)
-val member_update : (Member_t.member_update -> unit) ref
+val member_update : (Member.member_update -> unit) ref
 
 (** Dispatched when requesting guild members through {!Client.request_guild_members} *)
-val members_chunk : (Member_t.t list -> unit) ref
+val members_chunk : (Member.t list -> unit) ref
 
 (** Dispatched when a role is created. *)
-val role_create : (Role_t.t -> unit) ref
+val role_create : (Role.t -> unit) ref
 
 (** Dispatched when a role is edited. *)
-val role_update : (Role_t.t -> unit) ref
+val role_update : (Role.t -> unit) ref
 
 (** Dispatched when a role is deleted. *)
-val role_delete : (Role_t.t -> unit) ref
+val role_delete : (Role.t -> unit) ref
 
 (** Dispatched when a message is sent. *)
-val message_create : (Message_t.t -> unit) ref
+val message_create : (Message.t -> unit) ref
 
 (** Dispatched when a message is edited. This does not necessarily mean the content changed. *)
-val message_update : (Message_t.message_update -> unit) ref
+val message_update : (Message.message_update -> unit) ref
 
 (** Dispatched when a message is deleted. *)
 val message_delete : (Snowflake.t -> Snowflake.t -> unit) ref
@@ -96,13 +96,13 @@ val message_delete : (Snowflake.t -> Snowflake.t -> unit) ref
 val message_bulk_delete : (Snowflake.t list -> unit) ref
 
 (** Dispatched when a rection is added to a message. *)
-val reaction_add : (Reaction_t.reaction_event -> unit) ref
+val reaction_add : (Reaction.reaction_event -> unit) ref
 
 (** Dispatched when a reaction is removed from a message. *)
-val reaction_remove : (Reaction_t.reaction_event -> unit) ref
+val reaction_remove : (Reaction.reaction_event -> unit) ref
 
 (** Dispatched when all reactions are cleared from a message. *)
-val reaction_bulk_remove : (Reaction_t.t list -> unit) ref
+val reaction_bulk_remove : (Reaction.t list -> unit) ref
 
 (** Dispatched when a user updates their presence. *)
 val presence_update : (Presence.t -> unit) ref

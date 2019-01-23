@@ -28,7 +28,7 @@ type t =
 | MESSAGE_CREATE of Message_t.t
 | MESSAGE_UPDATE of Message_t.message_update
 | MESSAGE_DELETE of Snowflake.t * Snowflake.t
-| MESSAGE_BULK_DELETE of Snowflake.t list
+| MESSAGE_DELETE_BULK of Snowflake.t list
 | MESSAGE_REACTION_ADD of Reaction_t.reaction_event
 | MESSAGE_REACTION_REMOVE of Reaction_t.reaction_event
 | MESSAGE_REACTION_REMOVE_ALL of Reaction_t.t list
@@ -65,7 +65,7 @@ let event_of_yojson ~contents t = match t with
     | "MESSAGE_CREATE" -> MESSAGE_CREATE (Message_t.of_yojson_exn contents)
     | "MESSAGE_UPDATE" -> MESSAGE_UPDATE (Message_t.message_update_of_yojson_exn contents)
     | "MESSAGE_DELETE" -> MESSAGE_DELETE (Yojson.Safe.Util.(member "id" contents |> Snowflake.of_yojson_exn), Yojson.Safe.Util.(member "channel_id" contents |> Snowflake.of_yojson_exn))
-    | "MESSAGE_BULK_DELETE" -> MESSAGE_BULK_DELETE (Yojson.Safe.Util.to_list contents |> List.map ~f:Snowflake.of_yojson_exn)
+    | "MESSAGE_DELETE_BULK" -> MESSAGE_DELETE_BULK (Yojson.Safe.Util.to_list contents |> List.map ~f:Snowflake.of_yojson_exn)
     | "MESSAGE_REACTION_ADD" -> MESSAGE_REACTION_ADD (Reaction_t.reaction_event_of_yojson_exn contents)
     | "MESSAGE_REACTION_REMOVE" -> MESSAGE_REACTION_REMOVE (Reaction_t.reaction_event_of_yojson_exn contents)
     | "MESSAGE_REACTION_REMOVE_ALL" -> MESSAGE_REACTION_REMOVE_ALL (Yojson.Safe.Util.to_list contents |> List.map ~f:Reaction_t.of_yojson_exn)
@@ -103,7 +103,7 @@ let dispatch ev = match ev with
     | MESSAGE_CREATE d -> !Dispatch.message_create d
     | MESSAGE_UPDATE d -> !Dispatch.message_update d
     | MESSAGE_DELETE (d,e) -> !Dispatch.message_delete d e
-    | MESSAGE_BULK_DELETE d -> !Dispatch.message_bulk_delete d
+    | MESSAGE_DELETE_BULK d -> !Dispatch.message_bulk_delete d
     | MESSAGE_REACTION_ADD d -> !Dispatch.reaction_add d
     | MESSAGE_REACTION_REMOVE d -> !Dispatch.reaction_remove d
     | MESSAGE_REACTION_REMOVE_ALL d -> !Dispatch.reaction_bulk_remove d

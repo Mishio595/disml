@@ -6,10 +6,10 @@
 		activity
 		attachment
 		ban ban_t
-		channel channel_t
+		channel channel_t channel_id channel_id_t
 		embed
 		emoji
-		guild guild_t
+		guild guild_t guild_id guild_id_t
 		member member_t
 		message message_t
 		presence
@@ -17,7 +17,7 @@
 		role role_t
 		snowflake
 		user user_t
-		client client_options dispatch endpoints event http opcode rl sharder
+		client client_options disml dispatch endpoints event http impl opcode rl s sharder
 	)
 	(libraries core async_ssl cohttp-async logs yojson websocket-async zlib ppx_deriving_yojson.runtime)
 	(preprocess (pps ppx_jane ppx_deriving_yojson))

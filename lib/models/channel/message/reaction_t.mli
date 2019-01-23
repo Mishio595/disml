@@ -1,3 +1,4 @@
+(** Represents a single reaction as received over the gateway. *)
 type reaction_event = {
     user_id: Snowflake.t;
     channel_id: Snowflake.t;
@@ -6,6 +7,7 @@ type reaction_event = {
     emoji: Emoji.partial_emoji;
 } [@@deriving sexp, yojson]
 
+(** Represents a number of emojis used as a reaction on a message. *)
 type t = {
     count: int;
     emoji: Emoji.t;

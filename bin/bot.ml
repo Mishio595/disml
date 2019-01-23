@@ -57,6 +57,9 @@ let check_command (msg:Message.t) =
         Client.set_status ~status:(`String status) client
         >>> fun _ ->
         Message.reply msg "Updated status" >>> ignore
+    | "!test" ->
+        let ch = `Channel_id 377716501446393856 in
+        Channel_id.say "Testing..." ch >>> ignore
     | _ -> ()
 
 let setup_logger () =

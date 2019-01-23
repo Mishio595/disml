@@ -57,3 +57,4 @@ type t = {
 } [@@deriving sexp, yojson]
 
 val wrap : pre -> t
+val get_id : t -> Snowflake.t

@@ -1,5 +1,6 @@
 exception Invalid_channel of Yojson.Safe.json
 
+(** Represents a Group channel object. *)
 type group = {
     id: Snowflake.t;
     last_message_id: Snowflake.t option;
@@ -10,12 +11,14 @@ type group = {
     recipients: User_t.t list;
 } [@@deriving sexp, yojson]
 
+(** Represents a private channel with a single user. *)
 type dm = {
     id: Snowflake.t;
     last_message_id: Snowflake.t option;
     last_pin_timestamp: string option;
 } [@@deriving sexp, yojson]
 
+(** Represents a text channel in a guild. *)
 type guild_text = {
     id: Snowflake.t;
     last_message_id: Snowflake.t option;
@@ -29,6 +32,7 @@ type guild_text = {
     slow_mode_timeout: int option;
 } [@@deriving sexp, yojson]
 
+(** Represents a voice channel in a guild. *)
 type guild_voice = {
     id: Snowflake.t;
     category_id: Snowflake.t option;
@@ -39,6 +43,7 @@ type guild_voice = {
     bitrate: int option;
 } [@@deriving sexp, yojson]
 
+(** Represents a guild category. *)
 type category = {
     id: Snowflake.t;
     guild_id: Snowflake.t option;
@@ -46,6 +51,7 @@ type category = {
     name: string;
 } [@@deriving sexp, yojson]
 
+(** Wrapper variant for all channel types. *)
 type t =
 | Group of group
 | Private of dm
@@ -54,6 +60,7 @@ type t =
 | Category of category
 [@@deriving sexp, yojson]
 
+(** Intermediate used internally. *)
 type channel_wrapper = {
     id: Snowflake.t;
     kind: int;

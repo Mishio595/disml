@@ -1,0 +1,1 @@
+include Impl.Guild(Guild_id_t)

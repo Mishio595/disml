@@ -65,3 +65,5 @@ let wrap ({id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_
     let widget_channel = Option.map ~f:Channel_t.wrap widget_channel in
     let system_channel = Option.map ~f:Channel_t.wrap system_channel in
     {id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel;system_channel;large;unavailable;member_count;members;channels}
+
+let get_id guild = guild.id

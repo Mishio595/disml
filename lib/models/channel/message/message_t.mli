@@ -1,3 +1,4 @@
+(** Represents data sent on {{!Dispatch.member_update}member update} events. *)
 type message_update = {
     id: Snowflake.t;
     author: User_t.t option;
@@ -20,6 +21,7 @@ type message_update = {
     kind: int option;
 } [@@deriving sexp, yojson]
 
+(** Represents a message object. *)
 type t = {
     id: Snowflake.t;
     author: User_t.t;

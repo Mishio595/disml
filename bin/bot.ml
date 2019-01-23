@@ -69,6 +69,7 @@ let setup_logger () =
 let main () =
     setup_logger ();
     Client.message_create := check_command;
+    Client.ready := (fun _ -> Logs.info (fun m -> m "Logged in"));
     let token = match Sys.getenv "DISCORD_TOKEN" with
     | Some t -> t
     | None -> failwith "No token in env"

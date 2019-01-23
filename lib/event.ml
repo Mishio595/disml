@@ -65,7 +65,7 @@ let event_of_yojson ~contents t = match t with
     | "MESSAGE_CREATE" -> MESSAGE_CREATE (Message_t.of_yojson_exn contents)
     | "MESSAGE_UPDATE" -> MESSAGE_UPDATE (Message_t.message_update_of_yojson_exn contents)
     | "MESSAGE_DELETE" -> MESSAGE_DELETE (Yojson.Safe.Util.(member "id" contents |> Snowflake.of_yojson_exn), Yojson.Safe.Util.(member "channel_id" contents |> Snowflake.of_yojson_exn))
-    | "MESSAGE_DELETE_BULK" -> MESSAGE_DELETE_BULK (Yojson.Safe.Util.to_list contents |> List.map ~f:Snowflake.of_yojson_exn)
+    | "MESSAGE_DELETE_BULK" -> MESSAGE_DELETE_BULK (Yojson.Safe.Util.(member "ids" contents |> to_list) |> List.map ~f:Snowflake.of_yojson_exn)
     | "MESSAGE_REACTION_ADD" -> MESSAGE_REACTION_ADD (Reaction_t.reaction_event_of_yojson_exn contents)
     | "MESSAGE_REACTION_REMOVE" -> MESSAGE_REACTION_REMOVE (Reaction_t.reaction_event_of_yojson_exn contents)
     | "MESSAGE_REACTION_REMOVE_ALL" -> MESSAGE_REACTION_REMOVE_ALL (Yojson.Safe.Util.to_list contents |> List.map ~f:Reaction_t.of_yojson_exn)

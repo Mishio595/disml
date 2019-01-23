@@ -38,7 +38,7 @@ module type ChannelImpl = sig
     (** [say str ch] is equivalent to [send_message ~content:str ch]. *)
     val say : string -> t -> Message_t.t Deferred.Or_error.t
 
-    val delete : t -> unit Deferred.Or_error.t
+    val delete : t -> Channel_t.t Deferred.Or_error.t
     val get_message : id:Snowflake.t -> t -> Message_t.t Deferred.Or_error.t
     val get_messages :
         ?mode:[ `Before | `After | `Around ] ->
@@ -74,13 +74,13 @@ module type GuildImpl = sig
     val get_prune_count : days:int -> t -> int Deferred.Or_error.t
     val get_webhooks : t -> Yojson.Safe.json Deferred.Or_error.t
     val kick_user : id:Snowflake.t -> ?reason:string -> t -> unit Deferred.Or_error.t
-    val leave : t -> Yojson.Safe.json Deferred.Or_error.t
+    val leave : t -> unit Deferred.Or_error.t
     val list_voice_regions : t -> Yojson.Safe.json Deferred.Or_error.t
     val prune : days:int -> t -> int Deferred.Or_error.t
     val request_members : t -> Member_t.t list Deferred.Or_error.t
-    val set_afk_channel : id:Snowflake.t -> t -> t Deferred.Or_error.t
-    val set_afk_timeout : timeout:int -> t -> t Deferred.Or_error.t
-    val set_name : name:string -> t -> t Deferred.Or_error.t
-    val set_icon : icon:string -> t -> t Deferred.Or_error.t
+    val set_afk_channel : id:Snowflake.t -> t -> Guild_t.t Deferred.Or_error.t
+    val set_afk_timeout : timeout:int -> t -> Guild_t.t Deferred.Or_error.t
+    val set_name : name:string -> t -> Guild_t.t Deferred.Or_error.t
+    val set_icon : icon:string -> t -> Guild_t.t Deferred.Or_error.t
     val unban_user : id:Snowflake.t -> ?reason:string -> t -> unit Deferred.Or_error.t
 end

@@ -93,7 +93,7 @@ val message_update : (Message.message_update -> unit) ref
 val message_delete : (Snowflake.t -> Snowflake.t -> unit) ref
 
 (** Dispatched when messages are bulk deleted. *)
-val message_bulk_delete : (Snowflake.t list -> unit) ref
+val message_delete_bulk : (Snowflake.t list -> unit) ref
 
 (** Dispatched when a rection is added to a message. *)
 val reaction_add : (Reaction.reaction_event -> unit) ref

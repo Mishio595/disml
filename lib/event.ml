@@ -103,7 +103,7 @@ let dispatch ev = match ev with
     | MESSAGE_CREATE d -> !Dispatch.message_create d
     | MESSAGE_UPDATE d -> !Dispatch.message_update d
     | MESSAGE_DELETE (d,e) -> !Dispatch.message_delete d e
-    | MESSAGE_DELETE_BULK d -> !Dispatch.message_bulk_delete d
+    | MESSAGE_DELETE_BULK d -> !Dispatch.message_delete_bulk d
     | MESSAGE_REACTION_ADD d -> !Dispatch.reaction_add d
     | MESSAGE_REACTION_REMOVE d -> !Dispatch.reaction_remove d
     | MESSAGE_REACTION_REMOVE_ALL d -> !Dispatch.reaction_bulk_remove d

@@ -30,7 +30,7 @@ type t =
 | MESSAGE_CREATE of Message_t.t
 | MESSAGE_UPDATE of Message_t.message_update
 | MESSAGE_DELETE of Snowflake.t * Snowflake.t
-| MESSAGE_BULK_DELETE of Snowflake.t list
+| MESSAGE_DELETE_BULK of Snowflake.t list
 | MESSAGE_REACTION_ADD of Reaction_t.reaction_event
 | MESSAGE_REACTION_REMOVE of Reaction_t.reaction_event
 | MESSAGE_REACTION_REMOVE_ALL of Reaction_t.t list

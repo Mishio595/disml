@@ -3,39 +3,45 @@ open Core
 module ChannelCreate = struct
     type t = {
         channel: Channel_t.t;
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp]
 
-    let deserialize = of_yojson_exn
+    let deserialize ev =
+        let channel = Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap) in
+        { channel; }
 end
 
 module ChannelDelete = struct
     type t = {
         channel: Channel_t.t;
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp]
 
-    let deserialize = of_yojson_exn
+    let deserialize ev =
+        let channel = Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap) in
+        { channel; }
 end
 
 module ChannelUpdate = struct
     type t = {
         channel: Channel_t.t;
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp]
 
-    let deserialize = of_yojson_exn
+    let deserialize ev =
+        let channel = Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap) in
+        { channel; }
 end
 
 module ChannelPinsUpdate = struct
     type t = {
-        channel_id: Channel_id_t.t;
-        last_pin_timestamp: string option;
-    } [@@deriving sexp, yojson]
+        channel_id: Channel_id.t;
+        last_pin_timestamp: string option [@default None];
+    } [@@deriving sexp, yojson { strict = false }]
 
     let deserialize = of_yojson_exn
 end
 
 module ChannelRecipientAdd = struct
     type t = {
-        channel_id: Channel_id_t.t;
+        channel_id: Channel_id.t;
         user: User_t.t;
     } [@@deriving sexp, yojson]
 
@@ -44,7 +50,7 @@ end
 
 module ChannelRecipientRemove = struct
     type t = {
-        channel_id: Channel_id_t.t;
+        channel_id: Channel_id.t;
         user: User_t.t;
     } [@@deriving sexp, yojson]
 
@@ -53,7 +59,7 @@ end
 
 module GuildBanAdd = struct
     type t = {
-        guild_id: Guild_id_t.t;
+        guild_id: Guild_id.t;
         user: User_t.t;
     } [@@deriving sexp, yojson]
 
@@ -62,7 +68,7 @@ end
 
 module GuildBanRemove = struct
     type t = {
-        guild_id: Guild_id_t.t;
+        guild_id: Guild_id.t;
         user: User_t.t;
     } [@@deriving sexp, yojson]
 
@@ -72,25 +78,25 @@ end
 module GuildCreate = struct
     type t = {
         guild: Guild_t.t;
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp]
 
-    let deserialize = of_yojson_exn
+    let deserialize ev =
+        let guild = Guild_t.(pre_of_yojson_exn ev |> wrap) in
+        { guild; }
 end
 
-(* TODO *)
 module GuildDelete = struct
     type t = {
-        foo: bool option [@default None];
-    } [@@deriving sexp, yojson]
+        id: Guild_id.t;
+    } [@@deriving sexp, yojson { strict = false }]
 
     let deserialize = of_yojson_exn
 end
 
-(* TODO *)
 module GuildUpdate = struct
     type t = {
-        foo: bool option [@default None];
-    } [@@deriving sexp, yojson]
+        id: Guild_id.t;
+    } [@@deriving sexp, yojson { strict = false }]
 
     let deserialize = of_yojson_exn
 end
@@ -98,7 +104,7 @@ end
 module GuildEmojisUpdate = struct
     type t = {
         emojis: Emoji.t list;
-        guild_id: Guild_id_t.t
+        guild_id: Guild_id.t
     } [@@deriving sexp, yojson]
 
     let deserialize = of_yojson_exn
@@ -106,7 +112,7 @@ end
 
 module GuildMemberAdd = struct
     type t = {
-        guild_id: Guild_id_t.t;
+        guild_id: Guild_id.t;
         member: Member_t.t;
     } [@@deriving sexp, yojson]
 
@@ -115,7 +121,7 @@ end
 
 module GuildMemberRemove = struct
     type t = {
-        guild_id: Guild_id_t.t;
+        guild_id: Guild_id.t;
         user: User_t.t;
     } [@@deriving sexp, yojson]
 
@@ -124,7 +130,7 @@ end
 
 module GuildMemberUpdate = struct
     type t = {
-        guild_id: Guild_id_t.t;
+        guild_id: Guild_id.t;
         nick: string option;
         roles: Role_id.t list;
         user: User_t.t;
@@ -135,7 +141,7 @@ end
 
 module GuildMembersChunk = struct
     type t = {
-        guild_id: Guild_id_t.t;
+        guild_id: Guild_id.t;
         members: (Snowflake.t * Member_t.t) list;
     } [@@deriving sexp, yojson]
 
@@ -144,7 +150,7 @@ end
 
 module GuildRoleCreate = struct
     type t = {
-        guild_id: Guild_id_t.t;
+        guild_id: Guild_id.t;
         role: Role_t.t;
     } [@@deriving sexp, yojson]
 
@@ -153,7 +159,7 @@ end
 
 module GuildRoleDelete = struct
     type t = {
-        guild_id: Guild_id_t.t;
+        guild_id: Guild_id.t;
         role_id: Role_id.t;
     } [@@deriving sexp, yojson]
 
@@ -162,8 +168,8 @@ end
 
 module GuildRoleUpdate = struct
     type t = {
-        guild_id: Guild_id_t.t;
-        role: Role_t.t;
+        guild_id: Guild_id.t;
+        role: Role_t.role;
     } [@@deriving sexp, yojson]
 
     let deserialize = of_yojson_exn
@@ -171,7 +177,7 @@ end
 
 module GuildUnavailable = struct
     type t = {
-        guild_id: Guild_id_t.t;
+        guild_id: Guild_id.t;
     } [@@deriving sexp, yojson]
 
     let deserialize = of_yojson_exn
@@ -180,15 +186,18 @@ end
 module MessageCreate = struct
     type t = {
         message: Message_t.t;
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp]
 
-    let deserialize = of_yojson_exn
+    let deserialize ev =
+        let message = Message_t.of_yojson_exn ev in
+        { message; }
 end
 
 module MessageDelete = struct
     type t = {
-        channel_id: Channel_id_t.t;
-        message_id: Message_id.t;
+        id: Message_id.t;
+        channel_id: Channel_id.t;
+        guild_id: Guild_id.t option [@default None];
     } [@@deriving sexp, yojson]
 
     let deserialize = of_yojson_exn
@@ -196,18 +205,18 @@ end
 
 module MessageUpdate = struct
     type t = {
-        id: Snowflake.t;
+        id: Message_id.t;
         author: User_t.t option [@default None];
-        channel_id: Snowflake.t;
+        channel_id: Channel_id.t;
         member: Member_t.partial_member option [@default None];
-        guild_id: Snowflake.t option [@default None];
+        guild_id: Guild_id.t option [@default None];
         content: string option [@default None];
         timestamp: string option [@default None];
         editedimestamp: string option [@default None];
         tts: bool option [@default None];
         mention_everyone: bool option [@default None];
-        mentions: Snowflake.t list [@default []];
-        role_mentions: Snowflake.t list [@default []];
+        mentions: User_id.t list [@default []];
+        role_mentions: Role_id.t list [@default []];
         attachments: Attachment.t list [@default []];
         embeds: Embed.t list [@default []];
         reactions: Snowflake.t list [@default []];
@@ -222,7 +231,7 @@ end
 
 module MessageDeleteBulk = struct
     type t = {
-        channel_id: Channel_id_t.t;
+        channel_id: Channel_id.t;
         ids: Message_id.t list;
     } [@@deriving sexp, yojson]
 
@@ -230,11 +239,7 @@ module MessageDeleteBulk = struct
 end
 
 module PresenceUpdate = struct
-    type t = {
-        guild_id: Guild_id_t.t option;
-        presence: Presence.t;
-        roles: Role_id.t list option;
-    } [@@deriving sexp, yojson]
+    include Presence
 
     let deserialize = of_yojson_exn
 end
@@ -247,7 +252,11 @@ end *)
 
 module ReactionAdd = struct
     type t = {
-        reaction: Reaction_t.t;
+        user_id: User_id.t;
+        channel_id: Channel_id.t;
+        message_id: Message_id.t;
+        guild_id: Guild_id.t option [@default None];
+        emoji: Emoji.partial_emoji;
     } [@@deriving sexp, yojson]
 
     let deserialize = of_yojson_exn
@@ -255,7 +264,11 @@ end
 
 module ReactionRemove = struct
     type t = {
-        reaction: Reaction_t.t;
+        user_id: User_id.t;
+        channel_id: Channel_id.t;
+        message_id: Message_id.t;
+        guild_id: Guild_id.t option [@default None];
+        emoji: Emoji.partial_emoji;
     } [@@deriving sexp, yojson]
 
     let deserialize = of_yojson_exn
@@ -263,8 +276,9 @@ end
 
 module ReactionRemoveAll = struct
     type t = {
-        channel_id: Channel_id_t.t;
+        channel_id: Channel_id.t;
         message_id: Message_id.t;
+        guild_id: Guild_id.t option [@default None];
     } [@@deriving sexp, yojson]
 
     let deserialize = of_yojson_exn
@@ -273,7 +287,7 @@ end
 module Ready = struct
     type t = {
         foo: bool option [@default None];
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false }]
 
     let deserialize = of_yojson_exn
 end
@@ -281,17 +295,18 @@ end
 module Resumed = struct
     type t = {
         trace: string option list;
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false }]
 
     let deserialize = of_yojson_exn
 end
 
 module TypingStart = struct
     type t = {
-        channel_id: Channel_id_t.t;
+        channel_id: Channel_id.t;
+        guild_id: Guild_id.t option [@default None];
         timestamp: int;
-        user_id: User_id_t.t;
-    } [@@deriving sexp, yojson]
+        user_id: User_id.t;
+    } [@@deriving sexp, yojson { strict = false }]
 
     let deserialize = of_yojson_exn
 end
@@ -306,8 +321,8 @@ end
 
 module WebhookUpdate = struct
     type t = {
-        channel_id: Channel_id_t.t;
-        guild_id: Guild_id_t.t;
+        channel_id: Channel_id.t;
+        guild_id: Guild_id.t;
     } [@@deriving sexp, yojson]
 
     let deserialize = of_yojson_exn

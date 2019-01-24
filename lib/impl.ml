@@ -1,4 +1,4 @@
-module Channel(T : S.Has_snowflake) : S.ChannelImpl with type t := T.t = struct
+module Channel(T : S.HasSnowflake) : S.ChannelImpl with type t := T.t = struct
     open Core
     include T
 
@@ -52,7 +52,7 @@ module Channel(T : S.Has_snowflake) : S.ChannelImpl with type t := T.t = struct
         Http.get_pinned_messages (get_id ch)
 end
 
-module Guild(T : S.Has_snowflake) : S.GuildImpl with type t := T.t = struct
+module Guild(T : S.HasSnowflake) : S.GuildImpl with type t := T.t = struct
     include T
 
     let ban_user ~id ?(reason="") ?(days=0) guild =
@@ -157,4 +157,8 @@ module Guild(T : S.Has_snowflake) : S.GuildImpl with type t := T.t = struct
         | Some r -> `Assoc [("reason", `String r)]
         | None -> `Null
         in Http.guild_ban_remove (get_id guild) id payload
+end
+
+module User(T : S.HasSnowflake) : S.UserImpl with type t := T.t = struct
+    include T
 end

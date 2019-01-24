@@ -1,36 +1,37 @@
 open Async
 open Core
 open Disml
+open Models
 
 let client = Ivar.create ()
 
-let check_command (msg:Message.t) =
-    let cmd, rest = match String.split ~on:' ' msg.content with
+let check_command (Event.MessageCreate.{message}) =
+    let cmd, rest = match String.split ~on:' ' message.content with
     | hd::tl -> hd, tl
     | [] -> "", []
     in match cmd with
     | "!ping" ->
-        Message.reply msg "Pong!" >>= begin fun msg ->
-        let msg = match msg with Ok m -> m | Error e -> Error.raise e in
-        let diff = Time.diff (Time.now ()) (Time.of_string msg.timestamp) in
-        Message.set_content msg (Printf.sprintf "Pong! `%d ms`" (Time.Span.to_ms diff |> Float.to_int))
+        Message.reply message "Pong!" >>= begin fun message ->
+        let message = match message with Ok m -> m | Error e -> Error.raise e in
+        let diff = Time.diff (Time.now ()) (Time.of_string message.timestamp) in
+        Message.set_content message (Printf.sprintf "Pong! `%d ms`" (Time.Span.to_ms diff |> Float.to_int))
         end >>> ignore
     | "spam" ->
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
         List.range 0 count
-        |> List.iter ~f:(fun i -> Message.reply msg (string_of_int i) >>> ignore)
+        |> List.iter ~f:(fun i -> Message.reply message (string_of_int i) >>> ignore)
     | "!list" ->
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
         let list = List.range 0 count
         |> List.sexp_of_t Int.sexp_of_t
         |> Sexp.to_string_hum in
-        Message.reply msg list >>> ignore
+        Message.reply message list >>> ignore
     | "!fold" ->
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
         let list = List.range 0 count
         |> List.fold ~init:0 ~f:(+)
         |> Int.to_string in
-        Message.reply msg list >>> ignore
+        Message.reply message list >>> ignore
     | "!embed" ->
         let image_url = "https://images-ext-1.discordapp.net/external/46n5KQDNg1K4-UybFifnLsIVJkmIutfBG5zO_vpU5Zk/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/345316276098433025/17ccdc992814cc6e21a9e7d743a30e37.webp" in
         let embed = Embed.(default
@@ -50,13 +51,13 @@ let check_command (msg:Message.t) =
             |> field ("field 2", "test", true)
             |> field ("field 1", "test", true)
         ) in
-        Message.reply_with ~embed msg >>> ignore
+        Message.reply_with ~embed message >>> ignore
     | "!status" ->
         let status = List.fold ~init:"" ~f:(fun a v -> a ^ " " ^ v) rest in
         Ivar.read client >>> fun client ->
         Client.set_status ~status:(`String status) client
         >>> fun _ ->
-        Message.reply msg "Updated status" >>> ignore
+        Message.reply message "Updated status" >>> ignore
     | "!test" ->
         let ch = `Channel_id 377716501446393856 in
         Channel_id.say "Testing..." ch >>> ignore

@@ -1,87 +1,81 @@
 open Core
-
-exception Invalid_event of string
+open Event_models
 
 type t =
-| HELLO of Yojson.Safe.json
-| READY of Yojson.Safe.json
-| RESUMED of Yojson.Safe.json
-| INVALID_SESSION of Yojson.Safe.json
-| CHANNEL_CREATE of Channel_t.t
-| CHANNEL_UPDATE of Channel_t.t
-| CHANNEL_DELETE of Channel_t.t
-| CHANNEL_PINS_UPDATE of Yojson.Safe.json
-| GUILD_CREATE of Guild_t.t
-| GUILD_UPDATE of Guild_t.t
-| GUILD_DELETE of Guild_t.t
-| GUILD_BAN_ADD of Ban_t.t
-| GUILD_BAN_REMOVE of Ban_t.t
-| GUILD_EMOJIS_UPDATE of Yojson.Safe.json
-| GUILD_INTEGRATIONS_UPDATE of Yojson.Safe.json
-| GUILD_MEMBER_ADD of Member_t.t
-| GUILD_MEMBER_REMOVE of Member_t.member_wrapper
-| GUILD_MEMBER_UPDATE of Member_t.member_update
-| GUILD_MEMBERS_CHUNK of Member_t.t list
-| GUILD_ROLE_CREATE of Role_t.t
-| GUILD_ROLE_UPDATE of Role_t.t
-| GUILD_ROLE_DELETE of Role_t.t
-| MESSAGE_CREATE of Message_t.t
-| MESSAGE_UPDATE of Message_t.message_update
-| MESSAGE_DELETE of Snowflake.t * Snowflake.t
-| MESSAGE_DELETE_BULK of Snowflake.t list
-| MESSAGE_REACTION_ADD of Reaction_t.reaction_event
-| MESSAGE_REACTION_REMOVE of Reaction_t.reaction_event
-| MESSAGE_REACTION_REMOVE_ALL of Reaction_t.t list
-| PRESENCE_UPDATE of Presence.t
-| TYPING_START of Yojson.Safe.json
-| USER_UPDATE of Yojson.Safe.json
-| VOICE_STATE_UPDATE of Yojson.Safe.json
-| VOICE_SERVER_UPDATE of Yojson.Safe.json
-| WEBHOOKS_UPDATE of Yojson.Safe.json
+| READY of Ready.t
+| RESUMED of Resumed.t
+| CHANNEL_CREATE of ChannelCreate.t
+| CHANNEL_UPDATE of ChannelUpdate.t
+| CHANNEL_DELETE of ChannelDelete.t
+| CHANNEL_PINS_UPDATE of ChannelPinsUpdate.t
+| GUILD_CREATE of GuildCreate.t
+| GUILD_UPDATE of GuildUpdate.t
+| GUILD_DELETE of GuildDelete.t
+| GUILD_BAN_ADD of GuildBanAdd.t
+| GUILD_BAN_REMOVE of GuildBanRemove.t
+| GUILD_EMOJIS_UPDATE of GuildEmojisUpdate.t
+(* | GUILD_INTEGRATIONS_UPDATE of Yojson.Safe.json *)
+| GUILD_MEMBER_ADD of GuildMemberAdd.t
+| GUILD_MEMBER_REMOVE of GuildMemberRemove.t
+| GUILD_MEMBER_UPDATE of GuildMemberUpdate.t
+| GUILD_MEMBERS_CHUNK of GuildMembersChunk.t
+| GUILD_ROLE_CREATE of GuildRoleCreate.t
+| GUILD_ROLE_UPDATE of GuildRoleUpdate.t
+| GUILD_ROLE_DELETE of GuildRoleDelete.t
+| MESSAGE_CREATE of MessageCreate.t
+| MESSAGE_UPDATE of MessageUpdate.t
+| MESSAGE_DELETE of MessageDelete.t
+| MESSAGE_DELETE_BULK of MessageDeleteBulk.t
+| REACTION_ADD of ReactionAdd.t
+| REACTION_REMOVE of ReactionRemove.t
+| REACTION_REMOVE_ALL of ReactionRemoveAll.t
+| PRESENCE_UPDATE of PresenceUpdate.t
+| TYPING_START of TypingStart.t
+| USER_UPDATE of UserUpdate.t
+(* | VOICE_STATE_UPDATE of Yojson.Safe.json *)
+(* | VOICE_SERVER_UPDATE of Yojson.Safe.json *)
+| WEBHOOK_UPDATE of WebhookUpdate.t
+| UNKNOWN of Unknown.t
 
 let event_of_yojson ~contents t = match t with
-    | "HELLO" -> HELLO contents
-    | "READY" -> READY contents
-    | "RESUMED" -> RESUMED contents
-    | "INVALID_SESSION" -> INVALID_SESSION contents
-    | "CHANNEL_CREATE" -> CHANNEL_CREATE (Channel_t.(channel_wrapper_of_yojson_exn contents |> wrap))
-    | "CHANNEL_UPDATE" -> CHANNEL_UPDATE (Channel_t.(channel_wrapper_of_yojson_exn contents |> wrap))
-    | "CHANNEL_DELETE" -> CHANNEL_DELETE (Channel_t.(channel_wrapper_of_yojson_exn contents |> wrap))
-    | "CHANNEL_PINS_UPDATE" -> CHANNEL_PINS_UPDATE contents
-    | "GUILD_CREATE" -> GUILD_CREATE (Guild_t.(pre_of_yojson_exn contents |> wrap))
-    | "GUILD_UPDATE" -> GUILD_UPDATE (Guild_t.(pre_of_yojson_exn contents |> wrap))
-    | "GUILD_DELETE" -> GUILD_DELETE (Guild_t.(pre_of_yojson_exn contents |> wrap))
-    | "GUILD_BAN_ADD" -> GUILD_BAN_ADD (Ban_t.of_yojson_exn contents)
-    | "GUILD_BAN_REMOVE" -> GUILD_BAN_REMOVE (Ban_t.of_yojson_exn contents)
-    | "GUILD_EMOJIS_UPDATE" -> GUILD_EMOJIS_UPDATE contents
-    | "GUILD_INTEGRATIONS_UPDATE" -> GUILD_INTEGRATIONS_UPDATE contents
-    | "GUILD_MEMBER_ADD" -> GUILD_MEMBER_ADD (Member_t.of_yojson_exn contents)
-    | "GUILD_MEMBER_REMOVE" -> GUILD_MEMBER_REMOVE (Member_t.member_wrapper_of_yojson_exn contents)
-    | "GUILD_MEMBER_UPDATE" -> GUILD_MEMBER_UPDATE (Member_t.member_update_of_yojson_exn contents)
-    | "GUILD_MEMBERS_CHUNK" -> GUILD_MEMBERS_CHUNK (Yojson.Safe.Util.to_list contents |> List.map ~f:Member_t.of_yojson_exn)
-    | "GUILD_ROLE_CREATE" -> GUILD_ROLE_CREATE (let Role_t.{guild_id;role} = Role_t.role_update_of_yojson_exn contents in Role_t.wrap ~guild_id role)
-    | "GUILD_ROLE_UPDATE" -> GUILD_ROLE_UPDATE (let Role_t.{guild_id;role} = Role_t.role_update_of_yojson_exn contents in Role_t.wrap ~guild_id role)
-    | "GUILD_ROLE_DELETE" -> GUILD_ROLE_DELETE (let Role_t.{guild_id;role} = Role_t.role_update_of_yojson_exn contents in Role_t.wrap ~guild_id role)
-    | "MESSAGE_CREATE" -> MESSAGE_CREATE (Message_t.of_yojson_exn contents)
-    | "MESSAGE_UPDATE" -> MESSAGE_UPDATE (Message_t.message_update_of_yojson_exn contents)
-    | "MESSAGE_DELETE" -> MESSAGE_DELETE (Yojson.Safe.Util.(member "id" contents |> Snowflake.of_yojson_exn), Yojson.Safe.Util.(member "channel_id" contents |> Snowflake.of_yojson_exn))
-    | "MESSAGE_DELETE_BULK" -> MESSAGE_DELETE_BULK (Yojson.Safe.Util.(member "ids" contents |> to_list) |> List.map ~f:Snowflake.of_yojson_exn)
-    | "MESSAGE_REACTION_ADD" -> MESSAGE_REACTION_ADD (Reaction_t.reaction_event_of_yojson_exn contents)
-    | "MESSAGE_REACTION_REMOVE" -> MESSAGE_REACTION_REMOVE (Reaction_t.reaction_event_of_yojson_exn contents)
-    | "MESSAGE_REACTION_REMOVE_ALL" -> MESSAGE_REACTION_REMOVE_ALL (Yojson.Safe.Util.to_list contents |> List.map ~f:Reaction_t.of_yojson_exn)
-    | "PRESENCE_UPDATE" -> PRESENCE_UPDATE (Presence.of_yojson_exn contents)
-    | "TYPING_START" -> TYPING_START contents
-    | "USER_UPDATE" -> USER_UPDATE contents
-    | "VOICE_STATE_UPDATE" -> VOICE_STATE_UPDATE contents
-    | "VOICE_SERVER_UPDATE" -> VOICE_SERVER_UPDATE contents
-    | "WEBHOOKS_UPDATE" -> WEBHOOKS_UPDATE contents
-    | s -> raise @@ Invalid_event s
+    | "READY" -> READY Ready.(deserialize contents)
+    | "RESUMED" -> RESUMED Resumed.(deserialize contents)
+    | "CHANNEL_CREATE" -> CHANNEL_CREATE ChannelCreate.(deserialize contents)
+    | "CHANNEL_UPDATE" -> CHANNEL_UPDATE ChannelUpdate.(deserialize contents)
+    | "CHANNEL_DELETE" -> CHANNEL_DELETE ChannelDelete.(deserialize contents)
+    | "CHANNEL_PINS_UPDATE" -> CHANNEL_PINS_UPDATE ChannelPinsUpdate.(deserialize contents)
+    | "GUILD_CREATE" -> GUILD_CREATE GuildCreate.(deserialize contents)
+    | "GUILD_UPDATE" -> GUILD_UPDATE GuildUpdate.(deserialize contents)
+    | "GUILD_DELETE" -> GUILD_DELETE GuildDelete.(deserialize contents)
+    | "GUILD_BAN_ADD" -> GUILD_BAN_ADD GuildBanAdd.(deserialize contents)
+    | "GUILD_BAN_REMOVE" -> GUILD_BAN_REMOVE GuildBanRemove.(deserialize contents)
+    | "GUILD_EMOJIS_UPDATE" -> GUILD_EMOJIS_UPDATE GuildEmojisUpdate.(deserialize contents)
+    (* | "GUILD_INTEGRATIONS_UPDATE" -> GUILD_INTEGRATIONS_UPDATE contents *)
+    | "GUILD_MEMBER_ADD" -> GUILD_MEMBER_ADD GuildMemberAdd.(deserialize contents)
+    | "GUILD_MEMBER_REMOVE" -> GUILD_MEMBER_REMOVE GuildMemberRemove.(deserialize contents)
+    | "GUILD_MEMBER_UPDATE" -> GUILD_MEMBER_UPDATE GuildMemberUpdate.(deserialize contents)
+    | "GUILD_MEMBERS_CHUNK" -> GUILD_MEMBERS_CHUNK GuildMembersChunk.(deserialize contents)
+    | "GUILD_ROLE_CREATE" -> GUILD_ROLE_CREATE GuildRoleCreate.(deserialize contents)
+    | "GUILD_ROLE_UPDATE" -> GUILD_ROLE_UPDATE GuildRoleUpdate.(deserialize contents)
+    | "GUILD_ROLE_DELETE" -> GUILD_ROLE_DELETE GuildRoleDelete.(deserialize contents)
+    | "MESSAGE_CREATE" -> MESSAGE_CREATE MessageCreate.(deserialize contents)
+    | "MESSAGE_UPDATE" -> MESSAGE_UPDATE MessageUpdate.(deserialize contents)
+    | "MESSAGE_DELETE" -> MESSAGE_DELETE MessageDelete.(deserialize contents)
+    | "MESSAGE_DELETE_BULK" -> MESSAGE_DELETE_BULK MessageDeleteBulk.(deserialize contents)
+    | "MESSAGE_REACTION_ADD" -> REACTION_ADD ReactionAdd.(deserialize contents)
+    | "MESSAGE_REACTION_REMOVE" -> REACTION_REMOVE ReactionRemove.(deserialize contents)
+    | "MESSAGE_REACTION_REMOVE_ALL" -> REACTION_REMOVE_ALL ReactionRemoveAll.(deserialize contents)
+    | "PRESENCE_UPDATE" -> PRESENCE_UPDATE PresenceUpdate.(deserialize contents)
+    | "TYPING_START" -> TYPING_START TypingStart.(deserialize contents)
+    | "USER_UPDATE" -> USER_UPDATE UserUpdate.(deserialize contents)
+    (* | "VOICE_STATE_UPDATE" -> VOICE_STATE_UPDATE contents *)
+    (* | "VOICE_SERVER_UPDATE" -> VOICE_SERVER_UPDATE contents *)
+    | "WEBHOOK_UPDATE" -> WEBHOOK_UPDATE WebhookUpdate.(deserialize contents)
+    | s -> UNKNOWN Unknown.(deserialize s contents)
 
 let dispatch ev = match ev with
-    | HELLO d -> !Dispatch.hello d
     | READY d -> !Dispatch.ready d
     | RESUMED d -> !Dispatch.resumed d
-    | INVALID_SESSION d -> !Dispatch.invalid_session d
     | CHANNEL_CREATE d -> !Dispatch.channel_create d
     | CHANNEL_UPDATE d -> !Dispatch.channel_update d
     | CHANNEL_DELETE d -> !Dispatch.channel_delete d
@@ -92,7 +86,7 @@ let dispatch ev = match ev with
     | GUILD_BAN_ADD d -> !Dispatch.member_ban d
     | GUILD_BAN_REMOVE d -> !Dispatch.member_unban d
     | GUILD_EMOJIS_UPDATE d -> !Dispatch.guild_emojis_update d
-    | GUILD_INTEGRATIONS_UPDATE d -> !Dispatch.integrations_update d
+    (* | GUILD_INTEGRATIONS_UPDATE d -> !Dispatch.integrations_update d *)
     | GUILD_MEMBER_ADD d -> !Dispatch.member_join d
     | GUILD_MEMBER_REMOVE d -> !Dispatch.member_leave d
     | GUILD_MEMBER_UPDATE d -> !Dispatch.member_update d
@@ -102,20 +96,19 @@ let dispatch ev = match ev with
     | GUILD_ROLE_DELETE d -> !Dispatch.role_delete d
     | MESSAGE_CREATE d -> !Dispatch.message_create d
     | MESSAGE_UPDATE d -> !Dispatch.message_update d
-    | MESSAGE_DELETE (d,e) -> !Dispatch.message_delete d e
+    | MESSAGE_DELETE d -> !Dispatch.message_delete d
     | MESSAGE_DELETE_BULK d -> !Dispatch.message_delete_bulk d
-    | MESSAGE_REACTION_ADD d -> !Dispatch.reaction_add d
-    | MESSAGE_REACTION_REMOVE d -> !Dispatch.reaction_remove d
-    | MESSAGE_REACTION_REMOVE_ALL d -> !Dispatch.reaction_bulk_remove d
+    | REACTION_ADD d -> !Dispatch.reaction_add d
+    | REACTION_REMOVE d -> !Dispatch.reaction_remove d
+    | REACTION_REMOVE_ALL d -> !Dispatch.reaction_remove_all d
     | PRESENCE_UPDATE d -> !Dispatch.presence_update d
     | TYPING_START d -> !Dispatch.typing_start d
     | USER_UPDATE d -> !Dispatch.user_update d
-    | VOICE_STATE_UPDATE d -> !Dispatch.voice_state_update d
-    | VOICE_SERVER_UPDATE d -> !Dispatch.voice_server_update d
-    | WEBHOOKS_UPDATE d -> !Dispatch.webhooks_update d
+    (* | VOICE_STATE_UPDATE d -> !Dispatch.voice_state_update d *)
+    (* | VOICE_SERVER_UPDATE d -> !Dispatch.voice_server_update d *)
+    | WEBHOOK_UPDATE d -> !Dispatch.webhook_update d
+    | UNKNOWN d -> !Dispatch.unknown d
 
 let handle_event ~ev contents =
-    try
-        event_of_yojson ~contents ev
-        |> dispatch
-    with Invalid_event ev -> Logs.debug (fun m -> m "Unknown event: %s" ev);
+    event_of_yojson ~contents ev
+    |> dispatch

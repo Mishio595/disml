@@ -11,12 +11,13 @@
 		emoji
 		guild guild_t guild_id guild_id_t
 		member member_t
-		message message_t
+		message message_t message_id
 		presence
 		reaction reaction_t
-		role role_t
+		role role_t role_id
 		snowflake
-		user user_t
+		user user_t user_id user_id_t
+		event_models
 		client client_options disml dispatch endpoints event http impl opcode rl s sharder
 	)
 	(libraries core async_ssl cohttp-async logs yojson websocket-async zlib ppx_deriving_yojson.runtime)

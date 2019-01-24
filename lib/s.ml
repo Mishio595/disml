@@ -1,6 +1,6 @@
 open Async
 
-module type Has_snowflake = sig
+module type HasSnowflake = sig
     type t [@@deriving sexp, yojson]
     val get_id : t -> Snowflake.t
 end
@@ -83,4 +83,10 @@ module type GuildImpl = sig
     val set_name : name:string -> t -> Guild_t.t Deferred.Or_error.t
     val set_icon : icon:string -> t -> Guild_t.t Deferred.Or_error.t
     val unban_user : id:Snowflake.t -> ?reason:string -> t -> unit Deferred.Or_error.t
+end
+
+module type UserImpl = sig
+    type t
+    (* val private_channel : t -> Channel_t.t *)
+    (* val send : t -> Yojson.Safe.json Deferred.Or_error.t *)
 end

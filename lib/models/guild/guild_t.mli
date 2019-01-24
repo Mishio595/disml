@@ -1,3 +1,7 @@
+type unavailable = {
+    id: Guild_id_t.t;
+} [@@deriving sexp, yojson]
+
 type pre = {
     id: Snowflake.t;
     name: string;

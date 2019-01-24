@@ -182,3 +182,4 @@ val execute_git_webhook :
     string -> Yojson.Safe.json -> Yojson.Safe.json Deferred.Or_error.t
 val get_audit_logs :
     int -> Yojson.Safe.json -> Yojson.Safe.json Deferred.Or_error.t
+val get_application_info : unit -> Yojson.Safe.json Deferred.Or_error.t

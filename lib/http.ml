@@ -352,3 +352,6 @@ let execute_git_webhook webhook_id token body =
 
 let get_audit_logs guild_id body =
     Base.request ~body `GET (Endpoints.guild_audit_logs guild_id)
+
+let get_application_info () =
+    Base.request `GET (Endpoints.application_information)

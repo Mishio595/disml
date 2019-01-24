@@ -9,11 +9,6 @@ type role = {
     mentionable: bool;
 } [@@deriving sexp, yojson]
 
-type role_update = {
-    role: role;
-    guild_id: Snowflake.t;
-} [@@deriving sexp, yojson]
-
 type t = {
     id: Snowflake.t;
     name: string;

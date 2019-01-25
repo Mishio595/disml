@@ -14,6 +14,7 @@ module Shard = struct
         ready: unit Ivar.t;
         url: string;
         id: int * int;
+        _internal: Reader.t * Writer.t;
     }
 
     type 'a t = {
@@ -206,6 +207,9 @@ module Shard = struct
             | _ -> 443 in
         let scheme = Option.value_exn ~message:"no scheme in uri" Uri.(scheme uri) in
         let tcp_fun (net_to_ws, ws_to_net) =
+            (* Writer.monitor ws_to_net
+            |> Monitor.detach_and_get_error_stream
+            |> Stream.iter ~f:(fun e -> Logs.err (fun m -> m "Socket Connection Error: %s" (Exn.sexp_of_t e |> Sexp.to_string_hum))); *)
             let (app_to_ws, write) = Pipe.create () in
             let (read, ws_to_app) = Pipe.create () in
             let initialized = Ivar.create () in
@@ -226,6 +230,7 @@ module Shard = struct
                 id = shards;
                 session = None;
                 url;
+                _internal = (net_to_ws, ws_to_net);
             }
         in
         match Unix.getaddrinfo host (string_of_int port) [] with
@@ -244,8 +249,12 @@ module Shard = struct
             in
             Conduit_async.V2.connect addr >>= tcp_fun
 
+    let shutdown_clean shard =
+        let (_,w) = shard._internal in
+        Writer.close w
+
     let recreate shard =
-        print_endline "Reconnecting...";
+        shutdown_clean shard >>= fun () ->
         create ~url:(shard.url) ~shards:(shard.id) ()
 end
 
@@ -310,4 +319,9 @@ let set_status_with ~f sharder =
 let request_guild_members ?query ?limit ~guild sharder =
     Deferred.all @@ List.map ~f:(fun t ->
         Shard.request_guild_members ~guild ?query ?limit t.state
+    ) sharder.shards
+
+let shutdown_all sharder =
+    Deferred.all @@ List.map ~f:(fun t ->
+        Shard.shutdown_clean t.state
     ) sharder.shards

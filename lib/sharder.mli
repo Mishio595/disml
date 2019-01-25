@@ -26,6 +26,7 @@ module Shard : sig
         ready: unit Ivar.t; (** A simple Ivar indicating if the shard has received READY. *)
         url: string; (** The websocket URL in use. *)
         id: int * int; (** A tuple as expected by Discord. First element is the current shard index, second element is the total shard count. *)
+        _internal: Reader.t * Writer.t;
     }
     
     (** Wrapper around an internal state, used to wrap {!shard}. *)
@@ -58,6 +59,8 @@ module Shard : sig
         shards:int * int ->
         unit ->
         shard Deferred.t
+
+    val shutdown_clean : shard -> unit Deferred.t
 end
 
 (** Calls {!Shard.set_status} for each shard registered with the sharder. *)
@@ -79,3 +82,5 @@ val request_guild_members :
     guild:Snowflake.t ->
     t ->
     Shard.shard list Deferred.t
+
+val shutdown_all : t -> unit list Deferred.t

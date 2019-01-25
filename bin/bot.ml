@@ -14,9 +14,9 @@ let check_command (Event.MessageCreate.{message}) =
         Message.reply message "Pong!" >>= begin fun message ->
         let message = match message with Ok m -> m | Error e -> Error.raise e in
         let diff = Time.diff (Time.now ()) (Time.of_string message.timestamp) in
-        Message.set_content message (Printf.sprintf "Pong! `%d ms`" (Time.Span.to_ms diff |> Float.to_int))
+        Message.set_content message (Printf.sprintf "Pong! `%d ms`" (Time.Span.to_ms diff |> Float.abs |> Float.to_int))
         end >>> ignore
-    | "spam" ->
+    | "!spam" ->
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
         List.range 0 count
         |> List.iter ~f:(fun i -> Message.reply message (string_of_int i) >>> ignore)

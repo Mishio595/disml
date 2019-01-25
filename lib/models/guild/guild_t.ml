@@ -2,7 +2,7 @@ open Core
 
 type unavailable = {
     id: Guild_id_t.t;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { strict = false }]
 
 type pre = {
     id: Snowflake.t;

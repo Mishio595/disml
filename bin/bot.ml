@@ -25,7 +25,10 @@ let check_command (Event.MessageCreate.{message}) =
         let list = List.range 0 count
         |> List.sexp_of_t Int.sexp_of_t
         |> Sexp.to_string_hum in
-        Message.reply message list >>> ignore
+        Message.reply message list >>> begin function
+        | Ok msg -> print_endline msg.content
+        | Error err -> print_endline (Error.to_string_hum err)
+        end
     | "!fold" ->
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
         let list = List.range 0 count
@@ -33,7 +36,7 @@ let check_command (Event.MessageCreate.{message}) =
         |> Int.to_string in
         Message.reply message list >>> ignore
     | "!embed" ->
-        let image_url = "https://images-ext-1.discordapp.net/external/46n5KQDNg1K4-UybFifnLsIVJkmIutfBG5zO_vpU5Zk/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/345316276098433025/17ccdc992814cc6e21a9e7d743a30e37.webp" in
+        let image_url = "https://cdn.discordapp.com/avatars/345316276098433025/17ccdc992814cc6e21a9e7d743a30e37.png" in
         let embed = Embed.(default
             |> title "Foo"
             |> description "Bar"

@@ -1,5 +1,5 @@
 type role = {
-    id: Snowflake.t;
+    id: Role_id.t;
     name: string;
     colour: int;
     hoist: bool;
@@ -10,7 +10,7 @@ type role = {
 } [@@deriving sexp, yojson]
 
 type t = {
-    id: Snowflake.t;
+    id: Role_id.t;
     name: string;
     colour: int;
     hoist: bool;
@@ -18,7 +18,7 @@ type t = {
     permissions: int;
     managed: bool;
     mentionable: bool;
-    guild_id: Snowflake.t;
+    guild_id: Guild_id_t.t;
 } [@@deriving sexp, yojson]
 
 val wrap : guild_id:Snowflake.t -> role -> t

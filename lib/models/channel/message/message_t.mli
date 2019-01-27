@@ -1,17 +1,17 @@
 (** Represents a message object. *)
 type t = {
-    id: Snowflake.t;
+    id: Message_id.t;
     author: User_t.t;
-    channel_id: Snowflake.t;
+    channel_id: Channel_id_t.t;
     member: Member_t.partial_member option;
-    guild_id: Snowflake.t option;
+    guild_id: Guild_id_t.t option;
     content: string;
     timestamp: string;
     editedimestamp: string option;
     tts: bool;
     mention_everyone: bool;
-    (* mentions: Snowflake.t list; *)
-    (* role_mentions: Snowflake.t list; *)
+    mentions: User_id_t.t list;
+    role_mentions: Role_id.t list;
     attachments: Attachment.t list;
     embeds: Embed.t list;
     reactions: Snowflake.t list;

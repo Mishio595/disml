@@ -1,9 +1,9 @@
 type partial_user = {
-    id: Snowflake.t;
+    id: User_id_t.t;
 } [@@deriving sexp, yojson]
 
 type t = {
-    id: Snowflake.t;
+    id: User_id_t.t;
     username: string;
     discriminator: string;
     avatar: string option;

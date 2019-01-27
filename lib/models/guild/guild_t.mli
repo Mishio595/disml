@@ -3,16 +3,16 @@ type unavailable = {
 } [@@deriving sexp, yojson]
 
 type pre = {
-    id: Snowflake.t;
+    id: Guild_id_t.t;
     name: string;
     icon: string option;
     splash: string option;
-    owner_id: Snowflake.t;
+    owner_id: User_id_t.t;
     region: string;
-    afk_channel_id: Snowflake.t option;
+    afk_channel_id: Channel_id_t.t option;
     afk_timeout: int;
     embed_enabled: bool option;
-    embed_channel_id: Snowflake.t option;
+    embed_channel_id: Channel_id_t.t option;
     verification_level: int;
     default_message_notifications: int;
     explicit_content_filter: int;
@@ -32,16 +32,16 @@ type pre = {
 } [@@deriving sexp, yojson]
 
 type t = {
-    id: Snowflake.t;
+    id: Guild_id_t.t;
     name: string;
     icon: string option;
     splash: string option;
-    owner_id: Snowflake.t;
+    owner_id: User_id_t.t;
     region: string;
-    afk_channel_id: Snowflake.t option;
+    afk_channel_id: Channel_id_t.t option;
     afk_timeout: int;
     embed_enabled: bool option;
-    embed_channel_id: Snowflake.t option;
+    embed_channel_id: Channel_id_t.t option;
     verification_level: int;
     default_message_notifications: int;
     explicit_content_filter: int;

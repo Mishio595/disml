@@ -1,70 +1,67 @@
-open Core
 open Async
 include Message_t
 
 let add_reaction msg (emoji:Emoji.t) =
+    let `Message_id id = msg.id in
+    let `Channel_id channel_id = msg.channel_id in
     let e = match emoji.id with
     | Some i -> Printf.sprintf "%s:%d" emoji.name i
     | None -> emoji.name
     in
-    Http.create_reaction msg.channel_id msg.id e
+    Http.create_reaction channel_id id e
    
 
 let remove_reaction msg (emoji:Emoji.t) (user:User_t.t) =
+    let `Message_id id = msg.id in
+    let `Channel_id channel_id = msg.channel_id in
+    let `User_id user_id = user.id in
     let e = match emoji.id with
     | Some i -> Printf.sprintf "%s:%d" emoji.name i
     | None -> emoji.name
     in
-    Http.delete_reaction msg.channel_id msg.id e user.id
+    Http.delete_reaction channel_id id e user_id
    
 
 let clear_reactions msg =
-    Http.delete_reactions msg.channel_id msg.id
+    let `Message_id id = msg.id in
+    let `Channel_id channel_id = msg.channel_id in
+    Http.delete_reactions channel_id id
    
 
 let delete msg =
-    Http.delete_message msg.channel_id msg.id
+    let `Message_id id = msg.id in
+    let `Channel_id channel_id = msg.channel_id in
+    Http.delete_message channel_id id
    
 
 let pin msg =
-    Http.pin_message msg.channel_id msg.id
+    let `Message_id id = msg.id in
+    let `Channel_id channel_id = msg.channel_id in
+    Http.pin_message channel_id id
    
 
 let unpin msg =
-    Http.unpin_message msg.channel_id msg.id
+    let `Message_id id = msg.id in
+    let `Channel_id channel_id = msg.channel_id in
+    Http.unpin_message channel_id id
    
 
-let reply msg cont =
-    let rep = `Assoc [("content", `String cont)] in
-    Http.create_message msg.channel_id rep
-   
+let reply msg content =
+    Channel_id.say content msg.channel_id
 
-let reply_with ?embed ?content ?file ?(tts=false) msg =
-    let embed = match embed with
-    | Some e -> Embed.to_yojson e
-    | None -> `Null in
-    let content = match content with
-    | Some c -> `String c
-    | None -> `Null in
-    let file = match file with
-    | Some f -> `String f
-    | None -> `Null in
-    let () = match embed, content with
-    | `Null, `Null -> raise Channel.Invalid_message
-    | _ -> () in
-    Http.create_message (msg.channel_id) (`Assoc [
-        ("embed", embed);
-        ("content", content);
-        ("file", file);
-        ("tts", `Bool tts);
-    ])
+let reply_with ?embed ?content ?file ?tts msg =
+    Channel_id.send_message ?embed ?content ?file ?tts msg.channel_id
 
 let set_content msg cont =
+    let `Message_id id = msg.id in
+    let `Channel_id channel_id = msg.channel_id in
     to_yojson { msg with content = cont; }
-    |> Http.edit_message msg.channel_id msg.id
+    |> Http.edit_message channel_id id
    
 
 let set_embed msg embed =
+    let `Message_id id = msg.id in
+    let `Channel_id channel_id = msg.channel_id in
     to_yojson { msg with embeds = [embed]; }
-    |> Http.edit_message msg.channel_id msg.id
+    |> Http.edit_message channel_id id
    

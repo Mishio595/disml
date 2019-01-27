@@ -2,29 +2,29 @@ exception Invalid_channel of Yojson.Safe.json
 
 (** Represents a Group channel object. *)
 type group = {
-    id: Snowflake.t;
-    last_message_id: Snowflake.t option;
+    id: Channel_id_t.t;
+    last_message_id: Message_id.t option;
     last_pin_timestamp: string option;
     icon: string option;
     name: string option;
-    owner_id: Snowflake.t;
+    owner_id: User_id_t.t;
     recipients: User_t.t list;
 } [@@deriving sexp, yojson]
 
 (** Represents a private channel with a single user. *)
 type dm = {
-    id: Snowflake.t;
-    last_message_id: Snowflake.t option;
+    id: Channel_id_t.t;
+    last_message_id: Message_id.t option;
     last_pin_timestamp: string option;
 } [@@deriving sexp, yojson]
 
 (** Represents a text channel in a guild. *)
 type guild_text = {
-    id: Snowflake.t;
-    last_message_id: Snowflake.t option;
+    id: Channel_id_t.t;
+    last_message_id: Message_id.t option;
     last_pin_timestamp: string option;
-    category_id: Snowflake.t option;
-    guild_id: Snowflake.t option;
+    category_id: Channel_id_t.t option;
+    guild_id: Guild_id_t.t option;
     name: string;
     position: int;
     topic: string option;
@@ -34,9 +34,9 @@ type guild_text = {
 
 (** Represents a voice channel in a guild. *)
 type guild_voice = {
-    id: Snowflake.t;
-    category_id: Snowflake.t option;
-    guild_id: Snowflake.t option;
+    id: Channel_id_t.t;
+    category_id: Channel_id_t.t option;
+    guild_id: Guild_id_t.t option;
     name: string;
     position: int;
     user_limit: int;
@@ -45,8 +45,8 @@ type guild_voice = {
 
 (** Represents a guild category. *)
 type category = {
-    id: Snowflake.t;
-    guild_id: Snowflake.t option;
+    id: Channel_id_t.t;
+    guild_id: Guild_id_t.t option;
     position: int;
     name: string;
 } [@@deriving sexp, yojson]
@@ -62,22 +62,22 @@ type t =
 
 (** Intermediate used internally. *)
 type channel_wrapper = {
-    id: Snowflake.t;
+    id: Channel_id_t.t;
     kind: int;
-    guild_id: Snowflake.t option;
+    guild_id: Guild_id_t.t option;
     position: int option;
     name: string option;
     topic: string option;
     nsfw: bool option;
-    last_message_id: Snowflake.t option;
+    last_message_id: Message_id.t option;
     bitrate: int option;
     user_limit: int option;
     slow_mode_timeout: int option;
     recipients: User_t.t list option;
     icon: string option;
-    owner_id: Snowflake.t option;
+    owner_id: User_id_t.t option;
     application_id: Snowflake.t option;
-    category_id: Snowflake.t option;
+    category_id: Channel_id_t.t option;
     last_pin_timestamp: string option;
 } [@@deriving sexp, yojson]
 

@@ -1,11 +1,17 @@
 include Role_t
 
-let edit_role ~body (role:t) = Http.guild_role_edit role.guild_id role.id body
+let edit_role ~body (role:t) =
+    let `Role_id id = role.id in
+    let `Guild_id guild_id = role.guild_id in
+    Http.guild_role_edit guild_id id body
 
 let allow_mention role =
     edit_role ~body:(`Assoc [("mentionable", `Bool true)]) role
 
-let delete (role:t) = Http.guild_role_remove role.guild_id role.id
+let delete (role:t) =
+    let `Role_id id = role.id in
+    let `Guild_id guild_id = role.guild_id in
+    Http.guild_role_remove guild_id id
 
 let disallow_mention role =
     edit_role ~body:(`Assoc [("mentionable", `Bool false)]) role

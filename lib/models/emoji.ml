@@ -8,7 +8,7 @@ type partial_emoji = {
 type t = {
     id: Snowflake.t option [@default None];
     name: string;
-    roles: Snowflake.t list [@default []];
+    roles: Role_id.t list [@default []];
     user: User_t.t option [@default None];
     require_colons: bool option [@default None];
     managed: bool option [@default None];

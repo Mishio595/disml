@@ -1,11 +1,11 @@
 open Core
 
 type partial_user = {
-    id: Snowflake.t;
+    id: User_id_t.t;
 } [@@deriving sexp, yojson { strict = false}]
 
 type t = {
-    id: Snowflake.t;
+    id: User_id_t.t;
     username: string;
     discriminator: string;
     avatar: string option [@default None];

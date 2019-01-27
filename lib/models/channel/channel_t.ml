@@ -3,27 +3,27 @@ open Core
 exception Invalid_channel of Yojson.Safe.json
 
 type group = {
-    id: Snowflake.t;
-    last_message_id: Snowflake.t option [@default None];
+    id: Channel_id_t.t;
+    last_message_id: Message_id.t option [@default None];
     last_pin_timestamp: string option [@default None];
     icon: string option [@default None];
     name: string option [@default None];
-    owner_id: Snowflake.t;
+    owner_id: User_id_t.t;
     recipients: User_t.t list [@default []];
 } [@@deriving sexp, yojson { strict = false}]
 
 type dm = {
-    id: Snowflake.t;
-    last_message_id: Snowflake.t option [@default None];
+    id: Channel_id_t.t;
+    last_message_id: Message_id.t option [@default None];
     last_pin_timestamp: string option [@default None];
 } [@@deriving sexp, yojson { strict = false}]
 
 type guild_text = {
-    id: Snowflake.t;
-    last_message_id: Snowflake.t option [@default None];
+    id: Channel_id_t.t;
+    last_message_id: Message_id.t option [@default None];
     last_pin_timestamp: string option [@default None];
-    category_id: Snowflake.t option [@default None][@key "parent_id"];
-    guild_id: Snowflake.t option [@default None];
+    category_id: Channel_id_t.t option [@default None][@key "parent_id"];
+    guild_id: Guild_id_t.t option [@default None];
     name: string;
     position: int;
     topic: string option [@default None];
@@ -32,9 +32,9 @@ type guild_text = {
 } [@@deriving sexp, yojson { strict = false}]
 
 type guild_voice = {
-    id: Snowflake.t;
-    category_id: Snowflake.t option [@default None][@key "parent_id"];
-    guild_id: Snowflake.t option [@default None];
+    id: Channel_id_t.t;
+    category_id: Channel_id_t.t option [@default None][@key "parent_id"];
+    guild_id: Guild_id_t.t option [@default None];
     name: string;
     position: int;
     user_limit: int [@default -1];
@@ -42,8 +42,8 @@ type guild_voice = {
 } [@@deriving sexp, yojson { strict = false}]
 
 type category = {
-    id: Snowflake.t;
-    guild_id: Snowflake.t option [@default None];
+    id: Channel_id_t.t;
+    guild_id: Guild_id_t.t option [@default None];
     position: int;
     name: string;
 } [@@deriving sexp, yojson { strict = false}]
@@ -57,22 +57,22 @@ type t =
 [@@deriving sexp, yojson { strict = false}]
 
 type channel_wrapper = {
-    id: Snowflake.t;
+    id: Channel_id_t.t;
     kind: int [@key "type"];
-    guild_id: Snowflake.t option [@default None];
+    guild_id: Guild_id_t.t option [@default None];
     position: int option [@default None];
     name: string option [@default None];
     topic: string option [@default None];
     nsfw: bool option [@default None];
-    last_message_id: Snowflake.t option [@default None];
+    last_message_id: Message_id.t option [@default None];
     bitrate: int option [@default None];
     user_limit: int option [@default None];
     slow_mode_timeout: int option [@default None];
     recipients: User_t.t list option [@default None];
     icon: string option [@default None];
-    owner_id: Snowflake.t option [@default None];
+    owner_id: User_id_t.t option [@default None];
     application_id: Snowflake.t option [@default None];
-    category_id: Snowflake.t option [@default None][@key "parent_id"];
+    category_id: Channel_id_t.t option [@default None][@key "parent_id"];
     last_pin_timestamp: string option [@default None];
 } [@@deriving sexp, yojson { strict = false}]
 
@@ -111,8 +111,8 @@ let wrap s =
     | _ -> raise (Invalid_channel (channel_wrapper_to_yojson s))
 
 let get_id = function
-| Group g -> g.id
-| Private p -> p.id
-| GuildText t -> t.id
-| GuildVoice v -> v.id
-| Category c -> c.id
+| Group g -> let `Channel_id id = g.id in id
+| Private p -> let `Channel_id id = p.id in id
+| GuildText t -> let `Channel_id id = t.id in id
+| GuildVoice v -> let `Channel_id id = v.id in id
+| Category c -> let `Channel_id id = c.id in id

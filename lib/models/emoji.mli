@@ -6,7 +6,7 @@ type partial_emoji = {
 type t = {
     id: Snowflake.t option;
     name: string;
-    roles: Snowflake.t list;
+    roles: Role_id.t list;
     user: User_t.t option;
     require_colons: bool option;
     managed: bool option;

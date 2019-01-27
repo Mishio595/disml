@@ -5,16 +5,16 @@ type unavailable = {
 } [@@deriving sexp, yojson { strict = false }]
 
 type pre = {
-    id: Snowflake.t;
+    id: Guild_id_t.t;
     name: string;
     icon: string option [@default None];
     splash: string option [@default None];
-    owner_id: Snowflake.t;
+    owner_id: User_id_t.t;
     region: string;
-    afk_channel_id: Snowflake.t option [@default None];
+    afk_channel_id: Channel_id_t.t option [@default None];
     afk_timeout: int;
     embed_enabled: bool option [@default None];
-    embed_channel_id: Snowflake.t option [@default None];
+    embed_channel_id: Channel_id_t.t option [@default None];
     verification_level: int;
     default_message_notifications: int;
     explicit_content_filter: int;
@@ -34,16 +34,16 @@ type pre = {
 } [@@deriving sexp, yojson { strict = false }]
 
 type t = {
-    id: Snowflake.t;
+    id: Guild_id_t.t;
     name: string;
     icon: string option [@default None];
     splash: string option [@default None];
-    owner_id: Snowflake.t;
+    owner_id: User_id_t.t;
     region: string;
-    afk_channel_id: Snowflake.t option [@default None];
+    afk_channel_id: Channel_id_t.t option [@default None];
     afk_timeout: int;
     embed_enabled: bool option [@default None];
-    embed_channel_id: Snowflake.t option [@default None];
+    embed_channel_id: Channel_id_t.t option [@default None];
     verification_level: int;
     default_message_notifications: int;
     explicit_content_filter: int;
@@ -63,11 +63,12 @@ type t = {
 } [@@deriving sexp, yojson { strict = false }]
 
 let wrap ({id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel;system_channel;large;unavailable;member_count;members;channels}:pre) =
+    let `Guild_id id = id in
     let roles = List.map ~f:(Role_t.wrap ~guild_id:id) roles in
     let members = List.map ~f:(Member_t.wrap ~guild_id:id) members in
     let channels = List.map ~f:Channel_t.wrap channels in
     let widget_channel = Option.map ~f:Channel_t.wrap widget_channel in
     let system_channel = Option.map ~f:Channel_t.wrap system_channel in
-    {id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel;system_channel;large;unavailable;member_count;members;channels}
+    {id = `Guild_id id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel;system_channel;large;unavailable;member_count;members;channels}
 
-let get_id guild = guild.id
+let get_id guild = let `Guild_id id = guild.id in id

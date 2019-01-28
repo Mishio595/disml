@@ -13,7 +13,7 @@ type pre = {
     region: string;
     afk_channel_id: Channel_id_t.t option [@default None];
     afk_timeout: int;
-    embed_enabled: bool option [@default None];
+    embed_enabled: bool [@default false];
     embed_channel_id: Channel_id_t.t option [@default None];
     verification_level: int;
     default_message_notifications: int;
@@ -23,9 +23,9 @@ type pre = {
     features: string list;
     mfa_level: int;
     application_id: Snowflake.t option [@default None];
-    widget_enabled: bool option [@default None];
-    widget_channel: Channel_t.channel_wrapper option [@default None];
-    system_channel: Channel_t.channel_wrapper option [@default None];
+    widget_enabled: bool [@default false];
+    widget_channel_id: Channel_id_t.t option [@default None];
+    system_channel_id: Channel_id_t.t option [@default None];
     large: bool;
     unavailable: bool;
     member_count: int option [@default None];
@@ -42,7 +42,7 @@ type t = {
     region: string;
     afk_channel_id: Channel_id_t.t option [@default None];
     afk_timeout: int;
-    embed_enabled: bool option [@default None];
+    embed_enabled: bool [@default false];
     embed_channel_id: Channel_id_t.t option [@default None];
     verification_level: int;
     default_message_notifications: int;
@@ -52,9 +52,9 @@ type t = {
     features: string list;
     mfa_level: int;
     application_id: Snowflake.t option [@default None];
-    widget_enabled: bool option [@default None];
-    widget_channel: Channel_t.t option [@default None];
-    system_channel: Channel_t.t option [@default None];
+    widget_enabled: bool [@default false];
+    widget_channel_id: Channel_id_t.t option [@default None];
+    system_channel_id: Channel_id_t.t option [@default None];
     large: bool;
     unavailable: bool;
     member_count: int option [@default None];
@@ -62,13 +62,11 @@ type t = {
     channels: Channel_t.t list;
 } [@@deriving sexp, yojson { strict = false }]
 
-let wrap ({id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel;system_channel;large;unavailable;member_count;members;channels}:pre) =
+let wrap ({id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel_id;system_channel_id;large;unavailable;member_count;members;channels}:pre) =
     let `Guild_id id = id in
     let roles = List.map ~f:(Role_t.wrap ~guild_id:id) roles in
     let members = List.map ~f:(Member_t.wrap ~guild_id:id) members in
     let channels = List.map ~f:Channel_t.wrap channels in
-    let widget_channel = Option.map ~f:Channel_t.wrap widget_channel in
-    let system_channel = Option.map ~f:Channel_t.wrap system_channel in
-    {id = `Guild_id id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel;system_channel;large;unavailable;member_count;members;channels}
+    {id = `Guild_id id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel_id;system_channel_id;large;unavailable;member_count;members;channels}
 
 let get_id guild = let `Guild_id id = guild.id in id

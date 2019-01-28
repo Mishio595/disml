@@ -22,7 +22,7 @@ module type ChannelImpl = sig
             let check_command (msg : Message.t) =
                 if String.is_prefix ~prefix:"!hello" msg.content then
                     let embed = Embed.(default |> title "Hello World!") in
-                    Channel.send_message ~embed msg.channel >>> ignore
+                    Channel_id.send_message ~embed msg.channel_id >>> ignore
 
             Client.message_create := check_command
         ]}

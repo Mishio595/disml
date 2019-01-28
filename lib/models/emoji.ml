@@ -10,7 +10,7 @@ type t = {
     name: string;
     roles: Role_id.t list [@default []];
     user: User_t.t option [@default None];
-    require_colons: bool option [@default None];
-    managed: bool option [@default None];
-    animated: bool option [@default None];
+    require_colons: bool [@default false];
+    managed: bool [@default false];
+    animated: bool [@default false];
 } [@@deriving sexp, yojson { strict = false}]

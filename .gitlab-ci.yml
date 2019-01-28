@@ -8,11 +8,12 @@ before_script:
   - opam install dune odoc
   - opam install `dune external-lib-deps . | grep -e "^\-[^\.]*$" | cut -c 3-`
   - opam pin add disml .
+  - opam install -d disml
 
 pages:
   stage: deploy
   script:
-  - opam install -d disml
+  - echo 'Nothing to do'
   artifacts:
     paths:
     - _build/default/_doc/_html

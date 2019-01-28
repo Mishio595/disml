@@ -4,6 +4,7 @@ before_script:
   - opam init
   - eval `opam config env`
   - opam update
+  - opam upgrade
   - opam install dune odoc
 
 pages:

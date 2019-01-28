@@ -2,6 +2,8 @@ image: ocaml/opam:latest
 
 before_script:
   - opam init
+  - eval `opam config env`
+  - opam update
   - opam install dune odoc
 
 pages:

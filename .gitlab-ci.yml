@@ -1,7 +1,8 @@
 image: ocaml/opam:latest
 
 before_script:
-  - sudo opam install dune odoc
+  - opam init
+  - opam install dune odoc
 
 pages:
   stage: deploy

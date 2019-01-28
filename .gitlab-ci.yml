@@ -1,14 +1,15 @@
 image: ocaml/opam2:latest
 
+cache:
+  paths:
+    - ~/.opam
+
 before_script:
   - sudo apt-get -y install m4 pkg-config libssl-dev libffi-dev
   - opam init
   - eval `opam config env`
   - opam update
-  - opam install dune odoc
-  - opam install `dune external-lib-deps . | grep -e "^\-[^\.]*$" | cut -c 3-`
-  - opam pin add disml .
-  - opam install -d disml
+  - opam pin -d add disml .
 
 pages:
   stage: deploy

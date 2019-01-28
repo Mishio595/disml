@@ -1,16 +1,12 @@
 image: ocaml/opam2:latest
 
-cache:
-  paths:
-    - /home/opam/.opam/ocaml-base-compiler/
-
 before_script:
   - sudo apt-get -y install m4 pkg-config libssl-dev libffi-dev
   - opam init
   - eval `opam config env`
   - opam update
   - opam pin add ppx_deriving_yojson https://github.com/ocaml-ppx/ppx_deriving_yojson.git#82bc0b8
-  - opam install -d ./disml.opam
+  - opam install -d --inplace-build ./disml.opam
 
 pages:
   stage: deploy
@@ -18,7 +14,7 @@ pages:
   - echo 'Nothing to do'
   artifacts:
     paths:
-    - /home/opam/.opam/ocaml-base-compiler/doc/disml
+    - _build/default/_doc/_html
   only:
   - tags
   - ci-setup

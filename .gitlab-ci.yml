@@ -6,7 +6,7 @@ before_script:
   - eval `opam config env`
   - opam update
   - opam install dune odoc
-  - opam install `dune external-lib-deps --missing . | grep -e "^\-[^\.]*$" | cut -c 3-`
+  - opam install `dune external-lib-deps . | grep -e "^\-[^\.]*$" | cut -c 3-`
 
 pages:
   stage: deploy

@@ -64,6 +64,13 @@ let check_command (Event.MessageCreate.{message}) =
     | "!test" ->
         let ch = `Channel_id 377716501446393856 in
         Channel_id.say "Testing..." ch >>> ignore
+    | "!echo" ->
+        let `Message_id id = message.id in
+        let id = Option.((List.hd rest >>| Int.of_string) |> value ~default:id) in
+        Channel_id.get_message ~id message.channel_id >>> begin function
+        | Ok msg -> Message.reply message (Printf.sprintf "```lisp\n%s```" (Message.sexp_of_t msg |> Sexp.to_string_hum)) >>> ignore
+        | _ -> ()
+        end
     | _ -> ()
 
 let setup_logger () =

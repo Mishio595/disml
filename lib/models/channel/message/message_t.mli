@@ -7,11 +7,11 @@ type t = {
     guild_id: Guild_id_t.t option;
     content: string;
     timestamp: string;
-    editedimestamp: string option;
+    edited_timestamp: string option;
     tts: bool;
     mention_everyone: bool;
-    mentions: User_id_t.t list;
-    role_mentions: Role_id.t list;
+    mentions: User_t.t list;
+    mention_roles: Role_id.t list;
     attachments: Attachment.t list;
     embeds: Embed.t list;
     reactions: Snowflake.t list;

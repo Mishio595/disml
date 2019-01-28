@@ -4,7 +4,6 @@ open Cohttp
 
 module Base = struct
     exception Invalid_Method
-    exception Bad_response_headers
 
     let rl = ref Rl.empty
 
@@ -30,7 +29,7 @@ module Base = struct
         (match Response.headers resp
         |> Rl.rl_of_header with
         | Some r -> Mvar.put (Rl.find_exn !rl path) r
-        | None -> raise Bad_response_headers)
+        | None -> return ())
         >>= fun () ->
         match resp |> Response.status |> Code.code_of_status with
         | 200 -> body |> Cohttp_async.Body.to_string >>| Yojson.Safe.from_string >>= Deferred.Or_error.return

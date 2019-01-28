@@ -1,7 +1,7 @@
 image: ocaml/opam2:latest
 
 before_script:
-  - sudo apt-get -y install m4
+  - sudo apt-get -y install m4 pkg-config
   - opam init
   - eval `opam config env`
   - opam update

@@ -6,12 +6,12 @@ before_script:
   - eval `opam config env`
   - opam update
   - opam pin add ppx_deriving_yojson https://github.com/ocaml-ppx/ppx_deriving_yojson.git#82bc0b8
-  - opam install -d --inplace-build ./disml.opam
+  - opam pin add disml .
 
 pages:
   stage: deploy
   script:
-  - echo 'Nothing to do'
+  - dune build @doc
   artifacts:
     paths:
     - _build/default/_doc/_html

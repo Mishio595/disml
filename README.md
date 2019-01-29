@@ -10,13 +10,13 @@ Latest changes are on master
 #### What is implemented?
 * The full Discord REST API
 * Complete gateway support (sans voice)
-* Automatic sharding
-* Event dispatch to a user-defined consumer
+* Automatic and manual sharding
+* Event dispatch to a user-defined consumer that can be changed at runtime
 * Automatic reconnection of dropped gateway connections
 * Automatic rate limit handling
 
 #### What is not implemented?
-* Abstractions for Discord Objects (Message, Guild, Channel, etc) (**Mostly Completed**)
+* Abstractions for Discord Objects (**Mostly Completed**)
 * Voice
 * Cache
 

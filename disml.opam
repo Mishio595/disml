@@ -25,7 +25,7 @@ depends: [
   "async_ssl" {>= "v0.11.0"}
   "core" {>= "v0.11.3"}
   "cohttp-async" {>= "1.2.0"}
-  "ppx_jane" {>= "v0.11.0"}
+  "ppx_sexp" {>= "v0.11.2"}
   "ppx_deriving_yojson" {>= "3.1"}
   "websocket-async" {>= "2.12"}
   "decompress"

@@ -70,8 +70,8 @@ module Shard = struct
         | None -> ""
         | Some p ->
             Yojson.Safe.to_string @@ `Assoc [
-            ("op", `Int (Opcode.to_int ev));
-            ("d", p);
+                "op", `Int (Opcode.to_int ev);
+                "d", p;
             ]
         in
         let (_, write) = shard.pipe in
@@ -105,25 +105,26 @@ module Shard = struct
 
     let set_status ~(status:Yojson.Safe.json) shard =
         let payload = match status with
-        | `Assoc [("name", `String name); ("type", `Int t)] ->
+        | `Assoc ["name", `String name; "type", `Int t]
+        | `Assoc ["type", `Int t; "name", `String name] ->
             `Assoc [
-                ("status", `String "online");
-                ("afk", `Bool false);
-                ("since", `Null);
-                ("game", `Assoc [
-                    ("name", `String name);
-                    ("type", `Int t)
-                ])
+                "status", `String "online";
+                "afk", `Bool false;
+                "since", `Null;
+                "game", `Assoc [
+                    "name", `String name;
+                    "type", `Int t;
+                ]
             ]
         | `String name ->
             `Assoc [
-                ("status", `String "online");
-                ("afk", `Bool false);
-                ("since", `Null);
-                ("game", `Assoc [
-                    ("name", `String name);
-                    ("type", `Int 0)
-                ])
+                "status", `String "online";
+                "afk", `Bool false;
+                "since", `Null;
+                "game", `Assoc [
+                    "name", `String name;
+                    "type", `Int 0
+                ]
             ]
         | _ -> raise Invalid_Payload
         in
@@ -132,9 +133,9 @@ module Shard = struct
 
     let request_guild_members ?(query="") ?(limit=0) ~guild shard =
         let payload = `Assoc [
-            ("guild_id", `String (Int.to_string guild));
-            ("query", `String query);
-            ("limit", `Int limit);
+            "guild_id", `String (Int.to_string guild);
+            "query", `String query;
+            "limit", `Int limit;
         ] in
         Ivar.read shard.ready >>= fun _ ->
         push_frame ~payload ~ev:REQUEST_GUILD_MEMBERS shard
@@ -151,24 +152,24 @@ module Shard = struct
             Mvar.take identify_lock >>= fun () ->
             Logs.debug (fun m -> m "Identifying shard [%d, %d]" (fst shard.id) (snd shard.id));
             let payload = `Assoc [
-                ("token", `String !Client_options.token);
-                ("properties", `Assoc [
-                    ("$os", `String Sys.os_type);
-                    ("$device", `String "dis.ml");
-                    ("$browser", `String "dis.ml")
-                ]);
-                ("compress", `Bool shard.compress);
-                ("large_threshold", `Int !Client_options.large_threshold);
-                ("shard", `List shards);
+                "token", `String !Client_options.token;
+                "properties", `Assoc [
+                    "$os", `String Sys.os_type;
+                    "$device", `String "dis.ml";
+                    "$browser", `String "dis.ml";
+                ];
+                "compress", `Bool shard.compress;
+                "large_threshold", `Int !Client_options.large_threshold;
+                "shard", `List shards;
             ] in
             push_frame ~payload ~ev:IDENTIFY shard
             >>| fun s -> s
         end
         | Some s ->
             let payload = `Assoc [
-                ("token", `String !Client_options.token);
-                ("session_id", `String s);
-                ("seq", `Int shard.seq)
+                "token", `String !Client_options.token;
+                "session_id", `String s;
+                "seq", `Int shard.seq;
             ] in
             push_frame ~payload ~ev:RESUME shard
 

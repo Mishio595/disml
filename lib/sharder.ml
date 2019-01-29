@@ -60,7 +60,6 @@ module Shard = struct
             | Text | Binary ->
                 let s = if compress then try_decompress s.content
                     else s.content in
-                (* Logs.debug (fun m -> m "%s" s); *)
                 Some (Yojson.Safe.from_string s)
             | _ -> None
         end
@@ -238,9 +237,6 @@ module Shard = struct
             | _ -> 443 in
         let scheme = Option.value_exn ~message:"no scheme in uri" Uri.(scheme uri) in
         let tcp_fun (net_to_ws, ws_to_net) =
-            (* Writer.monitor ws_to_net
-            |> Monitor.detach_and_get_error_stream
-            |> Stream.iter ~f:(fun e -> Logs.err (fun m -> m "Socket Connection Error: %s" (Exn.sexp_of_t e |> Sexp.to_string_hum))); *)
             let (app_to_ws, write) = Pipe.create () in
             let (read, ws_to_app) = Pipe.create () in
             let initialized = Ivar.create () in

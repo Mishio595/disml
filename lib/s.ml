@@ -48,6 +48,7 @@ module type ChannelImpl = sig
         Message_t.t list Deferred.Or_error.t
     val broadcast_typing : t -> unit Deferred.Or_error.t
     val get_pins : t -> Message_t.t list Deferred.Or_error.t
+    val bulk_delete : Snowflake.t list -> t -> unit Deferred.Or_error.t
     (* TODO more things related to guild channels *)
 end
 

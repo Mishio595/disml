@@ -23,6 +23,7 @@ module Base = struct
             "User-Agent", "Dis.ml v0.1.0";
             "Authorization", ("Bot " ^ !Client_options.token);
             "Content-Type", "application/json";
+            "Connection", "keep-alive";
         ]
 
     let process_response path ((resp:Response.t), body) =

@@ -127,8 +127,8 @@ module Shard = struct
                     ("$device", `String "dis.ml");
                     ("$browser", `String "dis.ml")
                 ]);
-                ("compress", `Bool false); (* TODO add compression handling*)
-                ("large_threshold", `Int 250);
+                ("compress", `Bool !Client_options.compress); (* TODO add compression handling*)
+                ("large_threshold", `Int !Client_options.large_threshold);
                 ("shard", `List shards);
             ] in
             push_frame ~payload ~ev:IDENTIFY shard

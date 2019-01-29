@@ -21,11 +21,13 @@ type t = {
         let _ =
             Scheduler.go_main ~main ()
     ]}
-    @param ?count Optional amount of shards to launch. Defaults to autosharding
-    @param string The token used for authentication
-    @return A deferred client object
+    @param ?count Optional amount of shards to launch. Defaults to autosharding.
+    @param ?compress Whether to use compression over the gateway. {b NOT CURRENTLY SUPPORTED. DO NOT SET TO TRUE. }
+    @param ?large Large threshold for guilds. Default is 250.
+    @param string The token used for authentication.
+    @return A deferred client object.
 *)
-val start : ?count:int -> string -> t Deferred.t
+val start : ?count:int -> ?compress:bool -> ?large:int -> string -> t Deferred.t
 
 (** Same as {!Sharder.set_status} where [client.sharder] is passed. *)
 val set_status : status:Yojson.Safe.json -> t -> Sharder.Shard.shard list Deferred.t

@@ -50,6 +50,10 @@ module Channel(T : S.HasSnowflake) : S.ChannelImpl with type t := T.t = struct
 
     let get_pins ch =
         Http.get_pinned_messages (get_id ch)
+
+    let bulk_delete msgs ch =
+        let msgs = `List (List.map ~f:(fun id -> `Int id) msgs) in
+        Http.bulk_delete (get_id ch) msgs
 end
 
 module Guild(T : S.HasSnowflake) : S.GuildImpl with type t := T.t = struct

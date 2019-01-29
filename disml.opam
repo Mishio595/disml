@@ -5,7 +5,7 @@ maintainer: "Adelyn Breedlove <tenseiken595@gmail.com>"
 authors: "Adelyn Breedlove <tenseiken595@gmail.com>"
 license: "MIT"
 homepage: "https://gitlab.com/Mishio595/disml"
-doc: "https://mishio595.github.io/disml/index.html"
+doc: "https://mishio595.gitlab.io/disml/"
 dev-repo: "git+https://gitlab.com/Mishio595/disml"
 bug-reports: "https://gitlab.com/Mishio595/disml/issues"
 tags: ["discord"]

@@ -9,27 +9,25 @@ exception Inflate_error of Zlib_inflate.error
 
 let window = Window.create ~witness:B.bytes
 
-let decompress data =
+let decompress src =
     let in_buf = Bytes.create 0xFFFF in
     let out_buf = Bytes.create 0xFFFF in
     let window = Window.reset window in
     let pos = ref 0 in
-    let res = Buffer.create (String.length data) in
+    let src_len = String.length src in
+    let res = Buffer.create (src_len) in
     Zlib_inflate.bytes in_buf out_buf
-    (fun in_buf ->
-        let n = min 0xFFFF (String.length data - !pos) in
-        Caml.Bytes.blit_string data !pos in_buf 0 n;
-        pos := !pos + n;
-        n)
-    (fun out_buf len ->
-        Buffer.add_subbytes res out_buf 0 len; 0xFFFF)
+    (fun dst ->
+        let len = min 0xFFFF (src_len - !pos) in
+        Caml.Bytes.blit_string src !pos dst 0 len;
+        pos := !pos + len;
+        len)
+    (fun obuf len ->
+        Buffer.add_subbytes res obuf 0 len; 0xFFFF)
     (Zlib_inflate.default ~witness:B.bytes window)
     |> function
     | Ok _ -> Buffer.contents res
     | Error exn -> raise (Inflate_error exn)
-
-let try_decompress data = try decompress data
-    with Inflate_error _ -> data
 
 module Shard = struct
     type shard = {
@@ -57,10 +55,10 @@ module Shard = struct
         | `Ok s -> begin
             let open Frame.Opcode in
             match s.opcode with
-            | Text | Binary ->
-                let s = if compress then try_decompress s.content
-                    else s.content in
-                Some (Yojson.Safe.from_string s)
+            | Text -> Some (Yojson.Safe.from_string s.content)
+            | Binary ->
+                if compress then Some (decompress s.content |> Yojson.Safe.from_string)
+                    else None
             | _ -> None
         end
         | `Eof -> None

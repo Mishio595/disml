@@ -12,6 +12,7 @@ type t
 (** Start the Sharder. This is called by {!Client.start}. *)
 val start :
     ?count:int ->
+    ?compress:bool ->
     unit ->
     t Deferred.t
 
@@ -19,14 +20,15 @@ val start :
 module Shard : sig
     (** Representation of the state of a shard. *)
     type shard = {
+        compress: bool; (** Whether to compress payloads. *)
+        id: int * int; (** A tuple as expected by Discord. First element is the current shard index, second element is the total shard count. *)
         hb_interval: Time.Span.t Ivar.t; (** Time span between heartbeats, wrapped in an Ivar. *)
         hb_stopper: unit Ivar.t; (** Stops the heartbeat sequencer when filled. *)
-        seq: int; (** Current sequence number *)
-        session: string option; (** Session id, if one exists. *)
         pipe: Frame.t Pipe.Reader.t * Frame.t Pipe.Writer.t; (** Raw frame IO pipe used for websocket communications. *)
         ready: unit Ivar.t; (** A simple Ivar indicating if the shard has received READY. *)
+        seq: int; (** Current sequence number *)
+        session: string option; (** Session id, if one exists. *)
         url: string; (** The websocket URL in use. *)
-        id: int * int; (** A tuple as expected by Discord. First element is the current shard index, second element is the total shard count. *)
         _internal: Reader.t * Writer.t;
     }
     
@@ -58,6 +60,7 @@ module Shard : sig
     val create :
         url:string ->
         shards:int * int ->
+        ?compress:bool ->
         unit ->
         shard Deferred.t
 

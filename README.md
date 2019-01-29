@@ -2,9 +2,7 @@
 
 This is a library for creating bots on [Discord](https://discordapp.com/). Dis.ml uses JaneStreet's Async and Core libs and I highly recommend having a solid understanding of both of these before using this library.
 
-Docs can currently be found at https://mishio595.github.io/disml/index.html.
-They are currently very much a WIP and are not necessarily up to date.
-It is advised to install `odoc` and run `dune build @doc` in the project root dir to get the most up-to-date docs. This will build them to `_build/default/_doc/`.
+Docs can be found [here](https://mishio595.gitlab.io/disml).
 
 ## State of the project
 Latest changes are on master

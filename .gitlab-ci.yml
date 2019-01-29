@@ -18,4 +18,3 @@ pages:
     - public
   only:
   - tags
-  - ci-setup

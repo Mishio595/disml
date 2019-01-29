@@ -1,14 +1,23 @@
 lib: [
   "_build/install/default/lib/disml/META" {"META"}
   "_build/install/default/lib/disml/activity.ml" {"activity.ml"}
+  "_build/install/default/lib/disml/activity.mli" {"activity.mli"}
   "_build/install/default/lib/disml/attachment.ml" {"attachment.ml"}
+  "_build/install/default/lib/disml/attachment.mli" {"attachment.mli"}
   "_build/install/default/lib/disml/ban.ml" {"ban.ml"}
   "_build/install/default/lib/disml/ban.mli" {"ban.mli"}
   "_build/install/default/lib/disml/ban_t.ml" {"ban_t.ml"}
+  "_build/install/default/lib/disml/ban_t.mli" {"ban_t.mli"}
   "_build/install/default/lib/disml/channel.ml" {"channel.ml"}
   "_build/install/default/lib/disml/channel.mli" {"channel.mli"}
+  "_build/install/default/lib/disml/channel_id.ml" {"channel_id.ml"}
+  "_build/install/default/lib/disml/channel_id.mli" {"channel_id.mli"}
+  "_build/install/default/lib/disml/channel_id_t.ml" {"channel_id_t.ml"}
+  "_build/install/default/lib/disml/channel_id_t.mli" {"channel_id_t.mli"}
   "_build/install/default/lib/disml/channel_t.ml" {"channel_t.ml"}
+  "_build/install/default/lib/disml/channel_t.mli" {"channel_t.mli"}
   "_build/install/default/lib/disml/client.ml" {"client.ml"}
+  "_build/install/default/lib/disml/client.mli" {"client.mli"}
   "_build/install/default/lib/disml/client_options.ml" {"client_options.ml"}
   "_build/install/default/lib/disml/client_options.mli" {"client_options.mli"}
   "_build/install/default/lib/disml/disml.a" {"disml.a"}
@@ -20,11 +29,17 @@ lib: [
   "_build/install/default/lib/disml/disml.cmxs" {"disml.cmxs"}
   "_build/install/default/lib/disml/disml.dune" {"disml.dune"}
   "_build/install/default/lib/disml/disml.ml" {"disml.ml"}
+  "_build/install/default/lib/disml/disml__.cmi" {"disml__.cmi"}
+  "_build/install/default/lib/disml/disml__.cmt" {"disml__.cmt"}
+  "_build/install/default/lib/disml/disml__.cmx" {"disml__.cmx"}
+  "_build/install/default/lib/disml/disml__.ml" {"disml__.ml"}
   "_build/install/default/lib/disml/disml__Activity.cmi" {"disml__Activity.cmi"}
   "_build/install/default/lib/disml/disml__Activity.cmt" {"disml__Activity.cmt"}
+  "_build/install/default/lib/disml/disml__Activity.cmti" {"disml__Activity.cmti"}
   "_build/install/default/lib/disml/disml__Activity.cmx" {"disml__Activity.cmx"}
   "_build/install/default/lib/disml/disml__Attachment.cmi" {"disml__Attachment.cmi"}
   "_build/install/default/lib/disml/disml__Attachment.cmt" {"disml__Attachment.cmt"}
+  "_build/install/default/lib/disml/disml__Attachment.cmti" {"disml__Attachment.cmti"}
   "_build/install/default/lib/disml/disml__Attachment.cmx" {"disml__Attachment.cmx"}
   "_build/install/default/lib/disml/disml__Ban.cmi" {"disml__Ban.cmi"}
   "_build/install/default/lib/disml/disml__Ban.cmt" {"disml__Ban.cmt"}
@@ -32,16 +47,27 @@ lib: [
   "_build/install/default/lib/disml/disml__Ban.cmx" {"disml__Ban.cmx"}
   "_build/install/default/lib/disml/disml__Ban_t.cmi" {"disml__Ban_t.cmi"}
   "_build/install/default/lib/disml/disml__Ban_t.cmt" {"disml__Ban_t.cmt"}
+  "_build/install/default/lib/disml/disml__Ban_t.cmti" {"disml__Ban_t.cmti"}
   "_build/install/default/lib/disml/disml__Ban_t.cmx" {"disml__Ban_t.cmx"}
   "_build/install/default/lib/disml/disml__Channel.cmi" {"disml__Channel.cmi"}
   "_build/install/default/lib/disml/disml__Channel.cmt" {"disml__Channel.cmt"}
   "_build/install/default/lib/disml/disml__Channel.cmti" {"disml__Channel.cmti"}
   "_build/install/default/lib/disml/disml__Channel.cmx" {"disml__Channel.cmx"}
+  "_build/install/default/lib/disml/disml__Channel_id.cmi" {"disml__Channel_id.cmi"}
+  "_build/install/default/lib/disml/disml__Channel_id.cmt" {"disml__Channel_id.cmt"}
+  "_build/install/default/lib/disml/disml__Channel_id.cmti" {"disml__Channel_id.cmti"}
+  "_build/install/default/lib/disml/disml__Channel_id.cmx" {"disml__Channel_id.cmx"}
+  "_build/install/default/lib/disml/disml__Channel_id_t.cmi" {"disml__Channel_id_t.cmi"}
+  "_build/install/default/lib/disml/disml__Channel_id_t.cmt" {"disml__Channel_id_t.cmt"}
+  "_build/install/default/lib/disml/disml__Channel_id_t.cmti" {"disml__Channel_id_t.cmti"}
+  "_build/install/default/lib/disml/disml__Channel_id_t.cmx" {"disml__Channel_id_t.cmx"}
   "_build/install/default/lib/disml/disml__Channel_t.cmi" {"disml__Channel_t.cmi"}
   "_build/install/default/lib/disml/disml__Channel_t.cmt" {"disml__Channel_t.cmt"}
+  "_build/install/default/lib/disml/disml__Channel_t.cmti" {"disml__Channel_t.cmti"}
   "_build/install/default/lib/disml/disml__Channel_t.cmx" {"disml__Channel_t.cmx"}
   "_build/install/default/lib/disml/disml__Client.cmi" {"disml__Client.cmi"}
   "_build/install/default/lib/disml/disml__Client.cmt" {"disml__Client.cmt"}
+  "_build/install/default/lib/disml/disml__Client.cmti" {"disml__Client.cmti"}
   "_build/install/default/lib/disml/disml__Client.cmx" {"disml__Client.cmx"}
   "_build/install/default/lib/disml/disml__Client_options.cmi" {"disml__Client_options.cmi"}
   "_build/install/default/lib/disml/disml__Client_options.cmt" {"disml__Client_options.cmt"}
@@ -53,9 +79,11 @@ lib: [
   "_build/install/default/lib/disml/disml__Dispatch.cmx" {"disml__Dispatch.cmx"}
   "_build/install/default/lib/disml/disml__Embed.cmi" {"disml__Embed.cmi"}
   "_build/install/default/lib/disml/disml__Embed.cmt" {"disml__Embed.cmt"}
+  "_build/install/default/lib/disml/disml__Embed.cmti" {"disml__Embed.cmti"}
   "_build/install/default/lib/disml/disml__Embed.cmx" {"disml__Embed.cmx"}
   "_build/install/default/lib/disml/disml__Emoji.cmi" {"disml__Emoji.cmi"}
   "_build/install/default/lib/disml/disml__Emoji.cmt" {"disml__Emoji.cmt"}
+  "_build/install/default/lib/disml/disml__Emoji.cmti" {"disml__Emoji.cmti"}
   "_build/install/default/lib/disml/disml__Emoji.cmx" {"disml__Emoji.cmx"}
   "_build/install/default/lib/disml/disml__Endpoints.cmi" {"disml__Endpoints.cmi"}
   "_build/install/default/lib/disml/disml__Endpoints.cmt" {"disml__Endpoints.cmt"}
@@ -63,31 +91,53 @@ lib: [
   "_build/install/default/lib/disml/disml__Endpoints.cmx" {"disml__Endpoints.cmx"}
   "_build/install/default/lib/disml/disml__Event.cmi" {"disml__Event.cmi"}
   "_build/install/default/lib/disml/disml__Event.cmt" {"disml__Event.cmt"}
+  "_build/install/default/lib/disml/disml__Event.cmti" {"disml__Event.cmti"}
   "_build/install/default/lib/disml/disml__Event.cmx" {"disml__Event.cmx"}
+  "_build/install/default/lib/disml/disml__Event_models.cmi" {"disml__Event_models.cmi"}
+  "_build/install/default/lib/disml/disml__Event_models.cmt" {"disml__Event_models.cmt"}
+  "_build/install/default/lib/disml/disml__Event_models.cmx" {"disml__Event_models.cmx"}
   "_build/install/default/lib/disml/disml__Guild.cmi" {"disml__Guild.cmi"}
   "_build/install/default/lib/disml/disml__Guild.cmt" {"disml__Guild.cmt"}
   "_build/install/default/lib/disml/disml__Guild.cmti" {"disml__Guild.cmti"}
   "_build/install/default/lib/disml/disml__Guild.cmx" {"disml__Guild.cmx"}
+  "_build/install/default/lib/disml/disml__Guild_id.cmi" {"disml__Guild_id.cmi"}
+  "_build/install/default/lib/disml/disml__Guild_id.cmt" {"disml__Guild_id.cmt"}
+  "_build/install/default/lib/disml/disml__Guild_id.cmti" {"disml__Guild_id.cmti"}
+  "_build/install/default/lib/disml/disml__Guild_id.cmx" {"disml__Guild_id.cmx"}
+  "_build/install/default/lib/disml/disml__Guild_id_t.cmi" {"disml__Guild_id_t.cmi"}
+  "_build/install/default/lib/disml/disml__Guild_id_t.cmt" {"disml__Guild_id_t.cmt"}
+  "_build/install/default/lib/disml/disml__Guild_id_t.cmti" {"disml__Guild_id_t.cmti"}
+  "_build/install/default/lib/disml/disml__Guild_id_t.cmx" {"disml__Guild_id_t.cmx"}
   "_build/install/default/lib/disml/disml__Guild_t.cmi" {"disml__Guild_t.cmi"}
   "_build/install/default/lib/disml/disml__Guild_t.cmt" {"disml__Guild_t.cmt"}
+  "_build/install/default/lib/disml/disml__Guild_t.cmti" {"disml__Guild_t.cmti"}
   "_build/install/default/lib/disml/disml__Guild_t.cmx" {"disml__Guild_t.cmx"}
   "_build/install/default/lib/disml/disml__Http.cmi" {"disml__Http.cmi"}
   "_build/install/default/lib/disml/disml__Http.cmt" {"disml__Http.cmt"}
   "_build/install/default/lib/disml/disml__Http.cmti" {"disml__Http.cmti"}
   "_build/install/default/lib/disml/disml__Http.cmx" {"disml__Http.cmx"}
+  "_build/install/default/lib/disml/disml__Impl.cmi" {"disml__Impl.cmi"}
+  "_build/install/default/lib/disml/disml__Impl.cmt" {"disml__Impl.cmt"}
+  "_build/install/default/lib/disml/disml__Impl.cmx" {"disml__Impl.cmx"}
   "_build/install/default/lib/disml/disml__Member.cmi" {"disml__Member.cmi"}
   "_build/install/default/lib/disml/disml__Member.cmt" {"disml__Member.cmt"}
   "_build/install/default/lib/disml/disml__Member.cmti" {"disml__Member.cmti"}
   "_build/install/default/lib/disml/disml__Member.cmx" {"disml__Member.cmx"}
   "_build/install/default/lib/disml/disml__Member_t.cmi" {"disml__Member_t.cmi"}
   "_build/install/default/lib/disml/disml__Member_t.cmt" {"disml__Member_t.cmt"}
+  "_build/install/default/lib/disml/disml__Member_t.cmti" {"disml__Member_t.cmti"}
   "_build/install/default/lib/disml/disml__Member_t.cmx" {"disml__Member_t.cmx"}
   "_build/install/default/lib/disml/disml__Message.cmi" {"disml__Message.cmi"}
   "_build/install/default/lib/disml/disml__Message.cmt" {"disml__Message.cmt"}
   "_build/install/default/lib/disml/disml__Message.cmti" {"disml__Message.cmti"}
   "_build/install/default/lib/disml/disml__Message.cmx" {"disml__Message.cmx"}
+  "_build/install/default/lib/disml/disml__Message_id.cmi" {"disml__Message_id.cmi"}
+  "_build/install/default/lib/disml/disml__Message_id.cmt" {"disml__Message_id.cmt"}
+  "_build/install/default/lib/disml/disml__Message_id.cmti" {"disml__Message_id.cmti"}
+  "_build/install/default/lib/disml/disml__Message_id.cmx" {"disml__Message_id.cmx"}
   "_build/install/default/lib/disml/disml__Message_t.cmi" {"disml__Message_t.cmi"}
   "_build/install/default/lib/disml/disml__Message_t.cmt" {"disml__Message_t.cmt"}
+  "_build/install/default/lib/disml/disml__Message_t.cmti" {"disml__Message_t.cmti"}
   "_build/install/default/lib/disml/disml__Message_t.cmx" {"disml__Message_t.cmx"}
   "_build/install/default/lib/disml/disml__Opcode.cmi" {"disml__Opcode.cmi"}
   "_build/install/default/lib/disml/disml__Opcode.cmt" {"disml__Opcode.cmt"}
@@ -95,6 +145,7 @@ lib: [
   "_build/install/default/lib/disml/disml__Opcode.cmx" {"disml__Opcode.cmx"}
   "_build/install/default/lib/disml/disml__Presence.cmi" {"disml__Presence.cmi"}
   "_build/install/default/lib/disml/disml__Presence.cmt" {"disml__Presence.cmt"}
+  "_build/install/default/lib/disml/disml__Presence.cmti" {"disml__Presence.cmti"}
   "_build/install/default/lib/disml/disml__Presence.cmx" {"disml__Presence.cmx"}
   "_build/install/default/lib/disml/disml__Reaction.cmi" {"disml__Reaction.cmi"}
   "_build/install/default/lib/disml/disml__Reaction.cmt" {"disml__Reaction.cmt"}
@@ -102,6 +153,7 @@ lib: [
   "_build/install/default/lib/disml/disml__Reaction.cmx" {"disml__Reaction.cmx"}
   "_build/install/default/lib/disml/disml__Reaction_t.cmi" {"disml__Reaction_t.cmi"}
   "_build/install/default/lib/disml/disml__Reaction_t.cmt" {"disml__Reaction_t.cmt"}
+  "_build/install/default/lib/disml/disml__Reaction_t.cmti" {"disml__Reaction_t.cmti"}
   "_build/install/default/lib/disml/disml__Reaction_t.cmx" {"disml__Reaction_t.cmx"}
   "_build/install/default/lib/disml/disml__Rl.cmi" {"disml__Rl.cmi"}
   "_build/install/default/lib/disml/disml__Rl.cmt" {"disml__Rl.cmt"}
@@ -111,59 +163,103 @@ lib: [
   "_build/install/default/lib/disml/disml__Role.cmt" {"disml__Role.cmt"}
   "_build/install/default/lib/disml/disml__Role.cmti" {"disml__Role.cmti"}
   "_build/install/default/lib/disml/disml__Role.cmx" {"disml__Role.cmx"}
+  "_build/install/default/lib/disml/disml__Role_id.cmi" {"disml__Role_id.cmi"}
+  "_build/install/default/lib/disml/disml__Role_id.cmt" {"disml__Role_id.cmt"}
+  "_build/install/default/lib/disml/disml__Role_id.cmti" {"disml__Role_id.cmti"}
+  "_build/install/default/lib/disml/disml__Role_id.cmx" {"disml__Role_id.cmx"}
   "_build/install/default/lib/disml/disml__Role_t.cmi" {"disml__Role_t.cmi"}
   "_build/install/default/lib/disml/disml__Role_t.cmt" {"disml__Role_t.cmt"}
+  "_build/install/default/lib/disml/disml__Role_t.cmti" {"disml__Role_t.cmti"}
   "_build/install/default/lib/disml/disml__Role_t.cmx" {"disml__Role_t.cmx"}
+  "_build/install/default/lib/disml/disml__S.cmi" {"disml__S.cmi"}
+  "_build/install/default/lib/disml/disml__S.cmt" {"disml__S.cmt"}
+  "_build/install/default/lib/disml/disml__S.cmx" {"disml__S.cmx"}
   "_build/install/default/lib/disml/disml__Sharder.cmi" {"disml__Sharder.cmi"}
   "_build/install/default/lib/disml/disml__Sharder.cmt" {"disml__Sharder.cmt"}
   "_build/install/default/lib/disml/disml__Sharder.cmti" {"disml__Sharder.cmti"}
   "_build/install/default/lib/disml/disml__Sharder.cmx" {"disml__Sharder.cmx"}
   "_build/install/default/lib/disml/disml__Snowflake.cmi" {"disml__Snowflake.cmi"}
   "_build/install/default/lib/disml/disml__Snowflake.cmt" {"disml__Snowflake.cmt"}
+  "_build/install/default/lib/disml/disml__Snowflake.cmti" {"disml__Snowflake.cmti"}
   "_build/install/default/lib/disml/disml__Snowflake.cmx" {"disml__Snowflake.cmx"}
   "_build/install/default/lib/disml/disml__User.cmi" {"disml__User.cmi"}
   "_build/install/default/lib/disml/disml__User.cmt" {"disml__User.cmt"}
   "_build/install/default/lib/disml/disml__User.cmti" {"disml__User.cmti"}
   "_build/install/default/lib/disml/disml__User.cmx" {"disml__User.cmx"}
+  "_build/install/default/lib/disml/disml__User_id.cmi" {"disml__User_id.cmi"}
+  "_build/install/default/lib/disml/disml__User_id.cmt" {"disml__User_id.cmt"}
+  "_build/install/default/lib/disml/disml__User_id.cmti" {"disml__User_id.cmti"}
+  "_build/install/default/lib/disml/disml__User_id.cmx" {"disml__User_id.cmx"}
+  "_build/install/default/lib/disml/disml__User_id_t.cmi" {"disml__User_id_t.cmi"}
+  "_build/install/default/lib/disml/disml__User_id_t.cmt" {"disml__User_id_t.cmt"}
+  "_build/install/default/lib/disml/disml__User_id_t.cmti" {"disml__User_id_t.cmti"}
+  "_build/install/default/lib/disml/disml__User_id_t.cmx" {"disml__User_id_t.cmx"}
   "_build/install/default/lib/disml/disml__User_t.cmi" {"disml__User_t.cmi"}
   "_build/install/default/lib/disml/disml__User_t.cmt" {"disml__User_t.cmt"}
+  "_build/install/default/lib/disml/disml__User_t.cmti" {"disml__User_t.cmti"}
   "_build/install/default/lib/disml/disml__User_t.cmx" {"disml__User_t.cmx"}
   "_build/install/default/lib/disml/dispatch.ml" {"dispatch.ml"}
   "_build/install/default/lib/disml/dispatch.mli" {"dispatch.mli"}
   "_build/install/default/lib/disml/embed.ml" {"embed.ml"}
+  "_build/install/default/lib/disml/embed.mli" {"embed.mli"}
   "_build/install/default/lib/disml/emoji.ml" {"emoji.ml"}
+  "_build/install/default/lib/disml/emoji.mli" {"emoji.mli"}
   "_build/install/default/lib/disml/endpoints.ml" {"endpoints.ml"}
   "_build/install/default/lib/disml/endpoints.mli" {"endpoints.mli"}
   "_build/install/default/lib/disml/event.ml" {"event.ml"}
+  "_build/install/default/lib/disml/event.mli" {"event.mli"}
+  "_build/install/default/lib/disml/event_models.ml" {"event_models.ml"}
   "_build/install/default/lib/disml/guild.ml" {"guild.ml"}
   "_build/install/default/lib/disml/guild.mli" {"guild.mli"}
+  "_build/install/default/lib/disml/guild_id.ml" {"guild_id.ml"}
+  "_build/install/default/lib/disml/guild_id.mli" {"guild_id.mli"}
+  "_build/install/default/lib/disml/guild_id_t.ml" {"guild_id_t.ml"}
+  "_build/install/default/lib/disml/guild_id_t.mli" {"guild_id_t.mli"}
   "_build/install/default/lib/disml/guild_t.ml" {"guild_t.ml"}
+  "_build/install/default/lib/disml/guild_t.mli" {"guild_t.mli"}
   "_build/install/default/lib/disml/http.ml" {"http.ml"}
   "_build/install/default/lib/disml/http.mli" {"http.mli"}
+  "_build/install/default/lib/disml/impl.ml" {"impl.ml"}
   "_build/install/default/lib/disml/member.ml" {"member.ml"}
   "_build/install/default/lib/disml/member.mli" {"member.mli"}
   "_build/install/default/lib/disml/member_t.ml" {"member_t.ml"}
+  "_build/install/default/lib/disml/member_t.mli" {"member_t.mli"}
   "_build/install/default/lib/disml/message.ml" {"message.ml"}
   "_build/install/default/lib/disml/message.mli" {"message.mli"}
+  "_build/install/default/lib/disml/message_id.ml" {"message_id.ml"}
+  "_build/install/default/lib/disml/message_id.mli" {"message_id.mli"}
   "_build/install/default/lib/disml/message_t.ml" {"message_t.ml"}
+  "_build/install/default/lib/disml/message_t.mli" {"message_t.mli"}
   "_build/install/default/lib/disml/opam" {"opam"}
   "_build/install/default/lib/disml/opcode.ml" {"opcode.ml"}
   "_build/install/default/lib/disml/opcode.mli" {"opcode.mli"}
   "_build/install/default/lib/disml/presence.ml" {"presence.ml"}
+  "_build/install/default/lib/disml/presence.mli" {"presence.mli"}
   "_build/install/default/lib/disml/reaction.ml" {"reaction.ml"}
   "_build/install/default/lib/disml/reaction.mli" {"reaction.mli"}
   "_build/install/default/lib/disml/reaction_t.ml" {"reaction_t.ml"}
+  "_build/install/default/lib/disml/reaction_t.mli" {"reaction_t.mli"}
   "_build/install/default/lib/disml/rl.ml" {"rl.ml"}
   "_build/install/default/lib/disml/rl.mli" {"rl.mli"}
   "_build/install/default/lib/disml/role.ml" {"role.ml"}
   "_build/install/default/lib/disml/role.mli" {"role.mli"}
+  "_build/install/default/lib/disml/role_id.ml" {"role_id.ml"}
+  "_build/install/default/lib/disml/role_id.mli" {"role_id.mli"}
   "_build/install/default/lib/disml/role_t.ml" {"role_t.ml"}
+  "_build/install/default/lib/disml/role_t.mli" {"role_t.mli"}
+  "_build/install/default/lib/disml/s.ml" {"s.ml"}
   "_build/install/default/lib/disml/sharder.ml" {"sharder.ml"}
   "_build/install/default/lib/disml/sharder.mli" {"sharder.mli"}
   "_build/install/default/lib/disml/snowflake.ml" {"snowflake.ml"}
+  "_build/install/default/lib/disml/snowflake.mli" {"snowflake.mli"}
   "_build/install/default/lib/disml/user.ml" {"user.ml"}
   "_build/install/default/lib/disml/user.mli" {"user.mli"}
+  "_build/install/default/lib/disml/user_id.ml" {"user_id.ml"}
+  "_build/install/default/lib/disml/user_id.mli" {"user_id.mli"}
+  "_build/install/default/lib/disml/user_id_t.ml" {"user_id_t.ml"}
+  "_build/install/default/lib/disml/user_id_t.mli" {"user_id_t.mli"}
   "_build/install/default/lib/disml/user_t.ml" {"user_t.ml"}
+  "_build/install/default/lib/disml/user_t.mli" {"user_t.mli"}
 ]
 doc: [
   "_build/install/default/doc/disml/LICENSE"

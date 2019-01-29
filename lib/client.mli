@@ -22,7 +22,7 @@ type t = {
             Scheduler.go_main ~main ()
     ]}
     @param ?count Optional amount of shards to launch. Defaults to autosharding.
-    @param ?compress Whether to use compression over the gateway. {b NOT CURRENTLY SUPPORTED. DO NOT SET TO TRUE. }
+    @param ?compress Whether to use compression over the gateway. }
     @param ?large Large threshold for guilds. Default is 250.
     @param string The token used for authentication.
     @return A deferred client object.

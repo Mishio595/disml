@@ -20,6 +20,7 @@ module Shard : sig
     (** Representation of the state of a shard. *)
     type shard = {
         hb_interval: Time.Span.t Ivar.t; (** Time span between heartbeats, wrapped in an Ivar. *)
+        hb_stopper: unit Ivar.t; (** Stops the heartbeat sequencer when filled. *)
         seq: int; (** Current sequence number *)
         session: string option; (** Session id, if one exists. *)
         pipe: Frame.t Pipe.Reader.t * Frame.t Pipe.Writer.t; (** Raw frame IO pipe used for websocket communications. *)

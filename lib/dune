@@ -20,7 +20,7 @@
 		event_models
 		client client_options disml dispatch endpoints event http impl opcode rl s sharder
 	)
-	(libraries checkseum.ocaml core async_ssl cohttp-async decompress logs yojson websocket-async ppx_deriving_yojson.runtime)
+	(libraries checkseum.c core async_ssl cohttp-async decompress logs yojson websocket-async ppx_deriving_yojson.runtime)
 	(preprocess (pps ppx_jane ppx_deriving_yojson))
 )
 

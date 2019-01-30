@@ -279,7 +279,7 @@ module Shard = struct
 
     let shutdown_clean shard =
         Logs.debug (fun m -> m "Performing clean shutdown. Shard [%d, %d]" (fst shard.id) (snd shard.id));
-        Pipe.write (snd shard.pipe) (Frame.create ~opcode:Frame.Opcode.Close ~final:true ())
+        Pipe.write_if_open (snd shard.pipe) (Frame.create ~opcode:Frame.Opcode.Close ~final:true ())
         >>= fun _ ->
         Ivar.fill shard.hb_stopper ();
         Writer.close (snd shard._internal)

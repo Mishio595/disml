@@ -8,6 +8,13 @@ before_script:
   - opam pin add ppx_deriving_yojson https://github.com/ocaml-ppx/ppx_deriving_yojson.git#82bc0b8
   - opam pin add -d disml .
 
+build:
+  stage: build
+  script:
+  - echo "Build successful"
+  only:
+  - master
+
 pages:
   stage: deploy
   script:

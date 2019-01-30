@@ -217,7 +217,7 @@ module MessageUpdate = struct
         editedimestamp: string option [@default None];
         tts: bool option [@default None];
         mention_everyone: bool option [@default None];
-        mentions: User_id.t list [@default []];
+        mentions: User_t.t list [@default []];
         role_mentions: Role_id.t list [@default []];
         attachments: Attachment.t list [@default []];
         embeds: Embed.t list [@default []];

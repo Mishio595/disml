@@ -3,39 +3,55 @@ open Core
 open Disml
 open Models
 
+(* Client object will be stored here after creation. *)
 let client = Ivar.create ()
 
+(* Define a function to handle message_create *)
 let check_command (Event.MessageCreate.{message}) =
+    (* Split content on space and return list head, list tail as tuple *)
     let cmd, rest = match String.split ~on:' ' message.content with
     | hd::tl -> hd, tl
     | [] -> "", []
+    (* Match against the command portion *)
     in match cmd with
     | "!ping" ->
-        Message.reply message "Pong!" >>= begin fun message ->
-        let message = match message with Ok m -> m | Error e -> Error.raise e in
-        let diff = Time.diff (Time.now ()) (Time.of_string message.timestamp) in
-        Message.set_content message (Printf.sprintf "Pong! `%d ms`" (Time.Span.to_ms diff |> Float.abs |> Float.to_int))
-        end >>> ignore
+        (* Reply with "Pong!" and bind to the response, new message is the created one *)
+        Message.reply message "Pong!" >>> begin function
+        | Ok message ->
+            (* Get the time difference between now and the timestamp of the reply *)
+            let diff = Time.diff (Time.now ()) (Time.of_string message.timestamp) in
+            (* Edit the reply to include the timestamp as rounded milliseconds. Ignore result *)
+            Message.set_content message (Printf.sprintf "Pong! `%d ms`" (Time.Span.to_ms diff |> Float.abs |> Float.to_int)) >>> ignore
+        | Error e -> Error.raise e
+        end
     | "!spam" ->
+        (* Convert first arg to an integer, defaulting to 0 *)
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
+        (* Generate a list, and send each element to discord as unique message, ignoring the results. Not recommended to use this, but I have it for ratelimit tests *)
         List.range 0 count
         |> List.iter ~f:(fun i -> Message.reply message (string_of_int i) >>> ignore)
     | "!list" ->
+        (* Convert first arg to an integer, defaulting to 0 *)
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
+        (* Generate a list and convert to an sexp string *)
         let list = List.range 0 count
         |> List.sexp_of_t Int.sexp_of_t
         |> Sexp.to_string_hum in
+        (* Send list as a message and bind the result, printing to console *)
         Message.reply message list >>> begin function
         | Ok msg -> print_endline msg.content
         | Error err -> print_endline (Error.to_string_hum err)
         end
     | "!fold" ->
+        (* Convert first arg to an integer, defaulting to 0 *)
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
+        (* Generate a list and sum the count before sending the result to discord. pretty useless lol *)
         let list = List.range 0 count
         |> List.fold ~init:0 ~f:(+)
         |> Int.to_string in
         Message.reply message list >>> ignore
     | "!embed" ->
+        (* Example of setting pretty much everything in an embed using the Embed module builders *)
         let image_url = "https://cdn.discordapp.com/avatars/345316276098433025/17ccdc992814cc6e21a9e7d743a30e37.png" in
         let embed = Embed.(default
             |> title "Foo"
@@ -56,38 +72,51 @@ let check_command (Event.MessageCreate.{message}) =
         ) in
         Message.reply_with ~embed message >>> ignore
     | "!status" ->
+        (* Concat all args into a string *)
         let status = List.fold ~init:"" ~f:(fun a v -> a ^ " " ^ v) rest in
+        (* Ensure the client is started by binding to the Ivar *)
         Ivar.read client >>> fun client ->
+        (* Set the status as a simple string *)
         Client.set_status ~status:(`String status) client
         >>> fun _ ->
+        (* Upon response, let the user know we updated the status *)
         Message.reply message "Updated status" >>> ignore
     | "!test" ->
-        let ch = `Channel_id 377716501446393856 in
-        Channel_id.say "Testing..." ch >>> ignore
+        (* Basic send message to channel ID, can use any ID as `Channel_id some_snowflake *)
+        Channel_id.say "Testing..." message.channel_id >>> ignore
     | "!echo" ->
+        (* Fetch a message by ID in the current channel, or default to message ID *)
         let `Message_id id = message.id in
         let id = Option.((List.hd rest >>| Int.of_string) |> value ~default:id) in
         Channel_id.get_message ~id message.channel_id >>> begin function
+        (* If successful, convert to sexp and send to discord *)
         | Ok msg -> Message.reply message (Printf.sprintf "```lisp\n%s```" (Message.sexp_of_t msg |> Sexp.to_string_hum)) >>> ignore
         | _ -> ()
         end
     | _ -> ()
 
+(* Example logs setup *)
 let setup_logger () =
     Logs.set_reporter (Logs_fmt.reporter ());
     Logs.set_level ~all:true (Some Logs.Debug)
 
 let main () =
+    (* Call the logger setup *)
     setup_logger ();
+    (* Set some event handlers *)
     Client.message_create := check_command;
-    Client.ready := (fun _ -> Logs.info (fun m -> m "Logged in"));
+    Client.ready := (fun _ -> Logs.info (fun m -> m "Ready!"));
+    (* Pull token from env var *)
     let token = match Sys.getenv "DISCORD_TOKEN" with
     | Some t -> t
     | None -> failwith "No token in env"
     in
+    (* Start client with no special options *)
     Client.start token
     >>> fun c ->
+    (* Fill that ivar once its done *)
     Ivar.fill client c
 
+(* Lastly, we have to register this to the Async Scheduler for anything to work *)
 let _ =
     Scheduler.go_main ~main ()

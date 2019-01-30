@@ -18,3 +18,5 @@ pages:
     - public
   only:
   - master
+  except:
+  - merge_requests

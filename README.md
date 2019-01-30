@@ -23,11 +23,22 @@ Latest changes are on master
 ## Getting started
 In order to get started you'll first need to install OCaml (of course). I recommend using OPAM and Dune as a package manager and build tool respectively.
 
-The project is not currently uploaded to opam. This will happen with the first stable release. If you do not use opam, see `disml.opam` for build instructions.
+The project is not currently uploaded to opam, but you can still install via opam by pinning to this repo.
+
+```
+opam pin add disml https://gitlab.com/Mishio595/disml.git
+```
+
+If you do not use opam, see `disml.opam` for build instructions.
 
 You'll find an example bot in /bin directory.
 
-### Barebones example
+### Examples
+
+##### Robust example
+`/bin/bot.ml`
+
+##### Basic example
 
 ```ocaml
 open Async

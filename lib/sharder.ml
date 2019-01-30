@@ -178,7 +178,7 @@ module Shard = struct
         | DISPATCH -> dispatch ~payload:f shard
         | HEARTBEAT -> heartbeat shard
         | INVALID_SESSION -> begin
-            Logs.err (fun m -> m "Received OP 9 on Shard [%d, %d]: %s" (fst shard.id) (snd shard.id) (Yojson.Safe.pretty_to_string f));
+            Logs.err (fun m -> m "Invalid Session on Shard [%d, %d]: %s" (fst shard.id) (snd shard.id) (Yojson.Safe.pretty_to_string f));
             if J.(member "d" f |> to_bool) then
                 initialize shard
             else begin
@@ -278,14 +278,15 @@ module Shard = struct
             Conduit_async.V2.connect addr >>= tcp_fun
 
     let shutdown_clean shard =
-        let (_,w) = shard._internal in
-        Pipe.write (snd shard.pipe) (Frame.create ~opcode:(Frame.Opcode.Close) ~final:true ())
+        Logs.debug (fun m -> m "Performing clean shutdown. Shard [%d, %d]" (fst shard.id) (snd shard.id));
+        Pipe.write (snd shard.pipe) (Frame.create ~opcode:Frame.Opcode.Close ~final:true ())
         >>= fun _ ->
         Ivar.fill shard.hb_stopper ();
-        Writer.close w
+        Writer.close (snd shard._internal)
 
     let recreate shard =
         shutdown_clean shard >>= fun () ->
+        Logs.debug (fun m -> m "Relaunching shard [%d, %d]" (fst shard.id) (snd shard.id));
         create ~url:(shard.url) ~shards:(shard.id) ()
 end
 
@@ -316,12 +317,14 @@ let start ?count ?compress () =
             >>| fun s -> t.state <- s; t
         end
         | None -> begin
+            Logs.warn (fun m -> m "Websocket unexpectedly closed. Restarting...");
             Shard.recreate t.state
             >>| fun s -> t.state <- s; t
         end)
         >>= fun t ->
         ev_loop t
     in
+    Logs.info (fun m -> m "Connecting to %s" url);
     let rec gen_shards l a =
         match l with
         | (id, total) when id >= total -> return a
@@ -334,11 +337,14 @@ let start ?count ?compress () =
                 ~stop:(Ivar.read t.state.hb_stopper)
                 ~continue_on_error:true
                 hb (fun () -> Shard.heartbeat t.state >>| ignore) in
-            ev_loop t >>> ignore;
+            ev_loop t >>> (fun _ -> Logs.err (fun m -> m "Event loop unexpectedly exited."));
             gen_shards (id+1, total) (t :: a)
     in
     gen_shards shard_list []
     >>| fun shards ->
+    (Http.get_current_user () >>> function
+    | Ok user -> Logs.info (fun m -> m "Logged in as %s" (User.tag user))
+    | _ -> ());
     { shards; }
 
 let set_status ~status sharder =

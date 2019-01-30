@@ -85,7 +85,7 @@ let main () =
     | Some t -> t
     | None -> failwith "No token in env"
     in
-    Client.start ~compress:true token
+    Client.start token
     >>> fun c ->
     Ivar.fill client c
 

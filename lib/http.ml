@@ -33,9 +33,11 @@ module Base = struct
         | None -> return ())
         >>= fun () ->
         match resp |> Response.status |> Code.code_of_status with
-        | 200 -> body |> Cohttp_async.Body.to_string >>| Yojson.Safe.from_string >>= Deferred.Or_error.return
+        | code when Code.is_success code -> body |> Cohttp_async.Body.to_string >>| Yojson.Safe.from_string >>= Deferred.Or_error.return
         | code ->
             body |> Cohttp_async.Body.to_string >>= fun body ->
+            let headers = Response.sexp_of_t resp |> Sexp.to_string_hum in
+            Logs.warn (fun m -> m "[Unsuccessful Response] [Code: %d]\n%s\n%s" code body headers);
             Deferred.Or_error.errorf "Unsuccessful response received: %d - %s" code body
 
     let request ?(body=`Null) ?(query=[]) m path =

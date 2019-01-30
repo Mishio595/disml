@@ -279,6 +279,8 @@ module Shard = struct
 
     let shutdown_clean shard =
         let (_,w) = shard._internal in
+        Pipe.write (snd shard.pipe) (Frame.create ~opcode:(Frame.Opcode.Close) ~final:true ())
+        >>= fun _ ->
         Ivar.fill shard.hb_stopper ();
         Writer.close w
 

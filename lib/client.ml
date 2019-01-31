@@ -1,5 +1,4 @@
 open Async
-include Client_options
 include Dispatch
 
 type t = {

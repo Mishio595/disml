@@ -1,6 +1,5 @@
 open Async
 
-include module type of Client_options
 include module type of Dispatch
 
 (** Type of the Client, it isn't recommended to access the fields directly. *)

@@ -221,7 +221,7 @@ module MessageUpdate = struct
         role_mentions: Role_id.t list [@default []];
         attachments: Attachment.t list [@default []];
         embeds: Embed.t list [@default []];
-        reactions: Snowflake.t list [@default []];
+        reactions: Reaction_t.t list [@default []];
         nonce: Snowflake.t option [@default None];
         pinned: bool option [@default None];
         webhook_id: Snowflake.t option [@default None];

@@ -14,7 +14,7 @@ type t = {
     mention_roles: Role_id.t list; (** A list of roles that were mentioned in the message. *)
     attachments: Attachment.t list; (** A list of attachments. *)
     embeds: Embed.t list; (** A List of embeds on the message. *)
-    reactions: Snowflake.t list; (** A list of reactions. *)
+    reactions: Reaction_t.t list; (** A list of reactions. *)
     nonce: Snowflake.t option; (** Used in verification, safe to ignore. *)
     pinned: bool; (** Whether the message is pinned. *)
     webhook_id: Snowflake.t option; (** The webhook ID, if the message was sent by a webhook. *)

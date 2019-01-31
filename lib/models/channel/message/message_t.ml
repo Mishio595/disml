@@ -15,7 +15,7 @@ type t = {
     mention_roles: Role_id.t list [@default []];
     attachments: Attachment.t list [@default []];
     embeds: Embed.t list [@default []];
-    reactions: Snowflake.t list [@default []];
+    reactions: Reaction_t.t list [@default []];
     nonce: Snowflake.t option [@default None];
     pinned: bool;
     webhook_id: Snowflake.t option [@default None];

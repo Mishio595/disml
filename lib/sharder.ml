@@ -282,7 +282,7 @@ module Shard = struct
         Pipe.write_if_open (snd shard.pipe) (Frame.create ~opcode:Frame.Opcode.Close ~final:true ())
         >>= fun _ ->
         Ivar.fill shard.hb_stopper ();
-        Writer.close (snd shard._internal)
+        Writer.close ~force_close:(Deferred.never ()) (snd shard._internal)
 
     let recreate shard =
         shutdown_clean shard >>= fun () ->

@@ -4,7 +4,7 @@ type partial_member = {
     joined_at: string;
     deaf: bool;
     mute: bool;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 type member = {
     nick: string option;
@@ -13,19 +13,19 @@ type member = {
     deaf: bool;
     mute: bool;
     user: User_t.t;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 type member_wrapper = {
     guild_id: Guild_id_t.t;
     user: User_t.t;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 type member_update = {
     guild_id: Guild_id_t.t;
     roles: Role_id.t list;
     user: User_t.t;
     nick: string option;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** A member object. *)
 type t = {
@@ -36,6 +36,6 @@ type t = {
     mute: bool; (** Whether the user is muted. *)
     user: User_t.t; (** The underlying user object for the member. *)
     guild_id: Guild_id_t.t; (** The guild ID in which the member exists. *)
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 val wrap : guild_id:Snowflake.t -> member -> t

@@ -4,38 +4,38 @@ type footer = {
     text: string;
     icon_url: string option [@default None];
     proxy_icon_url: string option [@default None];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 type image = {
     url: string option [@default None];
     proxy_url: string option [@default None];
     height: int option [@default None];
     width: int option [@default None];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 type video = {
     url: string option [@default None];
     height: int option [@default None];
     width: int option [@default None];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 type provider = {
     name: string option [@default None];
     url: string option [@default None];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 type author = {
     name: string option [@default None];
     url: string option [@default None];
     icon_url: string option [@default None];
     proxy_icon_url: string option [@default None];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 type field = {
     name: string;
     value: string;
     inline: bool [@default false];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 type t = {
     title: string option [@default None];
@@ -51,7 +51,7 @@ type t = {
     provider: provider option [@default None];
     author: author option [@default None];
     fields: field list [@default []];
-} [@@deriving sexp, yojson { strict = false }]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 let default = {
     title = None;

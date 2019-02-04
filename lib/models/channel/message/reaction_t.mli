@@ -5,10 +5,10 @@ type reaction_event = {
     message_id: Message_id.t;
     guild_id: Guild_id_t.t option;
     emoji: Emoji.partial_emoji;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** Represents a number of emojis used as a reaction on a message. *)
 type t = {
     count: int;
     emoji: Emoji.t;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]

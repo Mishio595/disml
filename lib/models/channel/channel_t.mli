@@ -9,14 +9,14 @@ type group = {
     name: string option;
     owner_id: User_id_t.t;
     recipients: User_t.t list;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** Represents a private channel with a single user. *)
 type dm = {
     id: Channel_id_t.t;
     last_message_id: Message_id.t option;
     last_pin_timestamp: string option;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** Represents a text channel in a guild. *)
 type guild_text = {
@@ -30,7 +30,7 @@ type guild_text = {
     topic: string option;
     nsfw: bool;
     slow_mode_timeout: int option;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** Represents a voice channel in a guild. *)
 type guild_voice = {
@@ -41,7 +41,7 @@ type guild_voice = {
     position: int;
     user_limit: int;
     bitrate: int option;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** Represents a guild category. *)
 type category = {
@@ -49,7 +49,7 @@ type category = {
     guild_id: Guild_id_t.t option;
     position: int;
     name: string;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** Wrapper variant for all channel types. *)
 type t =
@@ -58,7 +58,7 @@ type t =
 | GuildText of guild_text
 | GuildVoice of guild_voice
 | Category of category
-[@@deriving sexp, yojson]
+[@@deriving sexp, yojson { exn = true }]
 
 (** Intermediate used internally. *)
 type channel_wrapper = {
@@ -79,7 +79,7 @@ type channel_wrapper = {
     application_id: Snowflake.t option;
     category_id: Channel_id_t.t option;
     last_pin_timestamp: string option;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 val unwrap_as_guild_text : channel_wrapper -> guild_text
 

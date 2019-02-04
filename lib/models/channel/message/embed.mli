@@ -3,7 +3,7 @@ type footer = {
     text: string;
     icon_url: string option;
     proxy_icon_url: string option;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** An image object belonging to an embed. *)
 type image = {
@@ -11,20 +11,20 @@ type image = {
     proxy_url: string option;
     height: int option;
     width: int option;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** A video object belonging to an embed. *)
 type video = {
     url: string option;
     height: int option;
     width: int option;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** A provider object belonging to an embed. *)
 type provider = {
     name: string option;
     url: string option;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** An author object belonging to an embed. *)
 type author = {
@@ -32,14 +32,14 @@ type author = {
     url: string option;
     icon_url: string option;
     proxy_icon_url: string option;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** A field object belonging to an embed. *)
 type field = {
     name: string;
     value: string;
     inline: bool;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** An embed object. See this {{:https://leovoel.github.io/embed-visualizer/}embed visualiser} if you need help understanding each component. *)
 type t = {
@@ -56,7 +56,7 @@ type t = {
     provider: provider option;
     author: author option;
     fields: field list [@default []];
-} [@@deriving sexp, yojson { strict = false }]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 (** An embed where all values are empty. *)
 val default : t

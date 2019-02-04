@@ -10,13 +10,13 @@ type group = {
     name: string option [@default None];
     owner_id: User_id_t.t;
     recipients: User_t.t list [@default []];
-} [@@deriving sexp, yojson { strict = false}]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type dm = {
     id: Channel_id_t.t;
     last_message_id: Message_id.t option [@default None];
     last_pin_timestamp: string option [@default None];
-} [@@deriving sexp, yojson { strict = false}]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type guild_text = {
     id: Channel_id_t.t;
@@ -29,7 +29,7 @@ type guild_text = {
     topic: string option [@default None];
     nsfw: bool;
     slow_mode_timeout: int option [@default None];
-} [@@deriving sexp, yojson { strict = false}]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type guild_voice = {
     id: Channel_id_t.t;
@@ -39,14 +39,14 @@ type guild_voice = {
     position: int;
     user_limit: int [@default -1];
     bitrate: int option [@default None];
-} [@@deriving sexp, yojson { strict = false}]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type category = {
     id: Channel_id_t.t;
     guild_id: Guild_id_t.t option [@default None];
     position: int;
     name: string;
-} [@@deriving sexp, yojson { strict = false}]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type t =
 | Group of group
@@ -54,7 +54,7 @@ type t =
 | GuildText of guild_text
 | GuildVoice of guild_voice
 | Category of category
-[@@deriving sexp, yojson { strict = false}]
+[@@deriving sexp, yojson { strict = false; exn = true }]
 
 type channel_wrapper = {
     id: Channel_id_t.t;
@@ -74,7 +74,7 @@ type channel_wrapper = {
     application_id: Snowflake.t option [@default None];
     category_id: Channel_id_t.t option [@default None][@key "parent_id"];
     last_pin_timestamp: string option [@default None];
-} [@@deriving sexp, yojson { strict = false}]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 let unwrap_as_guild_text {id;guild_id;position;name;topic;nsfw;last_message_id;slow_mode_timeout;category_id;last_pin_timestamp;_} =
     let position = Option.value_exn position in

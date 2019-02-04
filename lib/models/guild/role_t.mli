@@ -8,7 +8,7 @@ type role = {
     permissions: int;
     managed: bool;
     mentionable: bool;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** A role object. *)
 type t = {
@@ -21,7 +21,7 @@ type t = {
     managed: bool; (** Whether the guild is managed by an integration. *)
     mentionable: bool; (** Whether the role can be mentioned. *)
     guild_id: Guild_id_t.t; (** The guild ID this role belongs to. *)
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** Convenience method to produce {!t} from {!role} and a snowflake. *)
 val wrap : guild_id:Snowflake.t -> role -> t

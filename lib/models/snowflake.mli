@@ -1,6 +1,6 @@
 open Core
 
-type t = Int.t [@@deriving sexp, yojson]
+type t = Int.t [@@deriving sexp, yojson { exn = true }]
 
 (** Convert a snowflake into a {!Core.Time.t} *)
 val time_of_t : t -> Time.t

@@ -5,13 +5,12 @@ before_script:
   - opam init
   - eval `opam config env`
   - opam update
-  - opam pin add ppx_deriving_yojson https://github.com/ocaml-ppx/ppx_deriving_yojson.git#82bc0b8
-  - opam pin add -d disml .
+  - opam pin add disml .
 
 build:
   stage: build
   script:
-  - echo "Build successful"
+  - opam pin add odoc --dev-repo
   only:
   - master
 

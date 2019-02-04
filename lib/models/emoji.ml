@@ -3,7 +3,7 @@ open Core
 type partial_emoji = {
     id: Snowflake.t option [@default None];
     name: string;
-} [@@deriving sexp, yojson { strict = false }]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type t = {
     id: Snowflake.t option [@default None];
@@ -13,4 +13,4 @@ type t = {
     require_colons: bool [@default false];
     managed: bool [@default false];
     animated: bool [@default false];
-} [@@deriving sexp, yojson { strict = false}]
+} [@@deriving sexp, yojson { strict = false; exn = true }]

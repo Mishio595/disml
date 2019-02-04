@@ -19,4 +19,4 @@ type t = {
     pinned: bool; (** Whether the message is pinned. *)
     webhook_id: Snowflake.t option; (** The webhook ID, if the message was sent by a webhook. *)
     kind: int; (** See {{:https://discordapp.com/developers/docs/resources/channel#message-object-message-types}the discord docs} for message type enumeration. *)
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]

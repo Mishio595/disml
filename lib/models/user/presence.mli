@@ -6,4 +6,4 @@ type t = {
     guild_id: Guild_id_t.t; (** The guild ID in which this presence exists. *)
     status: string; (** One of [online], [idle], [offline], or [dnd]. *)
     activities: Activity.t list; (** A list of all of the user's current activities. *)
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]

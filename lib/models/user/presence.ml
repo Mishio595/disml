@@ -7,4 +7,4 @@ type t = {
     guild_id: Guild_id_t.t;
     status: string;
     activities: Activity.t list;
-} [@@deriving sexp, yojson { strict = false}]
+} [@@deriving sexp, yojson { strict = false; exn = true }]

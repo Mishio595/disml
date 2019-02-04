@@ -2,7 +2,7 @@
 type partial_emoji = {
     id: Snowflake.t option;
     name: string;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]
 
 (** A full emoji object. *)
 type t = {
@@ -13,4 +13,4 @@ type t = {
     require_colons: bool; (** Whether the emoji must be wrapped in colons. Is false for unicode emojis. *)
     managed: bool; (** Whether the emoji is managed by an integration. *)
     animated: bool; (** Whether the emoji is animated. *)
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]

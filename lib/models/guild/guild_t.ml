@@ -2,7 +2,7 @@ open Core
 
 type unavailable = {
     id: Guild_id_t.t;
-} [@@deriving sexp, yojson { strict = false }]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type pre = {
     id: Guild_id_t.t;
@@ -31,7 +31,7 @@ type pre = {
     member_count: int option [@default None];
     members: Member_t.member list;
     channels: Channel_t.channel_wrapper list;
-} [@@deriving sexp, yojson { strict = false }]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type t = {
     id: Guild_id_t.t;
@@ -60,7 +60,7 @@ type t = {
     member_count: int option [@default None];
     members: Member_t.t list;
     channels: Channel_t.t list;
-} [@@deriving sexp, yojson { strict = false }]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 let wrap ({id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel_id;system_channel_id;large;unavailable;member_count;members;channels}:pre) =
     let `Guild_id id = id in

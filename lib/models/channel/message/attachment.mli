@@ -6,4 +6,4 @@ type t = {
     proxy_url: string;
     height: int;
     width: int;
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { exn = true }]

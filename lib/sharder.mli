@@ -44,7 +44,7 @@ module Shard : sig
 
     (** Set the status of the shard. *)
     val set_status :
-        status:Yojson.Safe.json ->
+        status:Yojson.Safe.t ->
         shard ->
         shard Deferred.t
 
@@ -69,13 +69,13 @@ end
 
 (** Calls {!Shard.set_status} for each shard registered with the sharder. *)
 val set_status :
-    status:Yojson.Safe.json ->
+    status:Yojson.Safe.t ->
     t ->
     Shard.shard list Deferred.t
 
-(** Like {!set_status} but takes a function with a {{!Shard.shard}shard} as its parameter and {{!Yojson.Safe.json}json} for its return. *)
+(** Like {!set_status} but takes a function with a {{!Shard.shard}shard} as its parameter and {{!Yojson.Safe.t}json} for its return. *)
 val set_status_with :
-    f:(Shard.shard -> Yojson.Safe.json) ->
+    f:(Shard.shard -> Yojson.Safe.t) ->
     t ->
     Shard.shard list Deferred.t
 

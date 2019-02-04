@@ -22,6 +22,7 @@
 	)
 	(libraries checkseum.ocaml core async_ssl cohttp-async decompress logs yojson websocket-async ppx_deriving_yojson.runtime)
 	(preprocess (pps ppx_sexp_conv ppx_deriving_yojson))
+	(flags (:standard -w -D)) ; Temporary solution for Yojson `json` type deprecation. Remove when ppx_deriving_yojson updates
 )
 
 (include_subdirs unqualified)

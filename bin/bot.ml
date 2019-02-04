@@ -113,7 +113,7 @@ let main () =
     | None -> failwith "No token in env"
     in
     (* Start client with no special options *)
-    Client.start token
+    Client.start ~large:250 ~compress:true token
     (* Fill that ivar once its done *)
     >>> Ivar.fill client
 

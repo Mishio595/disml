@@ -35,6 +35,7 @@ module Shard = struct
         id: int * int;
         hb_interval: Time.Span.t Ivar.t;
         hb_stopper: unit Ivar.t;
+        large_threshold: int;
         pipe: Frame.t Pipe.Reader.t * Frame.t Pipe.Writer.t;
         ready: unit Ivar.t;
         seq: int;
@@ -157,7 +158,7 @@ module Shard = struct
                     "$browser", `String "dis.ml";
                 ];
                 "compress", `Bool shard.compress;
-                "large_threshold", `Int !Client_options.large_threshold;
+                "large_threshold", `Int shard.large_threshold;
                 "shard", `List shards;
             ] in
             push_frame ~payload ~ev:IDENTIFY shard
@@ -224,7 +225,7 @@ module Shard = struct
                         uri)
 
 
-    let create ~url ~shards ?(compress=true) () =
+    let create ~url ~shards ?(compress=true) ?(large_threshold=100) () =
         let open Core in
         let uri = (url ^ "?v=6&encoding=json") |> Uri.of_string in
         let extra_headers = Http.Base.process_request_headers () in
@@ -257,6 +258,7 @@ module Shard = struct
                 id = shards;
                 session = None;
                 url;
+                large_threshold;
                 compress;
                 _internal = (net_to_ws, ws_to_net);
             }
@@ -294,7 +296,7 @@ type t = {
     shards: (Shard.shard Shard.t) list;
 }
 
-let start ?count ?compress () =
+let start ?count ?compress ?large_threshold () =
     let module J = Yojson.Safe.Util in
     Http.get_gateway_bot () >>= fun data ->
     let data = match data with
@@ -329,7 +331,7 @@ let start ?count ?compress () =
         match l with
         | (id, total) when id >= total -> return a
         | (id, total) ->
-            Shard.create ~url ~shards:(id, total) ?compress ()
+            Shard.create ~url ~shards:(id, total) ?compress ?large_threshold ()
             >>= fun shard ->
             let t = Shard.{ state = shard; } in
             let _ = Ivar.read t.state.hb_interval >>> fun hb ->

@@ -13,6 +13,7 @@ type t
 val start :
     ?count:int ->
     ?compress:bool ->
+    ?large_threshold:int ->
     unit ->
     t Deferred.t
 
@@ -24,6 +25,7 @@ module Shard : sig
         id: int * int; (** A tuple as expected by Discord. First element is the current shard index, second element is the total shard count. *)
         hb_interval: Time.Span.t Ivar.t; (** Time span between heartbeats, wrapped in an Ivar. *)
         hb_stopper: unit Ivar.t; (** Stops the heartbeat sequencer when filled. *)
+        large_threshold: int; (** Minimum number of members needed for a guild to be considered large. *)
         pipe: Frame.t Pipe.Reader.t * Frame.t Pipe.Writer.t; (** Raw frame IO pipe used for websocket communications. *)
         ready: unit Ivar.t; (** A simple Ivar indicating if the shard has received READY. *)
         seq: int; (** Current sequence number *)
@@ -61,6 +63,7 @@ module Shard : sig
         url:string ->
         shards:int * int ->
         ?compress:bool ->
+        ?large_threshold:int ->
         unit ->
         shard Deferred.t
 

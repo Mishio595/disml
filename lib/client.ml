@@ -7,8 +7,7 @@ type t = {
 
 let start ?count ?compress ?(large=250) token =
     Client_options.token := token;
-    Client_options.large_threshold := large;
-    Sharder.start ?count ?compress ()
+    Sharder.start ?count ?compress ~large_threshold:large ()
     >>| fun sharder ->
     { sharder; }
 

@@ -10,13 +10,14 @@ before_script:
 build:
   stage: build
   script:
-  - opam pin add odoc --dev-repo
+  - echo "Build successful"
   only:
   - master
 
 pages:
   stage: deploy
   script:
+  - opam pin add odoc --dev-repo
   - dune build @doc
   - cp -r _build/default/_doc/_html/ public/
   artifacts:

@@ -8,6 +8,36 @@ module ChannelCreate = struct
     let deserialize ev =
         let channel = Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap) in
         { channel; }
+
+    let update_cache (cache:Cache.t) t =
+        let open Channel_t in
+        let module C = Cache.ChannelMap in
+        match t.channel with
+        | GuildText c ->
+            let update = C.update cache.text_channels c.id ~f:(function
+            | Some _ -> c
+            | None -> c) in
+            Cache.cache := { cache with text_channels = update }
+        | GuildVoice c ->
+            let update = C.update cache.voice_channels c.id ~f:(function
+            | Some _ -> c
+            | None -> c) in
+            Cache.cache := { cache with voice_channels = update }
+        | Category c ->
+            let update = C.update cache.categories c.id ~f:(function
+            | Some _ -> c
+            | None -> c) in
+            Cache.cache := { cache with categories = update }
+        | Group c ->
+            let update = C.update cache.groups c.id ~f:(function
+            | Some _ -> c
+            | None -> c) in
+            Cache.cache := { cache with groups = update }
+        | Private c ->
+            let update = C.update cache.private_channels c.id ~f:(function
+            | Some _ -> c
+            | None -> c) in
+            Cache.cache := { cache with private_channels = update }
 end
 
 module ChannelDelete = struct
@@ -18,6 +48,26 @@ module ChannelDelete = struct
     let deserialize ev =
         let channel = Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap) in
         { channel; }
+
+    let update_cache (cache:Cache.t) t =
+        let open Channel_t in
+        let module C = Cache.ChannelMap in
+        match t.channel with
+        | GuildText c ->
+            let update = C.remove cache.text_channels c.id in
+            Cache.cache := { cache with text_channels = update }
+        | GuildVoice c ->
+            let update = C.remove cache.voice_channels c.id in
+            Cache.cache := { cache with voice_channels = update }
+        | Category c ->
+            let update = C.remove cache.categories c.id in
+            Cache.cache := { cache with categories = update }
+        | Group c ->
+            let update = C.remove cache.groups c.id in
+            Cache.cache := { cache with groups = update }
+        | Private c ->
+            let update = C.remove cache.private_channels c.id in
+            Cache.cache := { cache with private_channels = update }
 end
 
 module ChannelUpdate = struct
@@ -28,6 +78,8 @@ module ChannelUpdate = struct
     let deserialize ev =
         let channel = Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap) in
         { channel; }
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module ChannelPinsUpdate = struct
@@ -37,6 +89,8 @@ module ChannelPinsUpdate = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module ChannelRecipientAdd = struct
@@ -46,6 +100,8 @@ module ChannelRecipientAdd = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module ChannelRecipientRemove = struct
@@ -55,6 +111,8 @@ module ChannelRecipientRemove = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildBanAdd = struct
@@ -64,6 +122,8 @@ module GuildBanAdd = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildBanRemove = struct
@@ -73,6 +133,8 @@ module GuildBanRemove = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildCreate = struct
@@ -83,6 +145,8 @@ module GuildCreate = struct
     let deserialize ev =
         let guild = Guild_t.(pre_of_yojson_exn ev |> wrap) in
         { guild; }
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildDelete = struct
@@ -91,6 +155,8 @@ module GuildDelete = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildUpdate = struct
@@ -101,6 +167,8 @@ module GuildUpdate = struct
     let deserialize ev =
         let guild = Guild_t.(pre_of_yojson_exn ev |> wrap) in
         { guild; }
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildEmojisUpdate = struct
@@ -110,6 +178,8 @@ module GuildEmojisUpdate = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 (* TODO guild integrations *)
@@ -118,6 +188,8 @@ module GuildMemberAdd = struct
     include Member_t
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildMemberRemove = struct
@@ -127,6 +199,8 @@ module GuildMemberRemove = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildMemberUpdate = struct
@@ -138,6 +212,8 @@ module GuildMemberUpdate = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildMembersChunk = struct
@@ -147,6 +223,8 @@ module GuildMembersChunk = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildRoleCreate = struct
@@ -156,6 +234,8 @@ module GuildRoleCreate = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildRoleDelete = struct
@@ -165,6 +245,8 @@ module GuildRoleDelete = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module GuildRoleUpdate = struct
@@ -174,6 +256,8 @@ module GuildRoleUpdate = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 (* TODO figure out if this is necessary *)
@@ -183,6 +267,8 @@ module GuildUnavailable = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module MessageCreate = struct
@@ -193,6 +279,8 @@ module MessageCreate = struct
     let deserialize ev =
         let message = Message_t.of_yojson_exn ev in
         { message; }
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module MessageDelete = struct
@@ -203,6 +291,8 @@ module MessageDelete = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module MessageUpdate = struct
@@ -229,6 +319,8 @@ module MessageUpdate = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module MessageDeleteBulk = struct
@@ -239,12 +331,16 @@ module MessageDeleteBulk = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module PresenceUpdate = struct
     include Presence
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 (* module PresencesReplace = struct
@@ -263,6 +359,8 @@ module ReactionAdd = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module ReactionRemove = struct
@@ -275,6 +373,8 @@ module ReactionRemove = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module ReactionRemoveAll = struct
@@ -285,6 +385,8 @@ module ReactionRemoveAll = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module Ready = struct
@@ -297,6 +399,8 @@ module Ready = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module Resumed = struct
@@ -305,6 +409,8 @@ module Resumed = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module TypingStart = struct
@@ -316,6 +422,8 @@ module TypingStart = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module UserUpdate = struct
@@ -326,6 +434,8 @@ module UserUpdate = struct
     let deserialize ev =
         let user = User_t.of_yojson_exn ev in
         { user; }
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module WebhookUpdate = struct
@@ -335,6 +445,8 @@ module WebhookUpdate = struct
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
+
+    let update_cache (cache:Cache.t) t = ()
 end
 
 module Unknown = struct

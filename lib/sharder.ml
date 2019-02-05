@@ -74,7 +74,7 @@ module Shard = struct
             ]
         in
         let (_, write) = shard.pipe in
-        Pipe.write write @@ Frame.create ~content ()
+        Pipe.write_if_open write @@ Frame.create ~content ()
         >>| fun () ->
         shard
 
@@ -279,17 +279,19 @@ module Shard = struct
             in
             Conduit_async.V2.connect addr >>= tcp_fun
 
-    let shutdown_clean shard =
-        Logs.debug (fun m -> m "Performing clean shutdown. Shard [%d, %d]" (fst shard.id) (snd shard.id));
-        Pipe.write_if_open (snd shard.pipe) (Frame.create ~opcode:Frame.Opcode.Close ~final:true ())
-        >>= fun _ ->
-        Ivar.fill shard.hb_stopper ();
-        Writer.close ~force_close:(Deferred.never ()) (snd shard._internal)
+    let shutdown ?(clean=false) ?(restart=true) t =
+        let _ = clean, restart in
+        Logs.debug (fun m -> m "Performing shutdown. Shard [%d, %d]" (fst t.state.id) (snd t.state.id));
+        Pipe.write_if_open (snd t.state.pipe) (Frame.close 1001)
+        >>= fun () ->
+        Ivar.fill_if_empty t.state.hb_stopper ();
+        Pipe.close (snd t.state.pipe);
+        Writer.close (snd t.state._internal)
 
-    let recreate shard =
-        shutdown_clean shard >>= fun () ->
-        Logs.debug (fun m -> m "Relaunching shard [%d, %d]" (fst shard.id) (snd shard.id));
-        create ~url:(shard.url) ~shards:(shard.id) ()
+    let recreate t =
+        shutdown t >>= fun () ->
+        Logs.debug (fun m -> m "Relaunching shard [%d, %d]" (fst t.state.id) (snd t.state.id));
+        create ~url:(t.state.url) ~shards:(t.state.id) ()
 end
 
 type t = {
@@ -320,7 +322,7 @@ let start ?count ?compress ?large_threshold () =
         end
         | None -> begin
             Logs.warn (fun m -> m "Websocket unexpectedly closed. Restarting...");
-            Shard.recreate t.state
+            Shard.recreate t
             >>| fun s -> t.state <- s; t
         end)
         >>= fun t ->
@@ -333,7 +335,7 @@ let start ?count ?compress ?large_threshold () =
         | (id, total) ->
             Shard.create ~url ~shards:(id, total) ?compress ?large_threshold ()
             >>= fun shard ->
-            let t = Shard.{ state = shard; } in
+            let t = Shard.{ state = shard } in
             let _ = Ivar.read t.state.hb_interval >>> fun hb ->
                 Clock.every'
                 ~stop:(Ivar.read t.state.hb_stopper)
@@ -364,7 +366,7 @@ let request_guild_members ?query ?limit ~guild sharder =
         Shard.request_guild_members ~guild ?query ?limit t.state
     ) sharder.shards
 
-let shutdown_all sharder =
+let shutdown_all ?restart sharder =
     Deferred.all @@ List.map ~f:(fun t ->
-        Shard.shutdown_clean t.state
+        Shard.shutdown ~clean:true ?restart t
     ) sharder.shards

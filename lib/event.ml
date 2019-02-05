@@ -74,99 +74,39 @@ let event_of_yojson ~contents = function
     | s -> UNKNOWN Unknown.(deserialize s contents)
 
 let dispatch = function
-    | READY d ->
-        Ready.update_cache !Cache.cache d;
-        !Dispatch.ready d
-    | RESUMED d ->
-        Resumed.update_cache !Cache.cache d;
-        !Dispatch.resumed d
-    | CHANNEL_CREATE d ->
-        ChannelCreate.update_cache !Cache.cache d;
-        !Dispatch.channel_create d
-    | CHANNEL_UPDATE d ->
-        ChannelUpdate.update_cache !Cache.cache d;
-        !Dispatch.channel_update d
-    | CHANNEL_DELETE d ->
-        ChannelDelete.update_cache !Cache.cache d;
-        !Dispatch.channel_delete d
-    | CHANNEL_PINS_UPDATE d ->
-        ChannelPinsUpdate.update_cache !Cache.cache d;
-        !Dispatch.channel_pins_update d
-    | GUILD_CREATE d ->
-        GuildCreate.update_cache !Cache.cache d;
-        !Dispatch.guild_create d
-    | GUILD_UPDATE d ->
-        GuildUpdate.update_cache !Cache.cache d;
-        !Dispatch.guild_update d
-    | GUILD_DELETE d ->
-        GuildDelete.update_cache !Cache.cache d;
-        !Dispatch.guild_delete d
-    | GUILD_BAN_ADD d ->
-        GuildBanAdd.update_cache !Cache.cache d;
-        !Dispatch.member_ban d
-    | GUILD_BAN_REMOVE d ->
-        GuildBanRemove.update_cache !Cache.cache d;
-        !Dispatch.member_unban d
-    | GUILD_EMOJIS_UPDATE d ->
-        GuildEmojisUpdate.update_cache !Cache.cache d;
-        !Dispatch.guild_emojis_update d
+    | READY d -> !Dispatch.ready d
+    | RESUMED d -> !Dispatch.resumed d
+    | CHANNEL_CREATE d -> !Dispatch.channel_create d
+    | CHANNEL_UPDATE d -> !Dispatch.channel_update d
+    | CHANNEL_DELETE d -> !Dispatch.channel_delete d
+    | CHANNEL_PINS_UPDATE d -> !Dispatch.channel_pins_update d
+    | GUILD_CREATE d -> !Dispatch.guild_create d
+    | GUILD_UPDATE d -> !Dispatch.guild_update d
+    | GUILD_DELETE d -> !Dispatch.guild_delete d
+    | GUILD_BAN_ADD d -> !Dispatch.member_ban d
+    | GUILD_BAN_REMOVE d -> !Dispatch.member_unban d
+    | GUILD_EMOJIS_UPDATE d -> !Dispatch.guild_emojis_update d
     (* | GUILD_INTEGRATIONS_UPDATE d -> !Dispatch.integrations_update d *)
-    | GUILD_MEMBER_ADD d ->
-        GuildMemberAdd.update_cache !Cache.cache d;
-        !Dispatch.member_join d
-    | GUILD_MEMBER_REMOVE d ->
-        GuildMemberRemove.update_cache !Cache.cache d;
-        !Dispatch.member_leave d
-    | GUILD_MEMBER_UPDATE d ->
-        GuildMemberUpdate.update_cache !Cache.cache d;
-        !Dispatch.member_update d
-    | GUILD_MEMBERS_CHUNK d ->
-        GuildMembersChunk.update_cache !Cache.cache d;
-        !Dispatch.members_chunk d
-    | GUILD_ROLE_CREATE d ->
-        GuildRoleCreate.update_cache !Cache.cache d;
-        !Dispatch.role_create d
-    | GUILD_ROLE_UPDATE d ->
-        GuildRoleUpdate.update_cache !Cache.cache d;
-        !Dispatch.role_update d
-    | GUILD_ROLE_DELETE d ->
-        GuildRoleDelete.update_cache !Cache.cache d;
-        !Dispatch.role_delete d
-    | MESSAGE_CREATE d ->
-        MessageCreate.update_cache !Cache.cache d;
-        !Dispatch.message_create d
-    | MESSAGE_UPDATE d ->
-        MessageUpdate.update_cache !Cache.cache d;
-        !Dispatch.message_update d
-    | MESSAGE_DELETE d ->
-        MessageDelete.update_cache !Cache.cache d;
-        !Dispatch.message_delete d
-    | MESSAGE_DELETE_BULK d ->
-        MessageDeleteBulk.update_cache !Cache.cache d;
-        !Dispatch.message_delete_bulk d
-    | REACTION_ADD d ->
-        ReactionAdd.update_cache !Cache.cache d;
-        !Dispatch.reaction_add d
-    | REACTION_REMOVE d ->
-        ReactionRemove.update_cache !Cache.cache d;
-        !Dispatch.reaction_remove d
-    | REACTION_REMOVE_ALL d ->
-        ReactionRemoveAll.update_cache !Cache.cache d;
-        !Dispatch.reaction_remove_all d
-    | PRESENCE_UPDATE d ->
-        PresenceUpdate.update_cache !Cache.cache d;
-        !Dispatch.presence_update d
-    | TYPING_START d ->
-        TypingStart.update_cache !Cache.cache d;
-        !Dispatch.typing_start d
-    | USER_UPDATE d ->
-        UserUpdate.update_cache !Cache.cache d;
-        !Dispatch.user_update d
+    | GUILD_MEMBER_ADD d -> !Dispatch.member_join d
+    | GUILD_MEMBER_REMOVE d -> !Dispatch.member_leave d
+    | GUILD_MEMBER_UPDATE d -> !Dispatch.member_update d
+    | GUILD_MEMBERS_CHUNK d -> !Dispatch.members_chunk d
+    | GUILD_ROLE_CREATE d -> !Dispatch.role_create d
+    | GUILD_ROLE_UPDATE d -> !Dispatch.role_update d
+    | GUILD_ROLE_DELETE d -> !Dispatch.role_delete d
+    | MESSAGE_CREATE d -> !Dispatch.message_create d
+    | MESSAGE_UPDATE d -> !Dispatch.message_update d
+    | MESSAGE_DELETE d -> !Dispatch.message_delete d
+    | MESSAGE_DELETE_BULK d -> !Dispatch.message_delete_bulk d
+    | REACTION_ADD d -> !Dispatch.reaction_add d
+    | REACTION_REMOVE d -> !Dispatch.reaction_remove d
+    | REACTION_REMOVE_ALL d -> !Dispatch.reaction_remove_all d
+    | PRESENCE_UPDATE d -> !Dispatch.presence_update d
+    | TYPING_START d -> !Dispatch.typing_start d
+    | USER_UPDATE d -> !Dispatch.user_update d
     (* | VOICE_STATE_UPDATE d -> !Dispatch.voice_state_update d *)
     (* | VOICE_SERVER_UPDATE d -> !Dispatch.voice_server_update d *)
-    | WEBHOOK_UPDATE d ->
-        WebhookUpdate.update_cache !Cache.cache d;
-        !Dispatch.webhook_update d
+    | WEBHOOK_UPDATE d -> !Dispatch.webhook_update d
     | UNKNOWN d -> !Dispatch.unknown d
 
 let handle_event ~ev contents =

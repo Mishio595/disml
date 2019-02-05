@@ -37,6 +37,7 @@ module Shard : sig
     (** Wrapper around an internal state, used to wrap {!shard}. *)
     type 'a t = {
         mutable state: 'a;
+        mutable stopped: bool;
     }
 
     (** Send a heartbeat to Discord. This is handled automatically. *)
@@ -67,7 +68,11 @@ module Shard : sig
         unit ->
         shard Deferred.t
 
-    val shutdown_clean : shard -> unit Deferred.t
+    val shutdown :
+        ?clean:bool ->
+        ?restart:bool ->
+        shard t ->
+        unit Deferred.t
 end
 
 (** Calls {!Shard.set_status} for each shard registered with the sharder. *)
@@ -90,4 +95,7 @@ val request_guild_members :
     t ->
     Shard.shard list Deferred.t
 
-val shutdown_all : t -> unit list Deferred.t
+val shutdown_all :
+        ?restart:bool ->
+        t ->
+        unit list Deferred.t

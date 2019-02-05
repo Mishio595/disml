@@ -93,6 +93,9 @@ let check_command Event.MessageCreate.{message} =
         | Ok msg -> Message.reply message (Printf.sprintf "```lisp\n%s```" (Message.sexp_of_t msg |> Sexp.to_string_hum)) >>> ignore
         | _ -> ()
         end
+    | "!shutdown" ->
+        Ivar.read client >>> fun client ->
+        Sharder.shutdown_all client.sharder >>> ignore
     | _ -> ()
 
 (* Example logs setup *)

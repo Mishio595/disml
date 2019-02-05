@@ -37,7 +37,7 @@ type t =
 | WEBHOOK_UPDATE of WebhookUpdate.t
 | UNKNOWN of Unknown.t
 
-let event_of_yojson ~contents t = match t with
+let event_of_yojson ~contents = function
     | "READY" -> READY Ready.(deserialize contents)
     | "RESUMED" -> RESUMED Resumed.(deserialize contents)
     | "CHANNEL_CREATE" -> CHANNEL_CREATE ChannelCreate.(deserialize contents)
@@ -73,7 +73,7 @@ let event_of_yojson ~contents t = match t with
     | "WEBHOOK_UPDATE" -> WEBHOOK_UPDATE WebhookUpdate.(deserialize contents)
     | s -> UNKNOWN Unknown.(deserialize s contents)
 
-let dispatch ev = match ev with
+let dispatch = function
     | READY d -> !Dispatch.ready d
     | RESUMED d -> !Dispatch.resumed d
     | CHANNEL_CREATE d -> !Dispatch.channel_create d

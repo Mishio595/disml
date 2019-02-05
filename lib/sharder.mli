@@ -37,6 +37,7 @@ module Shard : sig
     (** Wrapper around an internal state, used to wrap {!shard}. *)
     type 'a t = {
         mutable state: 'a;
+        mutable stopped: bool;
     }
 
     (** Send a heartbeat to Discord. This is handled automatically. *)

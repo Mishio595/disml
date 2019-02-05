@@ -29,6 +29,8 @@
 (** The primary interface for connecting to Discord and handling gateway events. *)
 module Client = Client
 
+module Cache = Cache
+
 (** Raw HTTP abstractions for Discord's REST API. *)
 module Http = Http
 

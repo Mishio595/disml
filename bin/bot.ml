@@ -93,6 +93,25 @@ let check_command Event.MessageCreate.{message} =
         | Ok msg -> Message.reply message (Printf.sprintf "```lisp\n%s```" (Message.sexp_of_t msg |> Sexp.to_string_hum)) >>> ignore
         | _ -> ()
         end
+    | "!cache" ->
+        let module C = Cache.ChannelMap in
+        let module G = Cache.GuildMap in
+        let module U = Cache.UserMap in
+        let cache = !Cache.cache in
+        let gc = G.length cache.guilds in
+        let tc = C.length cache.text_channels in
+        let vc = C.length cache.voice_channels in
+        let cs = C.length cache.categories in
+        let gr = C.length cache.groups in
+        let pr = C.length cache.private_channels in
+        let uc = U.length cache.users in
+        let user = Option.(value ~default:"None" (cache.user >>| User.tag)) in
+        let embed = Embed.(default
+            |> description (Printf.sprintf "Guilds: %d\nText Channels: %d\nVoice Channels: %d\nCategories: %d\nGroups: %d\nPrivate Channels: %d\nUsers: %d\nCurrent User: %s" gc tc vc cs gr pr uc user)) in
+        Message.reply_with ~embed message >>> ignore
+    | "!shutdown" ->
+        Ivar.read client >>> fun client ->
+        Sharder.shutdown_all client.sharder >>> ignore
     | _ -> ()
 
 (* Example logs setup *)

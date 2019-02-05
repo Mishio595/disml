@@ -328,25 +328,24 @@ let start ?count ?compress ?large_threshold () =
         match l with
         | (id, total) when id >= total -> return a
         | (id, total) ->
-            let create (t:Shard.shard Shard.t option) = match t with
-            | None -> Shard.create ~url ~shards:(id, total) ?compress ?large_threshold ()
-            | Some t ->
-                let Shard.{ url; id; compress; large_threshold; _ } = t.state in
-                Shard.create ~url ~shards:id ~compress ~large_threshold ()
+            let wrap ?(reuse:Shard.shard Shard.t option) state = match reuse with
+            | Some t -> t.state <- state; return t
+            | None -> return Shard.{ state; stopped = false } in
+            let create () =
+                Shard.create ~url ~shards:(id, total) ?compress ?large_threshold ()
             in
-            let bind (t:Shard.shard Shard.t) =
+            let rec bind (t:Shard.shard Shard.t) =
                 let _ = Ivar.read t.state.hb_interval >>> fun hb ->
                     Clock.every'
                     ~stop:(Ivar.read t.state.hb_stopper)
                     ~continue_on_error:true
                     hb (fun () -> Shard.heartbeat t.state >>| ignore) in
                 ev_loop t >>> ignore;
+                Pipe.closed (fst t.state.pipe) >>= (fun () ->
+                create () >>= wrap ~reuse:t >>= bind) >>> ignore;
                 return t
             in
-            let wrap state = return Shard.{ state; stopped = false } in
-            create None >>= wrap >>= bind >>= fun t ->
-            Pipe.closed (fst t.state.pipe) >>= (fun () ->
-            create (Some t) >>= wrap >>= bind) >>> ignore;
+            create () >>= wrap >>= bind >>= fun t ->
             gen_shards (id+1, total) (t :: a)
     in
     gen_shards shard_list []

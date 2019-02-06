@@ -1,3 +1,4 @@
+open Async
 open Core
 
 module ChannelMap : module type of Map.Make(Channel_id_t)
@@ -17,7 +18,7 @@ type t = {
     users: User_t.t UserMap.t;
 }
 
-val cache : t ref
+val cache : t Mvar.Read_write.t
 
 val create :
     (* ?max_messages:int -> *)

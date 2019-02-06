@@ -16,23 +16,23 @@ module ChannelCreate = struct
         | GuildText c ->
             let update = C.update cache.text_channels c.id ~f:(function
             | Some _ | None -> c) in
-            Cache.cache := { cache with text_channels = update }
+            { cache with text_channels = update }
         | GuildVoice c ->
             let update = C.update cache.voice_channels c.id ~f:(function
             | Some _ | None -> c) in
-            Cache.cache := { cache with voice_channels = update }
+            { cache with voice_channels = update }
         | Category c ->
             let update = C.update cache.categories c.id ~f:(function
             | Some _ | None -> c) in
-            Cache.cache := { cache with categories = update }
+            { cache with categories = update }
         | Group c ->
             let update = C.update cache.groups c.id ~f:(function
             | Some _ | None -> c) in
-            Cache.cache := { cache with groups = update }
+            { cache with groups = update }
         | Private c ->
             let update = C.update cache.private_channels c.id ~f:(function
             | Some _ | None -> c) in
-            Cache.cache := { cache with private_channels = update }
+            { cache with private_channels = update }
 end
 
 module ChannelDelete = struct
@@ -50,19 +50,19 @@ module ChannelDelete = struct
         match t.channel with
         | GuildText c ->
             let update = C.remove cache.text_channels c.id in
-            Cache.cache := { cache with text_channels = update }
+            { cache with text_channels = update }
         | GuildVoice c ->
             let update = C.remove cache.voice_channels c.id in
-            Cache.cache := { cache with voice_channels = update }
+            { cache with voice_channels = update }
         | Category c ->
             let update = C.remove cache.categories c.id in
-            Cache.cache := { cache with categories = update }
+            { cache with categories = update }
         | Group c ->
             let update = C.remove cache.groups c.id in
-            Cache.cache := { cache with groups = update }
+            { cache with groups = update }
         | Private c ->
             let update = C.remove cache.private_channels c.id in
-            Cache.cache := { cache with private_channels = update }
+            { cache with private_channels = update }
 end
 
 module ChannelUpdate = struct
@@ -82,27 +82,27 @@ module ChannelUpdate = struct
             let update = C.update cache.text_channels c.id ~f:(function
             | Some _ -> c
             | None -> c) in
-            Cache.cache := { cache with text_channels = update }
+            { cache with text_channels = update }
         | GuildVoice c ->
             let update = C.update cache.voice_channels c.id ~f:(function
             | Some _ -> c
             | None -> c) in
-            Cache.cache := { cache with voice_channels = update }
+            { cache with voice_channels = update }
         | Category c ->
             let update = C.update cache.categories c.id ~f:(function
             | Some _ -> c
             | None -> c) in
-            Cache.cache := { cache with categories = update }
+            { cache with categories = update }
         | Group c ->
             let update = C.update cache.groups c.id ~f:(function
             | Some _ -> c
             | None -> c) in
-            Cache.cache := { cache with groups = update }
+            { cache with groups = update }
         | Private c ->
             let update = C.update cache.private_channels c.id ~f:(function
             | Some _ -> c
             | None -> c) in
-            Cache.cache := { cache with private_channels = update }
+            { cache with private_channels = update }
 end
 
 module ChannelPinsUpdate = struct
@@ -119,17 +119,18 @@ module ChannelPinsUpdate = struct
             let update = match C.find cache.private_channels t.channel_id with
             | Some c -> C.set cache.private_channels ~key:t.channel_id ~data:{ c with last_pin_timestamp = t.last_pin_timestamp }
             | None -> cache.private_channels in
-            Cache.cache := { cache with private_channels = update }
+            { cache with private_channels = update }
         else if C.mem cache.text_channels t.channel_id then
             let update = match C.find cache.text_channels t.channel_id with
             | Some c -> C.set cache.text_channels ~key:t.channel_id ~data:{ c with last_pin_timestamp = t.last_pin_timestamp }
             | None -> cache.text_channels in
-            Cache.cache := { cache with text_channels = update }
+            { cache with text_channels = update }
         else if C.mem cache.groups t.channel_id then
             let update = match C.find cache.groups t.channel_id with
             | Some c -> C.set cache.groups ~key:t.channel_id ~data:{ c with last_pin_timestamp = t.last_pin_timestamp }
             | None -> cache.groups in
-            Cache.cache := { cache with groups = update }
+            { cache with groups = update }
+        else cache
 end
 
 (* Don't see where these would get used *)
@@ -165,7 +166,7 @@ module GuildBanAdd = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module GuildBanRemove = struct
@@ -176,7 +177,7 @@ module GuildBanRemove = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module GuildCreate = struct
@@ -190,6 +191,7 @@ module GuildCreate = struct
 
     let update_cache (cache:Cache.t) t =
         let open Channel_t in
+        let module C = Cache.ChannelMap in
         let update = Cache.GuildMap.update cache.guilds t.guild.id ~f:(function
         | Some _ | None -> t.guild) in
         let text, voice, cat = ref [], ref [], ref [] in
@@ -198,36 +200,40 @@ module GuildCreate = struct
         | GuildVoice c -> voice := (c.id, c) :: !voice
         | Category c -> cat := (c.id, c) :: !cat
         | _ -> ());
-        let text_channels = Cache.ChannelMap.(of_alist !text
-            |> function `Ok m -> m | _ -> Cache.ChannelMap.empty
-            |> merge cache.text_channels ~f:(fun ~key -> function
-            | `Both (_, c) | `Left c | `Right c -> let _ = key in Some c)) in
-        let voice_channels = Cache.ChannelMap.(of_alist !voice
-            |> function `Ok m -> m | _ -> Cache.ChannelMap.empty
-            |> merge cache.voice_channels ~f:(fun ~key -> function
-            | `Both (_, c) | `Left c | `Right c -> let _ = key in Some c)) in
-        let categories = Cache.ChannelMap.(of_alist !cat
-            |> function `Ok m -> m | _ -> Cache.ChannelMap.empty
-            |> merge cache.categories ~f:(fun ~key -> function
-            | `Both (_, c) | `Left c | `Right c -> let _ = key in Some c)) in
-        Cache.cache := { cache with
-            guilds = update;
-            text_channels;
-            voice_channels;
-            categories;
-            };
+        let text_channels = match C.of_alist !text with
+            | `Ok m ->
+                C.merge m cache.text_channels ~f:(fun ~key -> function
+                | `Both (c, _) | `Left c | `Right c -> let _ = key in Some c)
+            | _ -> cache.text_channels in
+        let voice_channels = match C.of_alist !voice with
+            | `Ok m ->
+                C.merge m cache.voice_channels ~f:(fun ~key -> function
+                | `Both (c, _) | `Left c | `Right c -> let _ = key in Some c)
+            | _ -> cache.voice_channels in
+        let categories = match C.of_alist !cat with
+            | `Ok m ->
+                C.merge m cache.categories ~f:(fun ~key -> function
+                | `Both (c, _) | `Left c | `Right c -> let _ = key in Some c)
+            | _ -> cache.categories in
+        { cache with guilds = update
+        ; text_channels
+        ; voice_channels
+        ; categories
+        }
 end
 
 module GuildDelete = struct
-    type t = {
-        id: Guild_id.t;
-    } [@@deriving sexp, yojson { strict = false; exn = true }]
+    type t = Guild_t.unavailable = {
+        id: Guild_id_t.t;
+        unavailable: bool;
+    }
+    
+    let deserialize = Guild_t.unavailable_of_yojson_exn
 
-    let deserialize = of_yojson_exn
-
+    (* TODO figure out of i need to empty channels here *)
     let update_cache (cache:Cache.t) t =
         let update = Cache.GuildMap.remove cache.guilds t.id in
-        Cache.cache := { cache with guilds = update }
+        { cache with guilds = update }
 end
 
 module GuildUpdate = struct
@@ -258,7 +264,7 @@ module GuildUpdate = struct
             widget_enabled;widget_channel_id;
             system_channel_id }
         | None -> t.guild) in
-        Cache.cache := { cache with guilds = update }
+        { cache with guilds = update }
 end
 
 module GuildEmojisUpdate = struct
@@ -274,7 +280,8 @@ module GuildEmojisUpdate = struct
             let update = match Cache.GuildMap.find cache.guilds t.guild_id with
             | Some g -> Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data:{ g with emojis = t.emojis }
             | None -> cache.guilds in
-            Cache.cache := { cache with guilds = update }
+            { cache with guilds = update }
+        else cache
 end
 
 (* TODO guild integrations *)
@@ -292,7 +299,8 @@ module GuildMemberAdd = struct
                 let data = { g with members } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            Cache.cache := { cache with guilds = update }
+            { cache with guilds = update }
+        else cache
 end
 
 module GuildMemberRemove = struct
@@ -311,7 +319,8 @@ module GuildMemberRemove = struct
                 let data = { g with members } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            Cache.cache := { cache with guilds = update }
+            { cache with guilds = update }
+        else cache
 end
 
 module GuildMemberUpdate = struct
@@ -335,7 +344,8 @@ module GuildMemberUpdate = struct
                 let data = { g with members } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            Cache.cache := { cache with guilds = update }
+            { cache with guilds = update }
+        else cache
 end
 
 (* TODO figure out if this deserializes properly, then add cache update *)
@@ -347,7 +357,7 @@ module GuildMembersChunk = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module GuildRoleCreate = struct
@@ -367,7 +377,8 @@ module GuildRoleCreate = struct
                 let data = { g with roles } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            Cache.cache := { cache with guilds = update }
+            { cache with guilds = update }
+        else cache
 end
 
 module GuildRoleDelete = struct
@@ -386,7 +397,8 @@ module GuildRoleDelete = struct
                 let data = { g with roles } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            Cache.cache := { cache with guilds = update }
+            { cache with guilds = update }
+        else cache
 end
 
 module GuildRoleUpdate = struct
@@ -407,7 +419,8 @@ module GuildRoleUpdate = struct
                 let data = { g with roles } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            Cache.cache := { cache with guilds = update }
+            { cache with guilds = update }
+        else cache
 end
 
 (* TODO figure out if this is necessary *)
@@ -418,7 +431,7 @@ module GuildUnavailable = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module MessageCreate = struct
@@ -430,7 +443,7 @@ module MessageCreate = struct
         let message = Message_t.of_yojson_exn ev in
         { message; }
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module MessageDelete = struct
@@ -442,7 +455,7 @@ module MessageDelete = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module MessageUpdate = struct
@@ -470,7 +483,7 @@ module MessageUpdate = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module MessageDeleteBulk = struct
@@ -482,7 +495,7 @@ module MessageDeleteBulk = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module PresenceUpdate = struct
@@ -490,7 +503,7 @@ module PresenceUpdate = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 (* module PresencesReplace = struct
@@ -510,7 +523,7 @@ module ReactionAdd = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module ReactionRemove = struct
@@ -524,7 +537,7 @@ module ReactionRemove = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module ReactionRemoveAll = struct
@@ -536,7 +549,7 @@ module ReactionRemoveAll = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module Ready = struct
@@ -552,7 +565,7 @@ module Ready = struct
 
     let update_cache (cache:Cache.t) t =
         let user = Some t.user in
-        Cache.cache := { cache with user }
+        { cache with user }
 end
 
 module Resumed = struct
@@ -562,7 +575,7 @@ module Resumed = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module TypingStart = struct
@@ -575,7 +588,7 @@ module TypingStart = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module UserUpdate = struct
@@ -589,7 +602,7 @@ module UserUpdate = struct
 
     let update_cache (cache:Cache.t) t =
         let user = Some t.user in
-        Cache.cache := { cache with user }
+        { cache with user }
 end
 
 module WebhookUpdate = struct
@@ -600,7 +613,7 @@ module WebhookUpdate = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (_cache:Cache.t) _t = ()
+    let update_cache (cache:Cache.t) _t = cache
 end
 
 module Unknown = struct

@@ -1,3 +1,4 @@
+open Async
 open Core
 open Event_models
 
@@ -73,99 +74,101 @@ let event_of_yojson ~contents = function
     | "WEBHOOK_UPDATE" -> WEBHOOK_UPDATE WebhookUpdate.(deserialize contents)
     | s -> UNKNOWN Unknown.(deserialize s contents)
 
-let dispatch = function
+let dispatch ev =
+    Mvar.take Cache.cache >>> fun cache ->
+    match ev with
     | READY d ->
-        Ready.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ Ready.update_cache cache d >>> fun () ->
         !Dispatch.ready d
     | RESUMED d ->
-        Resumed.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ Resumed.update_cache cache d >>> fun () ->
         !Dispatch.resumed d
     | CHANNEL_CREATE d ->
-        ChannelCreate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ ChannelCreate.update_cache cache d >>> fun () ->
         !Dispatch.channel_create d
     | CHANNEL_UPDATE d ->
-        ChannelUpdate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ ChannelUpdate.update_cache cache d >>> fun () ->
         !Dispatch.channel_update d
     | CHANNEL_DELETE d ->
-        ChannelDelete.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ ChannelDelete.update_cache cache d >>> fun () ->
         !Dispatch.channel_delete d
     | CHANNEL_PINS_UPDATE d ->
-        ChannelPinsUpdate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ ChannelPinsUpdate.update_cache cache d >>> fun () ->
         !Dispatch.channel_pins_update d
     | GUILD_CREATE d ->
-        GuildCreate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildCreate.update_cache cache d >>> fun () ->
         !Dispatch.guild_create d
     | GUILD_UPDATE d ->
-        GuildUpdate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildUpdate.update_cache cache d >>> fun () ->
         !Dispatch.guild_update d
     | GUILD_DELETE d ->
-        GuildDelete.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildDelete.update_cache cache d >>> fun () ->
         !Dispatch.guild_delete d
     | GUILD_BAN_ADD d ->
-        GuildBanAdd.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildBanAdd.update_cache cache d >>> fun () ->
         !Dispatch.member_ban d
     | GUILD_BAN_REMOVE d ->
-        GuildBanRemove.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildBanRemove.update_cache cache d >>> fun () ->
         !Dispatch.member_unban d
     | GUILD_EMOJIS_UPDATE d ->
-        GuildEmojisUpdate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildEmojisUpdate.update_cache cache d >>> fun () ->
         !Dispatch.guild_emojis_update d
     (* | GUILD_INTEGRATIONS_UPDATE d -> !Dispatch.integrations_update d *)
     | GUILD_MEMBER_ADD d ->
-        GuildMemberAdd.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildMemberAdd.update_cache cache d >>> fun () ->
         !Dispatch.member_join d
     | GUILD_MEMBER_REMOVE d ->
-        GuildMemberRemove.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildMemberRemove.update_cache cache d >>> fun () ->
         !Dispatch.member_leave d
     | GUILD_MEMBER_UPDATE d ->
-        GuildMemberUpdate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildMemberUpdate.update_cache cache d >>> fun () ->
         !Dispatch.member_update d
     | GUILD_MEMBERS_CHUNK d ->
-        GuildMembersChunk.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildMembersChunk.update_cache cache d >>> fun () ->
         !Dispatch.members_chunk d
     | GUILD_ROLE_CREATE d ->
-        GuildRoleCreate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildRoleCreate.update_cache cache d >>> fun () ->
         !Dispatch.role_create d
     | GUILD_ROLE_UPDATE d ->
-        GuildRoleUpdate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildRoleUpdate.update_cache cache d >>> fun () ->
         !Dispatch.role_update d
     | GUILD_ROLE_DELETE d ->
-        GuildRoleDelete.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ GuildRoleDelete.update_cache cache d >>> fun () ->
         !Dispatch.role_delete d
     | MESSAGE_CREATE d ->
-        MessageCreate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ MessageCreate.update_cache cache d >>> fun () ->
         !Dispatch.message_create d
     | MESSAGE_UPDATE d ->
-        MessageUpdate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ MessageUpdate.update_cache cache d >>> fun () ->
         !Dispatch.message_update d
     | MESSAGE_DELETE d ->
-        MessageDelete.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ MessageDelete.update_cache cache d >>> fun () ->
         !Dispatch.message_delete d
     | MESSAGE_DELETE_BULK d ->
-        MessageDeleteBulk.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ MessageDeleteBulk.update_cache cache d >>> fun () ->
         !Dispatch.message_delete_bulk d
     | REACTION_ADD d ->
-        ReactionAdd.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ ReactionAdd.update_cache cache d >>> fun () ->
         !Dispatch.reaction_add d
     | REACTION_REMOVE d ->
-        ReactionRemove.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ ReactionRemove.update_cache cache d >>> fun () ->
         !Dispatch.reaction_remove d
     | REACTION_REMOVE_ALL d ->
-        ReactionRemoveAll.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ ReactionRemoveAll.update_cache cache d >>> fun () ->
         !Dispatch.reaction_remove_all d
     | PRESENCE_UPDATE d ->
-        PresenceUpdate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ PresenceUpdate.update_cache cache d >>> fun () ->
         !Dispatch.presence_update d
     | TYPING_START d ->
-        TypingStart.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ TypingStart.update_cache cache d >>> fun () ->
         !Dispatch.typing_start d
     | USER_UPDATE d ->
-        UserUpdate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ UserUpdate.update_cache cache d >>> fun () ->
         !Dispatch.user_update d
     (* | VOICE_STATE_UPDATE d -> !Dispatch.voice_state_update d *)
     (* | VOICE_SERVER_UPDATE d -> !Dispatch.voice_server_update d *)
     | WEBHOOK_UPDATE d ->
-        WebhookUpdate.update_cache !Cache.cache d;
+        Mvar.put Cache.cache @@ WebhookUpdate.update_cache cache d >>> fun () ->
         !Dispatch.webhook_update d
     | UNKNOWN d -> !Dispatch.unknown d
 

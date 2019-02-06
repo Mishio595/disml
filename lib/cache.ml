@@ -1,3 +1,4 @@
+open Async
 open Core
 
 module ChannelMap = Map.Make(Channel_id_t)
@@ -29,4 +30,7 @@ let create () = {
     users = UserMap.empty;
     }
 
-let cache = ref (create ())
+let cache =
+    let m = Mvar.create () in
+    Mvar.set m (create ());
+    m

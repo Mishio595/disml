@@ -128,7 +128,7 @@ let main () =
     setup_logger ();
     (* Set some event handlers *)
     Client.message_create := check_command;
-    Client.ready := (fun _ -> Logs.info (fun m -> m "Ready!"));
+    Client.ready := (fun ready -> Logs.info (fun m -> m "Logged in as %s" (User.tag ready.user)));
     Client.guild_create := (fun {guild} -> Logs.info (fun m -> m "Joined guild %s" guild.name));
     (* Pull token from env var *)
     let token = match Sys.getenv "DISCORD_TOKEN" with

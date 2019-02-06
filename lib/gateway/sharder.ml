@@ -350,9 +350,6 @@ let start ?count ?compress ?large_threshold () =
     in
     gen_shards shard_list []
     >>| fun shards ->
-    (Http.get_current_user () >>> function
-    | Ok user -> Logs.info (fun m -> m "Logged in as %s" (User.tag user))
-    | _ -> ());
     { shards; }
 
 let set_status ~status sharder =

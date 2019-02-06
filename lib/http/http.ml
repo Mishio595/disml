@@ -20,7 +20,7 @@ module Base = struct
     let process_request_headers () =
         let h = Header.init () in
         Header.add_list h [
-            "User-Agent", "Dis.ml v0.1.0";
+            "User-Agent", "DiscordBot (https://gitlab.com/Mishio595/disml, v0.2.3)";
             "Authorization", ("Bot " ^ !Client_options.token);
             "Content-Type", "application/json";
             "Connection", "keep-alive";

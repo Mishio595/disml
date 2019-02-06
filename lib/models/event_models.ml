@@ -189,9 +189,33 @@ module GuildCreate = struct
         { guild; }
 
     let update_cache (cache:Cache.t) t =
+        let open Channel_t in
         let update = Cache.GuildMap.update cache.guilds t.guild.id ~f:(function
         | Some _ | None -> t.guild) in
-        Cache.cache := { cache with guilds = update }
+        let text, voice, cat = ref [], ref [], ref [] in
+        List.iter t.guild.channels ~f:(function
+        | GuildText c -> text := (c.id, c) :: !text
+        | GuildVoice c -> voice := (c.id, c) :: !voice
+        | Category c -> cat := (c.id, c) :: !cat
+        | _ -> ());
+        let text_channels = Cache.ChannelMap.(of_alist !text
+            |> function `Ok m -> m | _ -> Cache.ChannelMap.empty
+            |> merge cache.text_channels ~f:(fun ~key -> function
+            | `Both (_, c) | `Left c | `Right c -> let _ = key in Some c)) in
+        let voice_channels = Cache.ChannelMap.(of_alist !voice
+            |> function `Ok m -> m | _ -> Cache.ChannelMap.empty
+            |> merge cache.voice_channels ~f:(fun ~key -> function
+            | `Both (_, c) | `Left c | `Right c -> let _ = key in Some c)) in
+        let categories = Cache.ChannelMap.(of_alist !cat
+            |> function `Ok m -> m | _ -> Cache.ChannelMap.empty
+            |> merge cache.categories ~f:(fun ~key -> function
+            | `Both (_, c) | `Left c | `Right c -> let _ = key in Some c)) in
+        Cache.cache := { cache with
+            guilds = update;
+            text_channels;
+            voice_channels;
+            categories;
+            };
 end
 
 module GuildDelete = struct

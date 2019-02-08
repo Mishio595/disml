@@ -105,13 +105,19 @@ let check_command Event.MessageCreate.{message} =
         let gr = C.length cache.groups in
         let pr = C.length cache.private_channels in
         let uc = U.length cache.users in
+        let pre = U.length cache.presences in
         let user = Option.(value ~default:"None" (cache.user >>| User.tag)) in
         let embed = Embed.(default
-            |> description (Printf.sprintf "Guilds: %d\nText Channels: %d\nVoice Channels: %d\nCategories: %d\nGroups: %d\nPrivate Channels: %d\nUsers: %d\nCurrent User: %s" gc tc vc cs gr pr uc user)) in
+            |> description (Printf.sprintf "Guilds: %d\nText Channels: %d\nVoice Channels: %d\nCategories: %d\nGroups: %d\nPrivate Channels: %d\nUsers: %d\nPresences: %d\nCurrent User: %s" gc tc vc cs gr pr uc pre user)) in
         Message.reply_with ~embed message >>> ignore
     | "!shutdown" ->
         Ivar.read client >>> fun client ->
         Sharder.shutdown_all client.sharder >>> ignore
+    | "!rgm" ->
+        Ivar.read client >>> fun client ->
+        (match message.guild_id with
+        | Some guild -> Client.request_guild_members ~guild client >>> ignore
+        | None -> ())
     | _ -> ()
 
 (* Example logs setup *)

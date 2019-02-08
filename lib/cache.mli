@@ -12,6 +12,7 @@ type t = {
     groups: Channel_t.group ChannelMap.t;
     private_channels: Channel_t.dm ChannelMap.t;
     guilds: Guild_t.t GuildMap.t;
+    presences: Presence.t UserMap.t;
     (* messages: Channel_id_t.t GuildMap.t; *)
     unavailable_guilds: Guild_t.unavailable GuildMap.t;
     user: User_t.t option;

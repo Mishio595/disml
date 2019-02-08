@@ -201,24 +201,31 @@ module GuildCreate = struct
         | Category c -> cat := (c.id, c) :: !cat
         | _ -> ());
         let text_channels = match C.of_alist !text with
-            | `Ok m ->
-                C.merge m cache.text_channels ~f:(fun ~key -> function
-                | `Both (c, _) | `Left c | `Right c -> let _ = key in Some c)
-            | _ -> cache.text_channels in
+        | `Ok m ->
+            C.merge m cache.text_channels ~f:(fun ~key -> function
+            | `Both (c, _) | `Left c | `Right c -> let _ = key in Some c)
+        | _ -> cache.text_channels in
         let voice_channels = match C.of_alist !voice with
-            | `Ok m ->
-                C.merge m cache.voice_channels ~f:(fun ~key -> function
-                | `Both (c, _) | `Left c | `Right c -> let _ = key in Some c)
-            | _ -> cache.voice_channels in
+        | `Ok m ->
+            C.merge m cache.voice_channels ~f:(fun ~key -> function
+            | `Both (c, _) | `Left c | `Right c -> let _ = key in Some c)
+        | _ -> cache.voice_channels in
         let categories = match C.of_alist !cat with
-            | `Ok m ->
-                C.merge m cache.categories ~f:(fun ~key -> function
-                | `Both (c, _) | `Left c | `Right c -> let _ = key in Some c)
-            | _ -> cache.categories in
+        | `Ok m ->
+            C.merge m cache.categories ~f:(fun ~key -> function
+            | `Both (c, _) | `Left c | `Right c -> let _ = key in Some c)
+        | _ -> cache.categories in
+        let users = List.map t.guild.members ~f:(fun m -> m.user.id, m.user) in
+        let users = match Cache.UserMap.of_alist users with
+        | `Ok m ->
+            Cache.UserMap.merge m cache.users ~f:(fun ~key -> function
+            | `Both (u, _) | `Left u | `Right u -> let _ = key in Some u)
+        | _ -> cache.users in
         { cache with guilds = update
         ; text_channels
         ; voice_channels
         ; categories
+        ; users
         }
 end
 
@@ -243,7 +250,7 @@ module GuildUpdate = struct
 
     let deserialize ev =
         let guild = Guild_t.(pre_of_yojson_exn ev |> wrap) in
-        { guild; }
+        { guild }
 
     let update_cache (cache:Cache.t) t =
         let open Guild_t in
@@ -352,12 +359,31 @@ end
 module GuildMembersChunk = struct
     type t = {
         guild_id: Guild_id.t;
-        members: (Snowflake.t * Member_t.t) list;
+        members: Member_t.member list;
     } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
 
-    let update_cache (cache:Cache.t) _t = cache
+    let update_cache (cache:Cache.t) t =
+        match Cache.GuildMap.find cache.guilds t.guild_id with
+        | None -> cache
+        | Some g ->
+            let `Guild_id guild_id = t.guild_id in
+            let users = List.map t.members ~f:(fun m -> m.user.id, m.user) in
+            let members = List.filter_map t.members ~f:(fun m ->
+                if List.exists g.members ~f:(fun m' -> m'.user.id <> m.user.id) then
+                    Some (Member_t.wrap ~guild_id m)
+                else None) in
+            let guilds = Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data:{ g with members } in
+            let users = match Cache.UserMap.of_alist users with
+            | `Ok m ->
+                Cache.UserMap.merge m cache.users ~f:(fun ~key -> function
+                | `Both (u, _) | `Left u | `Right u -> let _ = key in Some u)
+            | _ -> cache.users in
+            { cache with guilds
+            ; users
+            }
+
 end
 
 module GuildRoleCreate = struct
@@ -421,17 +447,6 @@ module GuildRoleUpdate = struct
             | None -> cache.guilds in
             { cache with guilds = update }
         else cache
-end
-
-(* TODO figure out if this is necessary *)
-module GuildUnavailable = struct
-    type t = {
-        guild_id: Guild_id.t;
-    } [@@deriving sexp, yojson { strict = false; exn = true }]
-
-    let deserialize = of_yojson_exn
-
-    let update_cache (cache:Cache.t) _t = cache
 end
 
 module MessageCreate = struct
@@ -503,7 +518,11 @@ module PresenceUpdate = struct
 
     let deserialize = of_yojson_exn
 
-    let update_cache (cache:Cache.t) _t = cache
+    (* TODO update users *)
+    let update_cache (cache:Cache.t) t =
+        let id = t.user.id in
+        let presences = Cache.UserMap.update cache.presences id ~f:(function Some _ | None -> t) in
+        { cache with presences }
 end
 
 (* module PresencesReplace = struct

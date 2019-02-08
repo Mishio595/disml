@@ -1,6 +1,10 @@
 (** A partial user. Used internally. *)
 type partial_user = {
     id: User_id_t.t;
+    username: string option;
+    discriminator: string option;
+    avatar: string option;
+    bot: bool;
 } [@@deriving sexp, yojson { exn = true }]
 
 (** A user object. *)

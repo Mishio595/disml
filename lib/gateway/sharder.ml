@@ -47,6 +47,7 @@ module Shard = struct
     type 'a t = {
         mutable state: 'a;
         mutable stopped: bool;
+        mutable can_resume: bool;
     }
 
     let identify_lock = Mvar.create ()
@@ -57,13 +58,16 @@ module Shard = struct
         | `Ok s -> begin
             let open Frame.Opcode in
             match s.opcode with
-            | Text -> Ok (Yojson.Safe.from_string s.content)
+            | Text -> `Ok (Yojson.Safe.from_string s.content)
             | Binary ->
-                if compress then Ok (decompress s.content |> Yojson.Safe.from_string)
-                    else Error "Failed to decompress"
-            | _ -> Error "Unexpected opcode"
+                if compress then `Ok (decompress s.content |> Yojson.Safe.from_string)
+                    else `Error "Failed to decompress"
+            | Close -> `Close s.extension
+            | op ->
+                let op = Frame.Opcode.to_string op in
+                `Error ("Unexpected opcode " ^ op)
         end
-        | `Eof -> Error "EOF"
+        | `Eof -> `Eof
 
     let push_frame ?payload ~ev shard =
         let content = match payload with
@@ -282,7 +286,8 @@ module Shard = struct
 
     let shutdown ?(clean=false) ?(restart=true) t =
         let _ = clean in
-        if not restart then t.stopped <- true;
+        t.can_resume <- restart;
+        t.stopped <- true;
         Logs.debug (fun m -> m "Performing shutdown. Shard [%d, %d]" (fst t.state.id) (snd t.state.id));
         Pipe.write_if_open (snd t.state.pipe) (Frame.close 1001)
         >>= fun () ->
@@ -313,12 +318,18 @@ let start ?count ?compress ?large_threshold () =
         let step (t:Shard.shard Shard.t) =
             Pipe.read (fst t.state.pipe) >>= fun frame -> 
             begin match Shard.parse ~compress:t.state.compress frame with
-            | Ok f ->
+            | `Ok f ->
                 Shard.handle_frame ~f t.state >>| fun s ->
                 t.state <- s
-            | Error e ->
-                Logs.warn (fun m -> m "Websocket closed. Reason: %s" e);
-                Deferred.never ()
+            | `Close c ->
+                Logs.warn (fun m -> m "Close frame received. Code: %d" c);
+                Shard.shutdown t
+            | `Error e ->
+                Logs.warn (fun m -> m "Websocket soft error: %s" e);
+                return ()
+            | `Eof ->
+                Logs.warn (fun m -> m "Websocket closed unexpectedly");
+                Shard.shutdown t
             end >>| fun () -> t
         in
         if t.stopped then return ()
@@ -329,8 +340,8 @@ let start ?count ?compress ?large_threshold () =
         | (id, total) when id >= total -> return a
         | (id, total) ->
             let wrap ?(reuse:Shard.shard Shard.t option) state = match reuse with
-            | Some t -> t.state <- state; return t
-            | None -> return Shard.{ state; stopped = false } in
+            | Some t -> t.state <- state; t.stopped <- false; return t
+            | None -> return Shard.{ state; stopped = false; can_resume = true; } in
             let create () =
                 Shard.create ~url ~shards:(id, total) ?compress ?large_threshold ()
             in
@@ -340,9 +351,9 @@ let start ?count ?compress ?large_threshold () =
                     ~stop:(Ivar.read t.state.hb_stopper)
                     ~continue_on_error:true
                     hb (fun () -> Shard.heartbeat t.state >>| ignore) in
-                ev_loop t >>> ignore;
-                Pipe.closed (fst t.state.pipe) >>= (fun () ->
-                create () >>= wrap ~reuse:t >>= bind) >>> ignore;
+                ev_loop t >>> (fun () -> Logs.debug (fun m -> m "Event loop stopped."));
+                Pipe.closed (fst t.state.pipe) >>> (fun () -> if t.can_resume then
+                create () >>= wrap ~reuse:t >>= bind >>> ignore);
                 return t
             in
             create () >>= wrap >>= bind >>= fun t ->

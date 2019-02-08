@@ -30,24 +30,24 @@ let decompress src =
     | Error exn -> raise (Inflate_error exn)
 
 module Shard = struct
-    type shard = {
-        compress: bool;
-        id: int * int;
-        hb_interval: Time.Span.t Ivar.t;
-        hb_stopper: unit Ivar.t;
-        large_threshold: int;
-        pipe: Frame.t Pipe.Reader.t * Frame.t Pipe.Writer.t;
-        ready: unit Ivar.t;
-        seq: int;
-        session: string option;
-        url: string;
-        _internal: Reader.t * Writer.t;
+    type shard =
+    { compress: bool
+    ; id: int * int
+    ; hb_interval: Time.Span.t Ivar.t
+    ; hb_stopper: unit Ivar.t
+    ; large_threshold: int
+    ; pipe: Frame.t Pipe.Reader.t * Frame.t Pipe.Writer.t
+    ; ready: unit Ivar.t
+    ; seq: int
+    ; session: string option
+    ; url: string
+    ; _internal: Reader.t * Writer.t
     }
 
-    type 'a t = {
-        mutable state: 'a;
-        mutable stopped: bool;
-        mutable can_resume: bool;
+    type 'a t =
+    { mutable state: 'a
+    ; mutable stopped: bool
+    ; mutable can_resume: bool
     }
 
     let identify_lock = Mvar.create ()
@@ -102,9 +102,9 @@ module Shard = struct
             J.(member "session_id" data |> to_string_option)
         end else None in
         Event.handle_event ~ev:t data;
-        return { shard with
-            seq = seq;
-            session = session;
+        return
+        { shard with seq = seq
+        ; session = session
         }
 
     let set_status ~(status:Yojson.Safe.t) shard =
@@ -155,26 +155,28 @@ module Shard = struct
         | None -> begin
             Mvar.take identify_lock >>= fun () ->
             Logs.debug (fun m -> m "Identifying shard [%d, %d]" (fst shard.id) (snd shard.id));
-            let payload = `Assoc [
-                "token", `String !Client_options.token;
-                "properties", `Assoc [
-                    "$os", `String Sys.os_type;
-                    "$device", `String "dis.ml";
-                    "$browser", `String "dis.ml";
-                ];
-                "compress", `Bool shard.compress;
-                "large_threshold", `Int shard.large_threshold;
-                "shard", `List shards;
-            ] in
+            let payload = `Assoc
+                [ "token", `String !Client_options.token
+                ; "properties", `Assoc
+                    [ "$os", `String Sys.os_type
+                    ; "$device", `String "dis.ml"
+                    ; "$browser", `String "dis.ml"
+                    ]
+                ; "compress", `Bool shard.compress
+                ; "large_threshold", `Int shard.large_threshold
+                ; "shard", `List shards
+                ]
+            in
             push_frame ~payload ~ev:IDENTIFY shard
             >>| fun s -> s
         end
         | Some s ->
-            let payload = `Assoc [
-                "token", `String !Client_options.token;
-                "session_id", `String s;
-                "seq", `Int shard.seq;
-            ] in
+            let payload = `Assoc
+                [ "token", `String !Client_options.token
+                ; "session_id", `String s
+                ; "seq", `Int shard.seq
+                ]
+            in
             push_frame ~payload ~ev:RESUME shard
 
     let handle_frame ~f shard =
@@ -205,6 +207,7 @@ module Shard = struct
         ~ws_to_app
         ~net_to_ws
         ~ws_to_net
+        ?(ms=500)
         uri =
         client
             ~initialized
@@ -218,7 +221,7 @@ module Shard = struct
                 match res with
                 | Ok () -> ()
                 | Error _ ->
-                    let backoff = Time.Span.create ~ms:500 () in
+                    let backoff = Time.Span.create ~ms () in
                     Clock.after backoff >>> (fun () ->
                     make_client
                         ~initialized
@@ -227,6 +230,7 @@ module Shard = struct
                         ~ws_to_app
                         ~net_to_ws
                         ~ws_to_net
+                        ~ms:(min 60_000 (ms * 2))
                         uri)
 
 
@@ -254,18 +258,17 @@ module Shard = struct
                 ~ws_to_net
                 uri;
             Ivar.read initialized >>| fun () ->
-            {
-                pipe = (read, write);
-                ready = Ivar.create ();
-                hb_interval = Ivar.create ();
-                hb_stopper = Ivar.create ();
-                seq = 0;
-                id = shards;
-                session = None;
-                url;
-                large_threshold;
-                compress;
-                _internal = (net_to_ws, ws_to_net);
+            { pipe = (read, write)
+            ; ready = Ivar.create ()
+            ; hb_interval = Ivar.create ()
+            ; hb_stopper = Ivar.create ()
+            ; seq = 0
+            ; id = shards
+            ; session = None
+            ; url
+            ; large_threshold
+            ; compress
+            ; _internal = (net_to_ws, ws_to_net)
             }
         in
         match Unix.getaddrinfo host (string_of_int port) [] with
@@ -340,8 +343,16 @@ let start ?count ?compress ?large_threshold () =
         | (id, total) when id >= total -> return a
         | (id, total) ->
             let wrap ?(reuse:Shard.shard Shard.t option) state = match reuse with
-            | Some t -> t.state <- state; t.stopped <- false; return t
-            | None -> return Shard.{ state; stopped = false; can_resume = true; } in
+            | Some t ->
+                t.state <- state;
+                t.stopped <- false;
+                return t
+            | None ->
+                return Shard.{ state
+                    ; stopped = false
+                    ; can_resume = true
+                    }
+            in
             let create () =
                 Shard.create ~url ~shards:(id, total) ?compress ?large_threshold ()
             in

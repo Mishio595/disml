@@ -299,9 +299,7 @@ module Shard = struct
         Writer.close (snd t.state._internal)
 end
 
-type t = {
-    shards: (Shard.shard Shard.t) list;
-}
+type t = { shards: (Shard.shard Shard.t) list }
 
 let start ?count ?compress ?large_threshold () =
     let module J = Yojson.Safe.Util in
@@ -372,7 +370,7 @@ let start ?count ?compress ?large_threshold () =
     in
     gen_shards shard_list []
     >>| fun shards ->
-    { shards; }
+    { shards }
 
 let set_status ~status sharder =
     Deferred.all @@ List.map ~f:(fun t ->

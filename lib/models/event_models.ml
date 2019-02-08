@@ -1,16 +1,15 @@
 open Core
 
 module ChannelCreate = struct
-    type t = { channel: Channel_t.t } [@@deriving sexp]
+    type t = Channel_t.t
 
     let deserialize ev =
-        let channel = Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap) in
-        { channel }
+        Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap)
 
     let update_cache (cache:Cache.t) t =
         let open Channel_t in
         let module C = Cache.ChannelMap in
-        match t.channel with
+        match t with
         | GuildText c ->
             let update = C.update cache.text_channels c.id ~f:(function
             | Some _ | None -> c) in
@@ -34,16 +33,15 @@ module ChannelCreate = struct
 end
 
 module ChannelDelete = struct
-    type t = { channel: Channel_t.t } [@@deriving sexp]
+    type t = Channel_t.t
 
     let deserialize ev =
-        let channel = Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap) in
-        { channel }
+        Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap)
 
     let update_cache (cache:Cache.t) t =
         let open Channel_t in
         let module C = Cache.ChannelMap in
-        match t.channel with
+        match t with
         | GuildText c ->
             let update = C.remove cache.text_channels c.id in
             { cache with text_channels = update }
@@ -62,16 +60,15 @@ module ChannelDelete = struct
 end
 
 module ChannelUpdate = struct
-    type t = { channel: Channel_t.t } [@@deriving sexp]
+    type t = Channel_t.t
 
     let deserialize ev =
-        let channel = Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap) in
-        { channel }
+        Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap)
 
     let update_cache (cache:Cache.t) t =
         let open Channel_t in
         let module C = Cache.ChannelMap in
-        match t.channel with
+        match t with
         | GuildText c ->
             let update = C.update cache.text_channels c.id ~f:(function
             | Some _ -> c
@@ -175,19 +172,18 @@ module GuildBanRemove = struct
 end
 
 module GuildCreate = struct
-    type t = { guild: Guild_t.t } [@@deriving sexp]
+    type t = Guild_t.t
 
     let deserialize ev =
-        let guild = Guild_t.(pre_of_yojson_exn ev |> wrap) in
-        { guild }
+        Guild_t.(pre_of_yojson_exn ev |> wrap)
 
-    let update_cache (cache:Cache.t) t =
+    let update_cache (cache:Cache.t) (t:t) =
         let open Channel_t in
         let module C = Cache.ChannelMap in
-        let update = Cache.GuildMap.update cache.guilds t.guild.id ~f:(function
-        | Some _ | None -> t.guild) in
+        let update = Cache.GuildMap.update cache.guilds t.id ~f:(function
+        | Some _ | None -> t) in
         let text, voice, cat = ref [], ref [], ref [] in
-        List.iter t.guild.channels ~f:(function
+        List.iter t.channels ~f:(function
         | GuildText c -> text := (c.id, c) :: !text
         | GuildVoice c -> voice := (c.id, c) :: !voice
         | Category c -> cat := (c.id, c) :: !cat
@@ -207,7 +203,7 @@ module GuildCreate = struct
             C.merge m cache.categories ~f:(fun ~key -> function
             | `Both (c, _) | `Left c | `Right c -> let _ = key in Some c)
         | _ -> cache.categories in
-        let users = List.map t.guild.members ~f:(fun m -> m.user.id, m.user) in
+        let users = List.map t.members ~f:(fun m -> m.user.id, m.user) in
         let users = match Cache.UserMap.of_alist users with
         | `Ok m ->
             Cache.UserMap.merge m cache.users ~f:(fun ~key -> function
@@ -236,17 +232,16 @@ module GuildDelete = struct
 end
 
 module GuildUpdate = struct
-    type t = { guild: Guild_t.t } [@@deriving sexp]
+    type t = Guild_t.t
 
     let deserialize ev =
-        let guild = Guild_t.(pre_of_yojson_exn ev |> wrap) in
-        { guild }
+        Guild_t.(pre_of_yojson_exn ev |> wrap)
 
     let update_cache (cache:Cache.t) t =
         let open Guild_t in
-        let {id; _} = t.guild in
+        let {id; _} = t in
         let update = Cache.GuildMap.update cache.guilds id ~f:(function
-        | Some _ | None -> t.guild) in
+        | Some _ | None -> t) in
         { cache with guilds = update }
 end
 
@@ -270,11 +265,11 @@ end
 (* TODO guild integrations *)
 
 module GuildMemberAdd = struct
-    include Member_t
+    type t = Member_t.t
 
-    let deserialize = of_yojson_exn
+    let deserialize = Member_t.of_yojson_exn
 
-    let update_cache (cache:Cache.t) t =
+    let update_cache (cache:Cache.t) (t:t) =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
             let update = match Cache.GuildMap.find cache.guilds t.guild_id with
             | Some g -> 
@@ -426,11 +421,10 @@ module GuildRoleUpdate = struct
 end
 
 module MessageCreate = struct
-    type t = { message: Message_t.t } [@@deriving sexp]
+    type t = Message_t.t
 
-    let deserialize ev =
-        let message = Message_t.of_yojson_exn ev in
-        { message; }
+    let deserialize =
+        Message_t.of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -488,12 +482,11 @@ module MessageDeleteBulk = struct
 end
 
 module PresenceUpdate = struct
-    include Presence
+    type t = Presence.t
 
-    let deserialize = of_yojson_exn
+    let deserialize = Presence.of_yojson_exn
 
-    (* TODO update users *)
-    let update_cache (cache:Cache.t) t =
+    let update_cache (cache:Cache.t) (t:t) =
         let id = t.user.id in
         let presences = Cache.UserMap.update cache.presences id ~f:(function Some _ | None -> t) in
         { cache with presences }
@@ -562,7 +555,8 @@ module Ready = struct
 end
 
 module Resumed = struct
-    type t = { trace: string option list [@key "_trace"] } [@@deriving sexp, yojson { strict = false; exn = true }]
+    type t = { trace: string option list [@key "_trace"] }
+    [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
 
@@ -583,14 +577,12 @@ module TypingStart = struct
 end
 
 module UserUpdate = struct
-    type t = { user: User_t.t } [@@deriving sexp, yojson { strict = false; exn = true }]
+    type t = User_t.t
 
-    let deserialize ev =
-        let user = User_t.of_yojson_exn ev in
-        { user; }
+    let deserialize = User_t.of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
-        let user = Some t.user in
+        let user = Some t in
         { cache with user }
 end
 

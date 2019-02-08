@@ -7,7 +7,7 @@ open Models
 let client = Ivar.create ()
 
 (* Define a function to handle message_create *)
-let check_command Event.MessageCreate.{message} =
+let check_command (message:Message.t) =
     (* Split content on space and return list head, list tail as tuple *)
     let cmd, rest = match String.split ~on:' ' message.content with
     | hd::tl -> hd, tl
@@ -131,7 +131,7 @@ let main () =
     (* Set some event handlers *)
     Client.message_create := check_command;
     Client.ready := (fun ready -> Logs.info (fun m -> m "Logged in as %s" (User.tag ready.user)));
-    Client.guild_create := (fun {guild} -> Logs.info (fun m -> m "Joined guild %s" guild.name));
+    Client.guild_create := (fun guild -> Logs.info (fun m -> m "Joined guild %s" guild.name));
     (* Pull token from env var *)
     let token = match Sys.getenv "DISCORD_TOKEN" with
     | Some t -> t

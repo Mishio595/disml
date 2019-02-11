@@ -1,5 +1,6 @@
 type unavailable = {
     id: Guild_id_t.t;
+    unavailable: bool;
 } [@@deriving sexp, yojson { exn = true }]
 
 (** Used internally. *)
@@ -26,7 +27,6 @@ type pre = {
     widget_channel_id: Channel_id_t.t option;
     system_channel_id: Channel_id_t.t option;
     large: bool;
-    unavailable: bool;
     member_count: int option;
     members: Member_t.member list;
     channels: Channel_t.channel_wrapper list;
@@ -56,7 +56,6 @@ type t = {
     widget_channel_id: Channel_id_t.t option; (** The channel ID for the widget, if enabled. *)
     system_channel_id: Channel_id_t.t option; (** The channel ID where system messages are sent. *)
     large: bool; (** Whether the guild exceeds the configured large threshold. *)
-    unavailable: bool; (** Whether the guild is unavailable or not. *)
     member_count: int option; (** Total number of members in the guild. *)
     members: Member_t.t list; (** List of guild members. *)
     channels: Channel_t.t list; (** List of guild channels. *)

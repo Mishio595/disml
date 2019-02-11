@@ -1,4 +1,8 @@
+open Core
+
 type t = [ `Guild_id of Snowflake.t ] [@@deriving sexp]
+
+let compare (`Guild_id t) (`Guild_id t') = Int.compare t t'
 
 let of_yojson a : (t, string) result =
     match Snowflake.of_yojson a with

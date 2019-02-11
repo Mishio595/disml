@@ -2,6 +2,7 @@ open Core
 
 type unavailable = {
     id: Guild_id_t.t;
+    unavailable: bool [@default false];
 } [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type pre = {
@@ -26,11 +27,10 @@ type pre = {
     widget_enabled: bool [@default false];
     widget_channel_id: Channel_id_t.t option [@default None];
     system_channel_id: Channel_id_t.t option [@default None];
-    large: bool;
-    unavailable: bool;
+    large: bool [@default false];
     member_count: int option [@default None];
-    members: Member_t.member list;
-    channels: Channel_t.channel_wrapper list;
+    members: Member_t.member list [@default []];
+    channels: Channel_t.channel_wrapper list [@default []];
 } [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type t = {
@@ -56,17 +56,16 @@ type t = {
     widget_channel_id: Channel_id_t.t option [@default None];
     system_channel_id: Channel_id_t.t option [@default None];
     large: bool;
-    unavailable: bool;
     member_count: int option [@default None];
     members: Member_t.t list;
     channels: Channel_t.t list;
 } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-let wrap ({id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel_id;system_channel_id;large;unavailable;member_count;members;channels}:pre) =
+let wrap ({id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel_id;system_channel_id;large;member_count;members;channels}:pre) =
     let `Guild_id id = id in
     let roles = List.map ~f:(Role_t.wrap ~guild_id:id) roles in
     let members = List.map ~f:(Member_t.wrap ~guild_id:id) members in
     let channels = List.map ~f:Channel_t.wrap channels in
-    {id = `Guild_id id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel_id;system_channel_id;large;unavailable;member_count;members;channels}
+    {id = `Guild_id id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel_id;system_channel_id;large;member_count;members;channels}
 
 let get_id guild = let `Guild_id id = guild.id in id

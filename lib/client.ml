@@ -18,4 +18,5 @@ let set_status_with ~f client =
     Sharder.set_status_with ~f client.sharder
 
 let request_guild_members ~guild ?query ?limit client =
+    let `Guild_id guild = guild in
     Sharder.request_guild_members ~guild ?query ?limit client.sharder

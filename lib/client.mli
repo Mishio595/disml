@@ -35,4 +35,4 @@ val set_status : status:Yojson.Safe.t -> t -> Sharder.Shard.shard list Deferred.
 val set_status_with : f:(Sharder.Shard.shard -> Yojson.Safe.t) -> t -> Sharder.Shard.shard list Deferred.t
 
 (** Same as {!Sharder.request_guild_members} where [client.sharder] is passed. *)
-val request_guild_members : guild:Snowflake.t -> ?query:string -> ?limit:int -> t -> Sharder.Shard.shard list Deferred.t
+val request_guild_members : guild:Guild_id.t -> ?query:string -> ?limit:int -> t -> Sharder.Shard.shard list Deferred.t

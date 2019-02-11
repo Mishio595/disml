@@ -99,8 +99,15 @@ let check_command (message:Message.t) =
         (match message.guild_id with
         | Some guild -> Client.request_guild_members ~guild client >>> ignore
         | None -> ())
-    | "!new" ->
-        Guild.cr
+    | "!new" -> (* Creates a guild named testing *)
+        Guild.create [ "name", `String "testing" ] >>= begin function
+        | Ok _ -> Message.reply message "Guild created"
+        | Error e -> Message.reply message (Printf.sprintf "Failed to create guild. Error: %s" (Error.to_string_hum e))
+        end >>> ignore
+    | "!delall" -> (* Deletes all guilds named testing *)
+        let cache = Mvar.peek_exn Cache.cache in
+        let guilds = Cache.GuildMap.filter cache.guilds ~f:(fun g -> g.name = "testing") in
+        let _ = Cache.GuildMap.map guilds ~f:Guild.delete in ()
     | _ -> () (* Fallback case, no matched command. *)
 
 (* Example logs setup *)
@@ -114,7 +121,8 @@ let main () =
     Client.message_create := check_command;
     Client.ready := (fun ready -> Logs.info (fun m -> m "Logged in as %s" (User.tag ready.user)));
     Client.guild_create := (fun guild -> Logs.info (fun m -> m "Joined guild %s" guild.name));
-    (* Pull token from env var. It is not recommended to hardcore your token. *)
+    Client.guild_delete := (fun {id;_} -> let `Guild_id id = id in Logs.info (fun m -> m "Left guild %d" id));
+    (* Pull token from env var. It is not recommended to hardcode your token. *)
     let token = match Sys.getenv "DISCORD_TOKEN" with
     | Some t -> t
     | None -> failwith "No token in env"

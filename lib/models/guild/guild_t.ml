@@ -2,7 +2,7 @@ open Core
 
 type unavailable = {
     id: Guild_id_t.t;
-    unavailable: bool;
+    unavailable: bool [@default false];
 } [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type pre = {
@@ -27,10 +27,10 @@ type pre = {
     widget_enabled: bool [@default false];
     widget_channel_id: Channel_id_t.t option [@default None];
     system_channel_id: Channel_id_t.t option [@default None];
-    large: bool;
+    large: bool [@default false];
     member_count: int option [@default None];
-    members: Member_t.member list;
-    channels: Channel_t.channel_wrapper list;
+    members: Member_t.member list [@default []];
+    channels: Channel_t.channel_wrapper list [@default []];
 } [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type t = {

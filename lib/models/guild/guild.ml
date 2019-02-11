@@ -9,6 +9,10 @@ let ban_user ~id ?(reason="") ?(days=0) guild =
         ("reason", `String reason);
     ])
 
+let create data =
+    let data = `Assoc data in
+    Http.create_guild data
+
 let create_emoji ~name ~image guild =
     Http.create_emoji (get_id guild) (`Assoc [
         ("name", `String name);

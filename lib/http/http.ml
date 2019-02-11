@@ -33,6 +33,7 @@ module Base = struct
         | None -> return ())
         >>= fun () ->
         match resp |> Response.status |> Code.code_of_status with
+        | 204 -> Deferred.Or_error.return `Null
         | code when Code.is_success code -> body |> Cohttp_async.Body.to_string >>| Yojson.Safe.from_string >>= Deferred.Or_error.return
         | code ->
             body |> Cohttp_async.Body.to_string >>= fun body ->

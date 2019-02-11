@@ -180,8 +180,8 @@ module GuildCreate = struct
     let update_cache (cache:Cache.t) (t:t) =
         let open Channel_t in
         let module C = Cache.ChannelMap in
-        let guilds = Cache.GuildMap.update cache.guilds t.id ~f:(function
-        | Some _ | None -> t) in
+        let guilds = Cache.GuildMap.update cache.guilds t.id ~f:(function Some _ | None -> t) in
+        let unavailable_guilds = Cache.GuildMap.remove cache.unavailable_guilds t.id in
         let text, voice, cat = ref [], ref [], ref [] in
         List.iter t.channels ~f:(function
         | GuildText c -> text := (c.id, c) :: !text
@@ -210,6 +210,7 @@ module GuildCreate = struct
             | `Both (u, _) | `Left u | `Right u -> let _ = key in Some u)
         | _ -> cache.users in
         { cache with guilds
+        ; unavailable_guilds
         ; text_channels
         ; voice_channels
         ; categories
@@ -229,6 +230,13 @@ module GuildDelete = struct
         let open Channel_t in
         let module G = Cache.GuildMap in
         let module C = Cache.ChannelMap in
+        if t.unavailable then
+            let guilds = G.remove cache.guilds t.id in
+            let unavailable_guilds = G.update cache.unavailable_guilds t.id ~f:(function Some _ | None -> t) in
+            { cache with guilds
+            ; unavailable_guilds
+            }
+        else
         match G.find cache.guilds t.id with
         | Some g ->
             let text_channels = ref cache.text_channels in
@@ -570,8 +578,15 @@ module Ready = struct
     let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
+        let unavailable_guilds = match List.map t.guilds ~f:(fun g -> g.id, g) |> Cache.GuildMap.of_alist with
+        | `Ok m -> Cache.GuildMap.merge m cache.unavailable_guilds ~f:(fun ~key -> function
+            | ` Both (g, _) | `Left g | `Right g -> let _ = key in Some g)
+        | _ -> cache.unavailable_guilds
+        in
         let user = Some t.user in
-        { cache with user }
+        { cache with user
+        ; unavailable_guilds
+        }
 end
 
 module Resumed = struct

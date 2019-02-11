@@ -3,6 +3,7 @@ open Async
 include module type of Guild_t
 
 val ban_user : id:Snowflake.t -> ?reason:string -> ?days:int -> t -> unit Deferred.Or_error.t
+val create : (string * Yojson.Safe.t) list -> t Deferred.Or_error.t
 val create_emoji : name:string -> image:string -> t -> Emoji.t Deferred.Or_error.t
 val create_role :
     name:string ->

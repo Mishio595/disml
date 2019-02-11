@@ -14,11 +14,11 @@ Latest changes are on master
 * Event dispatch to a user-defined consumer that can be changed at runtime
 * Automatic reconnection of dropped gateway connections, using RESUME when possible
 * Automatic rate limit handling for REST requests
+* Cache
 
 #### What is not implemented?
 * Abstractions for Discord Objects (**Mostly Completed**)
 * Voice
-* Cache
 
 ## Getting started
 In order to get started you'll first need to install OCaml (of course). I recommend using OPAM and Dune as a package manager and build tool respectively.

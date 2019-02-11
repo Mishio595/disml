@@ -11,25 +11,25 @@ module ChannelCreate = struct
         let module C = Cache.ChannelMap in
         match t with
         | GuildText c ->
-            let update = C.update cache.text_channels c.id ~f:(function
+            let text_channels = C.update cache.text_channels c.id ~f:(function
             | Some _ | None -> c) in
-            { cache with text_channels = update }
+            { cache with text_channels }
         | GuildVoice c ->
-            let update = C.update cache.voice_channels c.id ~f:(function
+            let voice_channels = C.update cache.voice_channels c.id ~f:(function
             | Some _ | None -> c) in
-            { cache with voice_channels = update }
+            { cache with voice_channels }
         | Category c ->
-            let update = C.update cache.categories c.id ~f:(function
+            let categories = C.update cache.categories c.id ~f:(function
             | Some _ | None -> c) in
-            { cache with categories = update }
+            { cache with categories }
         | Group c ->
-            let update = C.update cache.groups c.id ~f:(function
+            let groups = C.update cache.groups c.id ~f:(function
             | Some _ | None -> c) in
-            { cache with groups = update }
+            { cache with groups }
         | Private c ->
-            let update = C.update cache.private_channels c.id ~f:(function
+            let private_channels = C.update cache.private_channels c.id ~f:(function
             | Some _ | None -> c) in
-            { cache with private_channels = update }
+            { cache with private_channels }
 end
 
 module ChannelDelete = struct
@@ -43,20 +43,20 @@ module ChannelDelete = struct
         let module C = Cache.ChannelMap in
         match t with
         | GuildText c ->
-            let update = C.remove cache.text_channels c.id in
-            { cache with text_channels = update }
+            let text_channels = C.remove cache.text_channels c.id in
+            { cache with text_channels }
         | GuildVoice c ->
-            let update = C.remove cache.voice_channels c.id in
-            { cache with voice_channels = update }
+            let voice_channels = C.remove cache.voice_channels c.id in
+            { cache with voice_channels }
         | Category c ->
-            let update = C.remove cache.categories c.id in
-            { cache with categories = update }
+            let categories = C.remove cache.categories c.id in
+            { cache with categories }
         | Group c ->
-            let update = C.remove cache.groups c.id in
-            { cache with groups = update }
+            let groups = C.remove cache.groups c.id in
+            { cache with groups }
         | Private c ->
-            let update = C.remove cache.private_channels c.id in
-            { cache with private_channels = update }
+            let private_channels = C.remove cache.private_channels c.id in
+            { cache with private_channels }
 end
 
 module ChannelUpdate = struct
@@ -70,30 +70,30 @@ module ChannelUpdate = struct
         let module C = Cache.ChannelMap in
         match t with
         | GuildText c ->
-            let update = C.update cache.text_channels c.id ~f:(function
+            let text_channels = C.update cache.text_channels c.id ~f:(function
             | Some _ -> c
             | None -> c) in
-            { cache with text_channels = update }
+            { cache with text_channels }
         | GuildVoice c ->
-            let update = C.update cache.voice_channels c.id ~f:(function
+            let voice_channels = C.update cache.voice_channels c.id ~f:(function
             | Some _ -> c
             | None -> c) in
-            { cache with voice_channels = update }
+            { cache with voice_channels }
         | Category c ->
-            let update = C.update cache.categories c.id ~f:(function
+            let categories = C.update cache.categories c.id ~f:(function
             | Some _ -> c
             | None -> c) in
-            { cache with categories = update }
+            { cache with categories }
         | Group c ->
-            let update = C.update cache.groups c.id ~f:(function
+            let groups = C.update cache.groups c.id ~f:(function
             | Some _ -> c
             | None -> c) in
-            { cache with groups = update }
+            { cache with groups }
         | Private c ->
-            let update = C.update cache.private_channels c.id ~f:(function
+            let private_channels = C.update cache.private_channels c.id ~f:(function
             | Some _ -> c
             | None -> c) in
-            { cache with private_channels = update }
+            { cache with private_channels }
 end
 
 module ChannelPinsUpdate = struct
@@ -107,20 +107,20 @@ module ChannelPinsUpdate = struct
     let update_cache (cache:Cache.t) t =
         let module C = Cache.ChannelMap in
         if C.mem cache.private_channels t.channel_id then
-            let update = match C.find cache.private_channels t.channel_id with
+            let private_channels = match C.find cache.private_channels t.channel_id with
             | Some c -> C.set cache.private_channels ~key:t.channel_id ~data:{ c with last_pin_timestamp = t.last_pin_timestamp }
             | None -> cache.private_channels in
-            { cache with private_channels = update }
+            { cache with private_channels }
         else if C.mem cache.text_channels t.channel_id then
-            let update = match C.find cache.text_channels t.channel_id with
+            let text_channels = match C.find cache.text_channels t.channel_id with
             | Some c -> C.set cache.text_channels ~key:t.channel_id ~data:{ c with last_pin_timestamp = t.last_pin_timestamp }
             | None -> cache.text_channels in
-            { cache with text_channels = update }
+            { cache with text_channels }
         else if C.mem cache.groups t.channel_id then
-            let update = match C.find cache.groups t.channel_id with
+            let groups = match C.find cache.groups t.channel_id with
             | Some c -> C.set cache.groups ~key:t.channel_id ~data:{ c with last_pin_timestamp = t.last_pin_timestamp }
             | None -> cache.groups in
-            { cache with groups = update }
+            { cache with groups }
         else cache
 end
 
@@ -180,7 +180,7 @@ module GuildCreate = struct
     let update_cache (cache:Cache.t) (t:t) =
         let open Channel_t in
         let module C = Cache.ChannelMap in
-        let update = Cache.GuildMap.update cache.guilds t.id ~f:(function
+        let guilds = Cache.GuildMap.update cache.guilds t.id ~f:(function
         | Some _ | None -> t) in
         let text, voice, cat = ref [], ref [], ref [] in
         List.iter t.channels ~f:(function
@@ -209,7 +209,7 @@ module GuildCreate = struct
             Cache.UserMap.merge m cache.users ~f:(fun ~key -> function
             | `Both (u, _) | `Left u | `Right u -> let _ = key in Some u)
         | _ -> cache.users in
-        { cache with guilds = update
+        { cache with guilds
         ; text_channels
         ; voice_channels
         ; categories
@@ -225,10 +225,31 @@ module GuildDelete = struct
     
     let deserialize = Guild_t.unavailable_of_yojson_exn
 
-    (* TODO figure out of i need to empty channels here *)
-    let update_cache (cache:Cache.t) t =
-        let update = Cache.GuildMap.remove cache.guilds t.id in
-        { cache with guilds = update }
+    let update_cache (cache:Cache.t) (t:t) =
+        let open Channel_t in
+        let module G = Cache.GuildMap in
+        let module C = Cache.ChannelMap in
+        match G.find cache.guilds t.id with
+        | Some g ->
+            let text_channels = ref cache.text_channels in
+            let voice_channels = ref cache.voice_channels in
+            let categories = ref cache.categories in
+            List.iter g.channels ~f:(function
+                | GuildText c -> text_channels := C.remove cache.text_channels c.id
+                | GuildVoice c -> voice_channels := C.remove cache.voice_channels c.id
+                | Category c -> categories := C.remove cache.categories c.id
+                | _ -> ()
+            );
+            let guilds = G.remove cache.guilds g.id in
+            let text_channels, voice_channels, categories = !text_channels, !voice_channels, !categories in
+            { cache with guilds
+            ; text_channels
+            ; voice_channels
+            ; categories
+            }
+        | None ->
+            let guilds = G.remove cache.guilds t.id in
+            { cache with guilds }
 end
 
 module GuildUpdate = struct
@@ -240,9 +261,9 @@ module GuildUpdate = struct
     let update_cache (cache:Cache.t) t =
         let open Guild_t in
         let {id; _} = t in
-        let update = Cache.GuildMap.update cache.guilds id ~f:(function
+        let guilds = Cache.GuildMap.update cache.guilds id ~f:(function
         | Some _ | None -> t) in
-        { cache with guilds = update }
+        { cache with guilds }
 end
 
 module GuildEmojisUpdate = struct
@@ -255,10 +276,10 @@ module GuildEmojisUpdate = struct
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
-            let update = match Cache.GuildMap.find cache.guilds t.guild_id with
+            let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
             | Some g -> Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data:{ g with emojis = t.emojis }
             | None -> cache.guilds in
-            { cache with guilds = update }
+            { cache with guilds }
         else cache
 end
 
@@ -271,13 +292,13 @@ module GuildMemberAdd = struct
 
     let update_cache (cache:Cache.t) (t:t) =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
-            let update = match Cache.GuildMap.find cache.guilds t.guild_id with
+            let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
             | Some g -> 
                 let members = t :: g.members in
                 let data = { g with members } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            { cache with guilds = update }
+            { cache with guilds }
         else cache
 end
 
@@ -291,13 +312,13 @@ module GuildMemberRemove = struct
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
-            let update = match Cache.GuildMap.find cache.guilds t.guild_id with
+            let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
             | Some g -> 
                 let members = List.filter g.members ~f:(fun m -> m.user.id <> t.user.id) in
                 let data = { g with members } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            { cache with guilds = update }
+            { cache with guilds }
         else cache
 end
 
@@ -313,7 +334,7 @@ module GuildMemberUpdate = struct
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
-            let update = match Cache.GuildMap.find cache.guilds t.guild_id with
+            let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
             | Some g -> 
                 let members = List.map g.members ~f:(fun m ->
                     if m.user.id = t.user.id then
@@ -322,11 +343,10 @@ module GuildMemberUpdate = struct
                 let data = { g with members } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            { cache with guilds = update }
+            { cache with guilds }
         else cache
 end
 
-(* TODO figure out if this deserializes properly, then add cache update *)
 module GuildMembersChunk = struct
     type t =
     { guild_id: Guild_id.t
@@ -367,14 +387,14 @@ module GuildRoleCreate = struct
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
-            let update = match Cache.GuildMap.find cache.guilds t.guild_id with
+            let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
             | Some g ->
                 let `Guild_id guild_id = t.guild_id in
                 let roles = Role_t.wrap ~guild_id t.role :: g.roles in
                 let data = { g with roles } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            { cache with guilds = update }
+            { cache with guilds }
         else cache
 end
 
@@ -388,13 +408,13 @@ module GuildRoleDelete = struct
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
-            let update = match Cache.GuildMap.find cache.guilds t.guild_id with
+            let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
             | Some g ->
                 let roles = List.filter g.roles ~f:(fun r -> r.id <> t.role_id) in
                 let data = { g with roles } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            { cache with guilds = update }
+            { cache with guilds }
         else cache
 end
 
@@ -408,7 +428,7 @@ module GuildRoleUpdate = struct
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
-            let update = match Cache.GuildMap.find cache.guilds t.guild_id with
+            let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
             | Some g ->
                 let `Guild_id guild_id = t.guild_id in
                 let roles = List.map g.roles ~f:(fun r ->
@@ -416,7 +436,7 @@ module GuildRoleUpdate = struct
                 let data = { g with roles } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
-            { cache with guilds = update }
+            { cache with guilds }
         else cache
 end
 

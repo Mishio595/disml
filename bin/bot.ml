@@ -99,6 +99,8 @@ let check_command (message:Message.t) =
         (match message.guild_id with
         | Some guild -> Client.request_guild_members ~guild client >>> ignore
         | None -> ())
+    | "!new" ->
+        Guild.cr
     | _ -> () (* Fallback case, no matched command. *)
 
 (* Example logs setup *)

@@ -47,7 +47,7 @@ open Disml
 open Models
 
 (* Create a function to handle message_create. *)
-let check_command (Event.MessageCreate.{message}) =
+let check_command (message:Message.t) =
     if String.is_prefix ~prefix:"!ping" message.content then
         Message.reply message "Pong!" >>> ignore
 

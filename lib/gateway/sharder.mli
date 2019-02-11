@@ -38,6 +38,7 @@ module Shard : sig
     type 'a t = {
         mutable state: 'a;
         mutable stopped: bool;
+        mutable can_resume: bool;
     }
 
     (** Send a heartbeat to Discord. This is handled automatically. *)

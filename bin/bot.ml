@@ -7,51 +7,39 @@ open Models
 let client = Ivar.create ()
 
 (* Define a function to handle message_create *)
-let check_command Event.MessageCreate.{message} =
-    (* Split content on space and return list head, list tail as tuple *)
+let check_command (message:Message.t) =
+    (* Simple example of command parsing. *)
     let cmd, rest = match String.split ~on:' ' message.content with
     | hd::tl -> hd, tl
     | [] -> "", []
-    (* Match against the command portion *)
     in match cmd with
-    | "!ping" ->
-        (* Reply with "Pong!" and bind to the response, new message is the created one *)
+    | "!ping" -> (* Example ping command with REST round trip time edited into the response. *)
         Message.reply message "Pong!" >>> begin function
         | Ok message ->
-            (* Get the time difference between now and the timestamp of the reply *)
             let diff = Time.diff (Time.now ()) (Time.of_string message.timestamp) in
-            (* Edit the reply to include the timestamp as rounded milliseconds. Ignore result *)
             Message.set_content message (Printf.sprintf "Pong! `%d ms`" (Time.Span.to_ms diff |> Float.abs |> Float.to_int)) >>> ignore
         | Error e -> Error.raise e
         end
-    | "!spam" ->
-        (* Convert first arg to an integer, defaulting to 0 *)
+    | "!spam" -> (* Send a list of consecutive integers of N size with 1 message per list item. *)
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
-        (* Generate a list, and send each element to discord as unique message, ignoring the results. Not recommended to use this, but I have it for ratelimit tests *)
         List.range 0 count
         |> List.iter ~f:(fun i -> Message.reply message (string_of_int i) >>> ignore)
-    | "!list" ->
-        (* Convert first arg to an integer, defaulting to 0 *)
+    | "!list" -> (* Send a list of consecutive integers of N size in a single message. *)
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
-        (* Generate a list and convert to an sexp string *)
         let list = List.range 0 count
         |> List.sexp_of_t Int.sexp_of_t
         |> Sexp.to_string_hum in
-        (* Send list as a message and bind the result, printing to console *)
         Message.reply message list >>> begin function
         | Ok msg -> print_endline msg.content
         | Error err -> print_endline (Error.to_string_hum err)
         end
-    | "!fold" ->
-        (* Convert first arg to an integer, defaulting to 0 *)
+    | "!fold" -> (* Sum a consecutive list of integers of N size and send the result. *)
         let count = Option.((List.hd rest >>| Int.of_string) |> value ~default:0) in
-        (* Generate a list and sum the count before sending the result to discord. pretty useless lol *)
         let list = List.range 0 count
         |> List.fold ~init:0 ~f:(+)
         |> Int.to_string in
         Message.reply message list >>> ignore
-    | "!embed" ->
-        (* Example of setting pretty much everything in an embed using the Embed module builders *)
+    | "!embed" -> (* Example of setting pretty much everything in an embed using the Embed module builders *)
         let image_url = "https://cdn.discordapp.com/avatars/345316276098433025/17ccdc992814cc6e21a9e7d743a30e37.png" in
         let embed = Embed.(default
             |> title "Foo"
@@ -71,32 +59,56 @@ let check_command Event.MessageCreate.{message} =
             |> field ("field 1", "test", true)
         ) in
         Message.reply_with ~embed message >>> ignore
-    | "!status" ->
-        (* Concat all args into a string *)
+    | "!status" -> (* Set the status of all shards to a given string. *)
         let status = List.fold ~init:"" ~f:(fun a v -> a ^ " " ^ v) rest in
-        (* Ensure the client is started by binding to the Ivar *)
         Ivar.read client >>> fun client ->
-        (* Set the status as a simple string *)
         Client.set_status ~status:(`String status) client
         >>> fun _ ->
-        (* Upon response, let the user know we updated the status *)
         Message.reply message "Updated status" >>> ignore
-    | "!test" ->
-        (* Basic send message to channel ID, can use any ID as `Channel_id some_snowflake *)
+    | "!test" -> (* Basic send message to channel ID, can use any ID as `Channel_id some_snowflake *)
         Channel_id.say "Testing..." message.channel_id >>> ignore
-    | "!echo" ->
-        (* Fetch a message by ID in the current channel, or default to message ID *)
+    | "!echo" -> (* Fetches a message by ID in the current channel, defaulting to the sent message, and prints in s-expr form. *)
         let `Message_id id = message.id in
         let id = Option.((List.hd rest >>| Int.of_string) |> value ~default:id) in
         Channel_id.get_message ~id message.channel_id >>> begin function
-        (* If successful, convert to sexp and send to discord *)
         | Ok msg -> Message.reply message (Printf.sprintf "```lisp\n%s```" (Message.sexp_of_t msg |> Sexp.to_string_hum)) >>> ignore
         | _ -> ()
         end
-    | "!shutdown" ->
+    | "!cache" -> (* Output cache counts as a a basic embed. *)
+        let module C = Cache.ChannelMap in
+        let module G = Cache.GuildMap in
+        let module U = Cache.UserMap in
+        let cache = Mvar.peek_exn Cache.cache in
+        let gc = G.length cache.guilds in
+        let tc = C.length cache.text_channels in
+        let vc = C.length cache.voice_channels in
+        let cs = C.length cache.categories in
+        let gr = C.length cache.groups in
+        let pr = C.length cache.private_channels in
+        let uc = U.length cache.users in
+        let pre = U.length cache.presences in
+        let user = Option.(value ~default:"None" (cache.user >>| User.tag)) in
+        let embed = Embed.(default
+            |> description (Printf.sprintf "Guilds: %d\nText Channels: %d\nVoice Channels: %d\nCategories: %d\nGroups: %d\nPrivate Channels: %d\nUsers: %d\nPresences: %d\nCurrent User: %s" gc tc vc cs gr pr uc pre user)) in
+        Message.reply_with ~embed message >>> ignore
+    | "!shutdown" -> (* Issue a shutdown to all shards. It is expected that they will restart if `?restart` is not false. *)
         Ivar.read client >>> fun client ->
         Sharder.shutdown_all client.sharder >>> ignore
-    | _ -> ()
+    | "!rgm" -> (* Request guild members to be sent over the gateway for the guild the command is run in. This will cause multiple GUILD_MEMBERS_CHUNK events. *)
+        Ivar.read client >>> fun client ->
+        (match message.guild_id with
+        | Some guild -> Client.request_guild_members ~guild client >>> ignore
+        | None -> ())
+    | "!new" -> (* Creates a guild named testing *)
+        Guild.create [ "name", `String "testing" ] >>= begin function
+        | Ok _ -> Message.reply message "Guild created"
+        | Error e -> Message.reply message (Printf.sprintf "Failed to create guild. Error: %s" (Error.to_string_hum e))
+        end >>> ignore
+    | "!delall" -> (* Deletes all guilds named testing *)
+        let cache = Mvar.peek_exn Cache.cache in
+        let guilds = Cache.GuildMap.filter cache.guilds ~f:(fun g -> g.name = "testing") in
+        let _ = Cache.GuildMap.map guilds ~f:Guild.delete in ()
+    | _ -> () (* Fallback case, no matched command. *)
 
 (* Example logs setup *)
 let setup_logger () =
@@ -104,18 +116,18 @@ let setup_logger () =
     Logs.set_level ~all:true (Some Logs.Debug)
 
 let main () =
-    (* Call the logger setup *)
     setup_logger ();
-    (* Set some event handlers *)
+    (* Register some event handlers *)
     Client.message_create := check_command;
-    Client.ready := (fun _ -> Logs.info (fun m -> m "Ready!"));
-    Client.guild_create := (fun {guild} -> Logs.info (fun m -> m "Joined guild %s" guild.name));
-    (* Pull token from env var *)
+    Client.ready := (fun ready -> Logs.info (fun m -> m "Logged in as %s" (User.tag ready.user)));
+    Client.guild_create := (fun guild -> Logs.info (fun m -> m "Joined guild %s" guild.name));
+    Client.guild_delete := (fun {id;_} -> let `Guild_id id = id in Logs.info (fun m -> m "Left guild %d" id));
+    (* Pull token from env var. It is not recommended to hardcode your token. *)
     let token = match Sys.getenv "DISCORD_TOKEN" with
     | Some t -> t
     | None -> failwith "No token in env"
     in
-    (* Start client with no special options *)
+    (* Start client. *)
     Client.start ~large:250 ~compress:true token
     (* Fill that ivar once its done *)
     >>> Ivar.fill client

@@ -71,7 +71,10 @@ let check_command (message:Message.t) =
         let `Message_id id = message.id in
         let id = Option.((List.hd rest >>| Int.of_string) |> value ~default:id) in
         Channel_id.get_message ~id message.channel_id >>> begin function
-        | Ok msg -> Message.reply message (Printf.sprintf "```lisp\n%s```" (Message.sexp_of_t msg |> Sexp.to_string_hum)) >>> ignore
+        | Ok msg ->
+            let str = Message.sexp_of_t msg |> Sexp.to_string_hum in
+            print_endline str;
+            Message.reply message (Printf.sprintf "```lisp\n%s```" str) >>> ignore
         | _ -> ()
         end
     | "!cache" -> (* Output cache counts as a a basic embed. *)
@@ -99,6 +102,17 @@ let check_command (message:Message.t) =
         (match message.guild_id with
         | Some guild -> Client.request_guild_members ~guild client >>> ignore
         | None -> ())
+    | "!rep" ->
+        let input = Option.(List.hd rest |> value ~default:"a") in
+        let list = List.(range 0 2000 >>| (fun _ -> input) |> fold ~init:"" ~f:(^)) in
+        Message.reply message list >>= begin function
+            | Ok m ->
+                String.length m.content
+                |> Int.to_string
+                |> (^) "Bytes: "
+                |> Message.reply m
+            | Error e -> Message.reply message (Error.to_string_hum e)
+        end >>> ignore
     | "!new" -> (* Creates a guild named testing *)
         Guild.create [ "name", `String "testing" ] >>= begin function
         | Ok _ -> Message.reply message "Guild created"

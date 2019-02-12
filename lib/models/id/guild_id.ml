@@ -1,4 +1,3 @@
-open Core
 include Guild_id_t
 
 let ban_user ~id ?(reason="") ?(days=0) guild =

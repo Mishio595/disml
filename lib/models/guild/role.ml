@@ -1,4 +1,3 @@
-open Core
 include Role_t
 
 let edit_role ~body (role:t) =

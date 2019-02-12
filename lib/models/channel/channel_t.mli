@@ -1,4 +1,4 @@
-exception Invalid_channel of Yojson.Safe.json
+exception Invalid_channel of Yojson.Safe.t
 
 (** Represents a Group channel object. *)
 type group = {

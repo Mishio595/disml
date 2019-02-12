@@ -15,7 +15,7 @@ type t =
 | GUILD_BAN_ADD of GuildBanAdd.t
 | GUILD_BAN_REMOVE of GuildBanRemove.t
 | GUILD_EMOJIS_UPDATE of GuildEmojisUpdate.t
-(* | GUILD_INTEGRATIONS_UPDATE of Yojson.Safe.json *)
+(* | GUILD_INTEGRATIONS_UPDATE of Yojson.Safe.t *)
 | GUILD_MEMBER_ADD of GuildMemberAdd.t
 | GUILD_MEMBER_REMOVE of GuildMemberRemove.t
 | GUILD_MEMBER_UPDATE of GuildMemberUpdate.t
@@ -33,8 +33,8 @@ type t =
 | PRESENCE_UPDATE of PresenceUpdate.t
 | TYPING_START of TypingStart.t
 | USER_UPDATE of UserUpdate.t
-(* | VOICE_STATE_UPDATE of Yojson.Safe.json *)
-(* | VOICE_SERVER_UPDATE of Yojson.Safe.json *)
+(* | VOICE_STATE_UPDATE of Yojson.Safe.t *)
+(* | VOICE_SERVER_UPDATE of Yojson.Safe.t *)
 | WEBHOOK_UPDATE of WebhookUpdate.t
 | UNKNOWN of Unknown.t
 

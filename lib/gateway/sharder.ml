@@ -107,7 +107,7 @@ module Shard = struct
         ; session = session
         }
 
-    let set_status ~(status:Yojson.Safe.json) shard =
+    let set_status ~(status:Yojson.Safe.t) shard =
         let payload = match status with
         | `Assoc ["name", `String name; "type", `Int t]
         | `Assoc ["type", `Int t; "name", `String name] ->

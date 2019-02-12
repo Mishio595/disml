@@ -1,4 +1,3 @@
-open Core
 include Member_t
 
 let add_role ~(role:Role_t.t) member =

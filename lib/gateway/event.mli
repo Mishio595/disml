@@ -16,7 +16,7 @@ type t =
 | GUILD_BAN_ADD of GuildBanAdd.t
 | GUILD_BAN_REMOVE of GuildBanRemove.t
 | GUILD_EMOJIS_UPDATE of GuildEmojisUpdate.t
-(* | GUILD_INTEGRATIONS_UPDATE of Yojson.Safe.t *)
+(* | GUILD_INTEGRATIONS_UPDATE of Yojson.Safe.json *)
 | GUILD_MEMBER_ADD of GuildMemberAdd.t
 | GUILD_MEMBER_REMOVE of GuildMemberRemove.t
 | GUILD_MEMBER_UPDATE of GuildMemberUpdate.t
@@ -34,16 +34,16 @@ type t =
 | PRESENCE_UPDATE of PresenceUpdate.t
 | TYPING_START of TypingStart.t
 | USER_UPDATE of UserUpdate.t
-(* | VOICE_STATE_UPDATE of Yojson.Safe.t *)
-(* | VOICE_SERVER_UPDATE of Yojson.Safe.t *)
+(* | VOICE_STATE_UPDATE of Yojson.Safe.json *)
+(* | VOICE_SERVER_UPDATE of Yojson.Safe.json *)
 | WEBHOOK_UPDATE of WebhookUpdate.t
 | UNKNOWN of Unknown.t
 
 (** Used to convert an event string and payload into a t wrapper type. *)
-val event_of_yojson : contents:Yojson.Safe.t -> string -> t
+val event_of_yojson : contents:Yojson.Safe.json -> string -> t
 
 (** Sends the event to the registered handler. *)
 val dispatch : t -> unit
 
 (** Wrapper to other functions. This is called from the shards. *)
-val handle_event : ev:string -> Yojson.Safe.t -> unit
+val handle_event : ev:string -> Yojson.Safe.json -> unit

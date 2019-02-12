@@ -1,5 +1,5 @@
-open Async
 open Core
+open Async
 
 module ChannelMap = Map.Make(Channel_id_t)
 module GuildMap = Map.Make(Guild_id_t)

@@ -1,3 +1,5 @@
+open Core
+
 type t = [ `Role_id of Snowflake.t ] [@@deriving sexp]
 
 let of_yojson a : (t, string) result =

@@ -635,7 +635,7 @@ end
 module Unknown = struct
     type t =
     { kind: string
-    ; value: Yojson.Safe.t
+    ; value: Yojson.Safe.json
     }
 
     let deserialize kind value = { kind; value; } 

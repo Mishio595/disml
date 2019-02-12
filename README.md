@@ -1,12 +1,11 @@
-# Dis.ml - An OCaml wrapper for the Discord API
+# Dis.ml - An OCaml library for interfacing with the Discord API
 
 This is a library for creating bots on [Discord](https://discordapp.com/). Dis.ml uses JaneStreet's Async and Core libs and I highly recommend having a solid understanding of both of these before using this library.
 
-Docs can be found [here](https://mishio595.gitlab.io/disml).
+Docs can be found [here](https://mishio595.gitlab.io/disml) or generated using odoc and dune with `dune build @doc`
 
+---
 ## State of the project
-Latest changes are on master
-
 #### What is implemented?
 * The full Discord REST API (Exposed through `Disml.Http` with abstractions on various models)
 * Complete gateway support (sans voice)
@@ -20,25 +19,32 @@ Latest changes are on master
 * Abstractions for Discord Objects (**Mostly Completed**)
 * Voice
 
+---
 ## Getting started
 In order to get started you'll first need to install OCaml (of course). I recommend using OPAM and Dune as a package manager and build tool respectively.
 
-The project is not currently uploaded to opam, but you can still install via opam by pinning to this repo.
+As of release 0.2.5 (12 February 2019), disml is published on OPAM and installable by running
 
 ```
-opam pin add disml https://gitlab.com/Mishio595/disml.git
+opam install disml
 ```
+If you would like to use the development version, run
+```
+opam pin add disml --dev-repo
+```
+**Note:** The dev repo relies on being pinned to the latest `ppx_deriving_yojson` due to breaking changes in `yojson.1.6.0`. You can pin the package with `opam pin add ppx_deriving_yojson --dev-repo`
 
 If you do not use opam, see `disml.opam` for build instructions.
 
 You'll find an example bot in /bin directory.
 
-### Examples
+---
+## Examples
 
-##### Robust example
-`/bin/bot.ml`
+#### Robust example
+`/bin/bot.ml` **Note:** I use this for most of my testing involving API compat, so you'll likely see some bizarre commands.
 
-##### Basic example
+#### Basic example
 
 ```ocaml
 open Async

@@ -20,7 +20,7 @@ Key features include:
 For examples, see `/bin` in the git repo.
 """
 depends: [
-  "ocaml" {>= "4.02.3"}
+  "ocaml" {>= "4.04.1"}
   "dune" {build & >= "1.3.0"}
   "async_ssl" {>= "v0.11.0"}
   "core" {>= "v0.11.3"}
@@ -35,5 +35,5 @@ depends: [
 build: [
   ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
-  ["dune" "build" "@doc" "-p" name "-j" jobs] {with-doc}
+  ["dune" "build" "@doc" "-j" jobs] {with-doc}
 ]

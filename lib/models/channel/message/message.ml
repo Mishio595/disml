@@ -1,3 +1,4 @@
+open Core
 open Async
 include Message_t
 

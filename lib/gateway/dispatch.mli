@@ -56,7 +56,7 @@ val member_unban : (GuildBanRemove.t -> unit) ref
 val guild_emojis_update : (GuildEmojisUpdate.t -> unit) ref
 
 (** Dispatched when a guild's integrations are updated. *)
-(* val integrations_update : (Yojson.Safe.t -> unit) ref *)
+(* val integrations_update : (Yojson.Safe.json -> unit) ref *)
 
 (** Dispatched when a member joins a guild. *)
 val member_join : (GuildMemberAdd.t -> unit) ref
@@ -116,5 +116,5 @@ val webhook_update : (WebhookUpdate.t -> unit) ref
 val unknown : (Unknown.t -> unit) ref
 
 (**/**)
-(* val voice_state_update : (Yojson.Safe.t -> unit) ref *)
-(* val voice_server_update : (Yojson.Safe.t -> unit) ref *)
+(* val voice_state_update : (Yojson.Safe.json -> unit) ref *)
+(* val voice_server_update : (Yojson.Safe.json -> unit) ref *)

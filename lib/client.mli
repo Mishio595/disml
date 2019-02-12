@@ -29,10 +29,10 @@ type t = {
 val start : ?count:int -> ?compress:bool -> ?large:int -> string -> t Deferred.t
 
 (** Same as {!Sharder.set_status} where [client.sharder] is passed. *)
-val set_status : status:Yojson.Safe.t -> t -> Sharder.Shard.shard list Deferred.t
+val set_status : status:Yojson.Safe.json -> t -> Sharder.Shard.shard list Deferred.t
 
 (** Same as {!Sharder.set_status_with} where [client.sharder] is passed. *)
-val set_status_with : f:(Sharder.Shard.shard -> Yojson.Safe.t) -> t -> Sharder.Shard.shard list Deferred.t
+val set_status_with : f:(Sharder.Shard.shard -> Yojson.Safe.json) -> t -> Sharder.Shard.shard list Deferred.t
 
 (** Same as {!Sharder.request_guild_members} where [client.sharder] is passed. *)
 val request_guild_members : guild:Guild_id.t -> ?query:string -> ?limit:int -> t -> Sharder.Shard.shard list Deferred.t

@@ -1,6 +1,6 @@
 open Core
 
-exception Invalid_channel of Yojson.Safe.t
+exception Invalid_channel of Yojson.Safe.json
 
 type group = {
     id: Channel_id_t.t;

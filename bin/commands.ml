@@ -92,6 +92,7 @@ let cache message _args =
 
 (* Issue a shutdown to all shards. It is expected that they will restart if `?restart` is not false. *)
 let shutdown _message _args =
+    let module Sharder = Gateway.Sharder in
     Ivar.read client >>> fun client ->
     Sharder.shutdown_all client.sharder >>> ignore
 

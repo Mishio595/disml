@@ -107,40 +107,29 @@ module Shard = struct
         ; session = session
         }
 
-    let set_status ~(status:Yojson.Safe.t) shard =
-        let payload = match status with
-        | `Assoc ["name", `String name; "type", `Int t]
-        | `Assoc ["type", `Int t; "name", `String name] ->
-            `Assoc [
-                "status", `String "online";
-                "afk", `Bool false;
-                "since", `Null;
-                "game", `Assoc [
-                    "name", `String name;
-                    "type", `Int t;
-                ]
+    let set_status ?(status="online") ?(kind=1) ?name ?since shard =
+        let since = Option.(since >>| (fun v -> `Int v) |> value ~default:`Null) in
+        let game = match name with
+            | Some name -> `Assoc [ "name", `String name; "type", `Int kind ]
+            | None -> `Null
+        in
+        let payload = `Assoc
+            [ "status", `String status
+            ; "afk", `Bool false
+            ; "since", since
+            ; "game", game
             ]
-        | `String name ->
-            `Assoc [
-                "status", `String "online";
-                "afk", `Bool false;
-                "since", `Null;
-                "game", `Assoc [
-                    "name", `String name;
-                    "type", `Int 0
-                ]
-            ]
-        | _ -> raise Invalid_Payload
         in
         Ivar.read shard.ready >>= fun _ ->
         push_frame ~payload ~ev:STATUS_UPDATE shard
 
     let request_guild_members ?(query="") ?(limit=0) ~guild shard =
-        let payload = `Assoc [
-            "guild_id", `String (Int.to_string guild);
-            "query", `String query;
-            "limit", `Int limit;
-        ] in
+        let payload = `Assoc
+            [ "guild_id", `String (Int.to_string guild)
+            ; "query", `String query
+            ; "limit", `Int limit
+            ]
+        in
         Ivar.read shard.ready >>= fun _ ->
         push_frame ~payload ~ev:REQUEST_GUILD_MEMBERS shard
 
@@ -372,14 +361,9 @@ let start ?count ?compress ?large_threshold () =
     >>| fun shards ->
     { shards }
 
-let set_status ~status sharder =
+let set_status ?status ?kind ?name ?since sharder =
     Deferred.all @@ List.map ~f:(fun t ->
-        Shard.set_status ~status t.state
-    ) sharder.shards
-
-let set_status_with ~f sharder =
-    Deferred.all @@ List.map ~f:(fun t ->
-        Shard.set_status ~status:(f t.state) t.state
+        Shard.set_status ?status ?kind ?name ?since t.state
     ) sharder.shards
 
 let request_guild_members ?query ?limit ~guild sharder =

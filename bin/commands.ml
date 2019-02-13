@@ -54,9 +54,9 @@ let embed message _args =
 
 (* Set the status of all shards to a given string. *)
 let status message args =
-    let status = List.fold ~init:"" ~f:(fun a v -> a ^ " " ^ v) args in
+    let name = List.fold ~init:"" ~f:(fun a v -> a ^ " " ^ v) args in
     Ivar.read client >>> fun client ->
-    Client.set_status ~status:(`String status) client
+    Client.set_status ~name client
     >>> fun _ ->
     Message.reply message "Updated status" >>> ignore
 
@@ -87,14 +87,19 @@ let cache message _args =
     let pre = U.length cache.presences in
     let user = Option.(value ~default:"None" (cache.user >>| User.tag)) in
     let embed = Embed.(default
-        |> description (Printf.sprintf "Guilds: %d\nText Channels: %d\nVoice Channels: %d\nCategories: %d\nGroups: %d\nPrivate Channels: %d\nUsers: %d\nPresences: %d\nCurrent User: %s" gc tc vc cs gr pr uc pre user)) in
+        |> description (Printf.sprintf
+            "Guilds: %d\nText Channels: %d\n\
+            Voice Channels: %d\nCategories: %d\n\
+            Groups: %d\nPrivate Channels: %d\n\
+            Users: %d\nPresences: %d\n\
+            Current User: %s"
+            gc tc vc cs gr pr uc pre user)) in
     Message.reply_with ~embed message >>> ignore
 
-(* Issue a shutdown to all shards. It is expected that they will restart if `?restart` is not false. *)
+(* Issue a shutdown to all shards, then exits the process. *)
 let shutdown _message _args =
-    let module Sharder = Gateway.Sharder in
-    Ivar.read client >>> fun client ->
-    Sharder.shutdown_all client.sharder >>> ignore
+    Ivar.read client >>= Client.shutdown_all ~restart:false >>> fun _ ->
+    exit 0
 
 (* Request guild members to be sent over the gateway for the guild the command is run in. This will cause multiple GUILD_MEMBERS_CHUNK events. *)
 let request_members (message:Message.t) _args =

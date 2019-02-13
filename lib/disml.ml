@@ -1,5 +1,5 @@
 (**
-    {2 Dis.ml - An OCaml wrapper for the Discord API}
+    {2 Dis.ml - An OCaml library for interfacing with the Discord API}
 
     {3 Example}
 
@@ -29,13 +29,35 @@
 (** The primary interface for connecting to Discord and handling gateway events. *)
 module Client = Client
 
+(** Caching module. {!Cache.cache} is an {{!Async.Mvar.Read_write.t}Mvar}, which is always filled, containing an immutable cache record to allow for safe, concurrent access. *)
 module Cache = Cache
 
 (** Raw HTTP abstractions for Discord's REST API. *)
-module Http = Http
+module Http = struct
+    include Http
 
-(** Gateway connection and sharding manager. *)
-module Sharder = Sharder
+    (** Internal module for resolving endpoints *)
+    module Endpoints = Endpoints
+
+    (** Internal module for handling rate limiting *)
+    module Ratelimits = Rl
+end
+
+(** Gateway connection super module. *)
+module Gateway = struct
+
+    (** Internal module used for dispatching events. *)
+    module Dispatch = Dispatch
+
+    (** Internal module for representing events. *)
+    module Event = Event
+
+    (** Internal module for representing Discord's opcodes. *)
+    module Opcode = Opcode
+
+    (** Shard manager *)
+    module Sharder = Sharder
+end
 
 (** Super module for all Discord object types. *)
 module Models = struct

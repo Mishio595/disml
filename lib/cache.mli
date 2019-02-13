@@ -10,7 +10,9 @@ module GuildMap : module type of Map.Make(Guild_id_t)
 (** Represents a Map of {!User_id.t} keys. *)
 module UserMap : module type of Map.Make(User_id_t)
 
-(** The full cache record. Immutable and intended to be wrapped in a concurrency-safe wrapper such as {{!Async.Mvar.Read_write.t}Mvar}. *)
+(** The full cache record. Immutable and intended to be wrapped in a concurrency-safe wrapper such as {{!Async.Mvar.Read_write.t}Mvar}.
+    Channels are split by type so it isn't necessary to match them later on.
+*)
 type t =
 { text_channels: Channel_t.guild_text ChannelMap.t
 ; voice_channels: Channel_t.guild_voice ChannelMap.t

@@ -62,7 +62,7 @@ module Shard = struct
             | Binary ->
                 if compress then `Ok (decompress s.content |> Yojson.Safe.from_string)
                     else `Error "Failed to decompress"
-            | Close -> `Close s.extension
+            | Close -> `Close s.content
             | op ->
                 let op = Frame.Opcode.to_string op in
                 `Error ("Unexpected opcode " ^ op)
@@ -312,7 +312,7 @@ let start ?count ?compress ?large_threshold () =
                 Shard.handle_frame ~f t.state >>| fun s ->
                 t.state <- s
             | `Close c ->
-                Logs.warn (fun m -> m "Close frame received. Code: %d" c);
+                Logs.warn (fun m -> m "Close frame received. Code: %s" c);
                 Shard.shutdown t
             | `Error e ->
                 Logs.warn (fun m -> m "Websocket soft error: %s" e);

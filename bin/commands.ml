@@ -129,5 +129,5 @@ let delete_guilds message _args =
     let all = Cache.GuildMap.(map guilds ~f:(fun g -> Guild.delete g >>| function
     | Ok () -> res := Printf.sprintf "%s\nDeleted %s" !res g.name
     | Error _ -> ()) |> to_alist) |> List.map ~f:(snd) in
-    Deferred.all all >>> fun _ ->
-    Message.reply message !res >>> ignore
+    Deferred.all all >>= (fun _ ->
+    Message.reply message !res) >>> ignore

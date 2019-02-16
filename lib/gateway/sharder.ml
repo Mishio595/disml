@@ -107,7 +107,7 @@ module Shard = struct
         ; session = session
         }
 
-    let set_status ?(status="online") ?(kind=1) ?name ?since shard =
+    let set_status ?(status="online") ?(kind=0) ?name ?since shard =
         let since = Option.(since >>| (fun v -> `Int v) |> value ~default:`Null) in
         let game = match name with
             | Some name -> `Assoc [ "name", `String name; "type", `Int kind ]

@@ -11,8 +11,8 @@ let start ?count ?compress ?(large=250) token =
     >>| fun sharder ->
     { sharder; }
 
-let set_status ?status ?kind ?name ?since client =
-    Sharder.set_status ?status ?kind ?name ?since client.sharder
+let set_status ?status ?kind ?name ?since ?url client =
+    Sharder.set_status ?status ?kind ?name ?since ?url client.sharder
 
 let request_guild_members ~guild ?query ?limit client =
     let `Guild_id guild = guild in

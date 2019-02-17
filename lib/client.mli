@@ -39,6 +39,7 @@ val set_status :
     ?kind:int ->
     ?name:string ->
     ?since:int ->
+    ?url:string ->
     t ->
     Sharder.Shard.shard list Deferred.t
 

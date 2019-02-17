@@ -52,6 +52,7 @@ module Shard : sig
         ?kind:int ->
         ?name:string ->
         ?since:int ->
+        ?url:string ->
         shard ->
         shard Deferred.t
 
@@ -85,6 +86,7 @@ val set_status :
     ?kind:int ->
     ?name:string ->
     ?since:int ->
+    ?url:string ->
     t ->
     Shard.shard list Deferred.t
 

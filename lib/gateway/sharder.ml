@@ -107,10 +107,15 @@ module Shard = struct
         ; session = session
         }
 
-    let set_status ?(status="online") ?(kind=0) ?name ?since shard =
+    let set_status ?(status="online") ?(kind=0) ?name ?since ?url shard =
         let since = Option.(since >>| (fun v -> `Int v) |> value ~default:`Null) in
+        let url = Option.(url >>| (fun v -> `String v) |> value ~default:`Null) in
         let game = match name with
-            | Some name -> `Assoc [ "name", `String name; "type", `Int kind ]
+            | Some name -> `Assoc
+                [ "name", `String name
+                ; "type", `Int kind
+                ; "url", url
+                ]
             | None -> `Null
         in
         let payload = `Assoc
@@ -361,9 +366,9 @@ let start ?count ?compress ?large_threshold () =
     >>| fun shards ->
     { shards }
 
-let set_status ?status ?kind ?name ?since sharder =
+let set_status ?status ?kind ?name ?since ?url sharder =
     Deferred.all @@ List.map ~f:(fun t ->
-        Shard.set_status ?status ?kind ?name ?since t.state
+        Shard.set_status ?status ?kind ?name ?since ?url t.state
     ) sharder.shards
 
 let request_guild_members ?query ?limit ~guild sharder =

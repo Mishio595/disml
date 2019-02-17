@@ -100,7 +100,7 @@ module Shard = struct
             Clock.after (Core.Time.Span.create ~sec:5 ())
             >>> (fun _ -> Mvar.put identify_lock () >>> ignore);
             J.(member "session_id" data |> to_string_option)
-        end else None in
+        end else shard.session in
         Event.handle_event ~ev:t data;
         return
         { shard with seq = seq

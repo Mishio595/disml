@@ -11,7 +11,7 @@ type rl = {
     limit: int;
     remaining: int;
     reset: int;
-}
+} [@@deriving sexp]
 
 (** Type representing the specific case of {!RouteMap}. *)
 type t = ((rl, read_write) Mvar.t) RouteMap.t

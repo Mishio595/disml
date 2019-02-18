@@ -27,10 +27,10 @@ module Base = struct
         ]
 
     let process_response path ((resp:Response.t), body) =
-        (match Response.headers resp
-        |> Rl.rl_of_header with
-        | Some r -> Mvar.put (Rl.find_exn !rl path) r
-        | None -> return ())
+        let limit = match Response.headers resp |> Rl.rl_of_header with
+        | Some r -> r
+        | None -> Rl.default
+        in Mvar.put (Rl.find_exn !rl path) limit
         >>= fun () ->
         match resp |> Response.status |> Code.code_of_status with
         | 204 -> Deferred.Or_error.return `Null

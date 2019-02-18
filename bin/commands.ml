@@ -131,3 +131,48 @@ let delete_guilds message _args =
     | Error _ -> ()) |> to_alist) |> List.map ~f:(snd) in
     Deferred.all all >>= (fun _ ->
     Message.reply message !res) >>> ignore
+
+let role_test (message:Message.t) args =
+    let exception Member_not_found in
+    let cache = Mvar.peek_exn Cache.cache in
+    let name = List.fold ~init:"" ~f:(fun a v -> a ^ " " ^ v) args in
+    let create_role name guild_id =
+        Guild_id.create_role ~name guild_id >>| function
+        | Ok role -> role
+        | Error e -> Error.raise e
+    in
+    let delete_role role =
+        Role.delete role >>| function
+        | Ok () -> ()
+        | Error e -> Error.raise e
+    in
+    let add_role member role =
+        Member.add_role ~role member >>| function
+        | Ok () -> ()
+        | Error e -> Error.raise e
+    in
+    let remove_role member role =
+        Member.remove_role ~role member >>| function
+        | Ok () -> ()
+        | Error e -> Error.raise e
+    in
+    let get_member id = match Cache.GuildMap.find cache.guilds id with
+        | Some guild ->
+            begin match List.find guild.members ~f:(fun m -> m.user.id = message.author.id) with
+            | Some member -> member
+            | None -> raise Member_not_found
+            end
+        | None -> raise Member_not_found
+    in
+    match message.guild_id with
+    | Some id -> begin try
+        let member = get_member id in
+        create_role name id >>= (fun role ->
+            add_role member role >>= (fun () -> remove_role member role)
+            >>= (fun () -> delete_role role)) >>= (fun () ->
+            Message.reply message "Role test finished") >>> ignore
+        with
+        | Member_not_found -> Message.reply message "Error: Member not found" >>> ignore
+        | exn -> Message.reply message (Printf.sprintf "Error: %s" Error.(of_exn exn |> to_string_hum)) >>> ignore
+        end
+    | None -> ()

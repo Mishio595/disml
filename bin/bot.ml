@@ -21,6 +21,7 @@ let check_command (message:Message.t) =
     | "!rgm" -> Commands.request_members message rest
     | "!new" -> Commands.new_guild message rest
     | "!delall" -> Commands.delete_guilds message rest
+    | "!roletest" -> Commands.role_test message rest
     | _ -> () (* Fallback case, no matched command. *)
 
 (* Example logs setup *)

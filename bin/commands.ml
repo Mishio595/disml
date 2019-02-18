@@ -148,12 +148,12 @@ let role_test (message:Message.t) args =
     in
     let add_role member role =
         Member.add_role ~role member >>| function
-        | Ok () -> ()
+        | Ok () -> role
         | Error e -> Error.raise e
     in
     let remove_role member role =
         Member.remove_role ~role member >>| function
-        | Ok () -> ()
+        | Ok () -> role
         | Error e -> Error.raise e
     in
     let get_member id = match Cache.GuildMap.find cache.guilds id with
@@ -167,12 +167,13 @@ let role_test (message:Message.t) args =
     match message.guild_id with
     | Some id -> begin try
         let member = get_member id in
-        create_role name id >>= (fun role ->
-            add_role member role >>= (fun () -> remove_role member role)
-            >>= (fun () -> delete_role role)) >>= (fun () ->
-            Message.reply message "Role test finished") >>> ignore
+            create_role name id
+            >>= add_role member
+            >>= remove_role member
+            >>= delete_role
+            >>= (fun () -> Message.reply message "Role test finished")
         with
-        | Member_not_found -> Message.reply message "Error: Member not found" >>> ignore
-        | exn -> Message.reply message (Printf.sprintf "Error: %s" Error.(of_exn exn |> to_string_hum)) >>> ignore
-        end
+        | Member_not_found -> Message.reply message "Error: Member not found"
+        | exn -> Message.reply message (Printf.sprintf "Error: %s" Error.(of_exn exn |> to_string_hum))
+        end >>> ignore
     | None -> ()

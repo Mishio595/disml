@@ -64,7 +64,10 @@ module Base = struct
             | _ -> raise Invalid_Method)
             >>= process_response path
         in if limit.remaining > 0 then process ()
-        else Clock.at (Core.Time.(Span.of_int_sec limit.reset |> of_span_since_epoch)) >>= process
+        else
+            let time = Time.(Span.of_int_sec limit.reset |> of_span_since_epoch) in
+            Logs.debug (fun m -> m "Rate-limiting [Route: %s] [Duration: %d ms]" path Time.(diff time (Time.now ()) |> Span.to_ms |> Float.to_int) );
+            Clock.at time >>= process
 end
 
 let get_gateway () =

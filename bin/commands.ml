@@ -167,11 +167,11 @@ let role_test (message:Message.t) args =
     match message.guild_id with
     | Some id -> begin try
         let member = get_member id in
-            create_role name id
-            >>= add_role member
-            >>= remove_role member
-            >>= delete_role
-            >>= (fun () -> Message.reply message "Role test finished")
+        create_role name id
+        >>= add_role member
+        >>= remove_role member
+        >>= delete_role
+        >>= (fun () -> Message.reply message "Role test finished")
         with
         | Member_not_found -> Message.reply message "Error: Member not found"
         | exn -> Message.reply message (Printf.sprintf "Error: %s" Error.(of_exn exn |> to_string_hum))

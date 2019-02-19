@@ -12,6 +12,7 @@
 		guild guild_t guild_id guild_id_t
 		member member_t
 		message message_t message_id
+		permissions
 		presence
 		reaction reaction_t
 		role role_t role_id
@@ -20,7 +21,7 @@
 		event_models
 		cache client client_options disml dispatch endpoints event http opcode rl sharder
 	)
-	(libraries checkseum.ocaml core async_ssl cohttp-async decompress logs yojson websocket-async ppx_deriving_yojson.runtime)
+	(libraries checkseum.ocaml core async_ssl cohttp-async decompress logs yojson websocket-async ppx_deriving_yojson.runtime bitmasks)
 	(preprocess (pps ppx_sexp_conv ppx_deriving_yojson))
 )
 

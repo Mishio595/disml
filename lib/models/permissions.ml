@@ -1,0 +1,47 @@
+type elt =
+| CREATE_INSTANT_INVITE
+| KICK_MEMBERS 
+| BAN_MEMBERS 
+| ADMINISTRATOR 
+| MANAGE_CHANNELS 
+| MANAGE_GUILD 
+| ADD_REACTIONS 
+| VIEW_AUDIT_LOG 
+| PRIORITY_SPEAKER 
+| READ_MESSAGES
+| SEND_MESSAGES 
+| SEND_TTS_MESSAGES 
+| MANAGE_MESSAGES 
+| EMBED_LINKS 
+| ATTACH_FILES 
+| READ_MESSAGE_HISTORY 
+| MENTION_EVERYONE 
+| USE_EXTERNAL_EMOJIS 
+| CONNECT 
+| SPEAK 
+| MUTE_MEMBERS 
+| DEAFEN_MEMBERS 
+| MOVE_MEMBERS 
+| USE_VAD 
+| CHANGE_NICKNAME 
+| MANAGE_NICKNAMES 
+| MANAGE_ROLES 
+| MANAGE_WEBHOOKS 
+| MANAGE_EMOJIS
+
+include BitMaskSet.Make(struct
+    include BitMaskSet.Int
+    type t = elt
+    let mask = 0b0111_1111_1111_1111_0111_1101_1111_1111
+end)
+
+let of_seq seq = List.of_seq seq |> of_list
+
+let to_seq mask = elements mask |> List.to_seq
+
+let to_seq_from (elt:elt) (_:storage) = Seq.return elt
+
+let add_seq seq init =
+    List.of_seq seq
+    |> of_list
+    |> (lor) init

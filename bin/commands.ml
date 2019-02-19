@@ -67,7 +67,6 @@ let echo (message:Message.t) args =
     Channel_id.get_message ~id message.channel_id >>> function
     | Ok msg ->
         let str = Message.sexp_of_t msg |> Sexp.to_string_hum in
-        print_endline str;
         Message.reply message (Printf.sprintf "```lisp\n%s```" str) >>> ignore
     | _ -> ()
 

@@ -31,6 +31,7 @@ depends: [
   "ppx_sexp_conv" {>= "v0.11.2"}
   "websocket-async" {>= "2.12"}
   "yojson" {>= "1.6.0"}
+  "bitmasks" {>= "1.1.0"}
 ]
 build: [
   ["dune" "subst"] {pinned}

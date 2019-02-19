@@ -52,13 +52,13 @@ type category = {
 } [@@deriving sexp, yojson { exn = true }]
 
 (** Wrapper variant for all channel types. *)
-type t =
-| Group of group
-| Private of dm
-| GuildText of guild_text
-| GuildVoice of guild_voice
-| Category of category
-[@@deriving sexp, yojson { exn = true }]
+type t = [
+| `Group of group
+| `Private of dm
+| `GuildText of guild_text
+| `GuildVoice of guild_voice
+| `Category of category
+] [@@deriving sexp, yojson { exn = true }]
 
 (** Intermediate used internally. *)
 type channel_wrapper = {

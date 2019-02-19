@@ -48,13 +48,13 @@ type category = {
     name: string;
 } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-type t =
-| Group of group
-| Private of dm
-| GuildText of guild_text
-| GuildVoice of guild_voice
-| Category of category
-[@@deriving sexp, yojson { strict = false; exn = true }]
+type t = [
+| `Group of group
+| `Private of dm
+| `GuildText of guild_text
+| `GuildVoice of guild_voice
+| `Category of category
+] [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type channel_wrapper = {
     id: Channel_id_t.t;
@@ -103,16 +103,16 @@ let unwrap_as_category {id;guild_id;position;name;_} =
 
 let wrap s =
     match s.kind with
-    | 0 -> GuildText (unwrap_as_guild_text s)
-    | 1 -> Private (unwrap_as_dm s)
-    | 2 -> GuildVoice (unwrap_as_guild_voice s)
-    | 3 -> Group (unwrap_as_group s)
-    | 4 -> Category (unwrap_as_category s)
+    | 0 -> `GuildText (unwrap_as_guild_text s)
+    | 1 -> `Private (unwrap_as_dm s)
+    | 2 -> `GuildVoice (unwrap_as_guild_voice s)
+    | 3 -> `Group (unwrap_as_group s)
+    | 4 -> `Category (unwrap_as_category s)
     | _ -> raise (Invalid_channel (channel_wrapper_to_yojson s))
 
-let get_id = function
-| Group g -> let `Channel_id id = g.id in id
-| Private p -> let `Channel_id id = p.id in id
-| GuildText t -> let `Channel_id id = t.id in id
-| GuildVoice v -> let `Channel_id id = v.id in id
-| Category c -> let `Channel_id id = c.id in id
+let get_id (c:t) = match c with
+| `Group g -> let `Channel_id id = g.id in id
+| `Private p -> let `Channel_id id = p.id in id
+| `GuildText t -> let `Channel_id id = t.id in id
+| `GuildVoice v -> let `Channel_id id = v.id in id
+| `Category c -> let `Channel_id id = c.id in id

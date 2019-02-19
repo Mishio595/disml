@@ -6,27 +6,26 @@ module ChannelCreate = struct
     let deserialize ev =
         Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap)
 
-    let update_cache (cache:Cache.t) t =
-        let open Channel_t in
+    let update_cache (cache:Cache.t) (t:t) =
         let module C = Cache.ChannelMap in
         match t with
-        | GuildText c ->
+        | `GuildText c ->
             let text_channels = C.update cache.text_channels c.id ~f:(function
             | Some _ | None -> c) in
             { cache with text_channels }
-        | GuildVoice c ->
+        | `GuildVoice c ->
             let voice_channels = C.update cache.voice_channels c.id ~f:(function
             | Some _ | None -> c) in
             { cache with voice_channels }
-        | Category c ->
+        | `Category c ->
             let categories = C.update cache.categories c.id ~f:(function
             | Some _ | None -> c) in
             { cache with categories }
-        | Group c ->
+        | `Group c ->
             let groups = C.update cache.groups c.id ~f:(function
             | Some _ | None -> c) in
             { cache with groups }
-        | Private c ->
+        | `Private c ->
             let private_channels = C.update cache.private_channels c.id ~f:(function
             | Some _ | None -> c) in
             { cache with private_channels }
@@ -38,23 +37,22 @@ module ChannelDelete = struct
     let deserialize ev =
         Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap)
 
-    let update_cache (cache:Cache.t) t =
-        let open Channel_t in
+    let update_cache (cache:Cache.t) (t:t) =
         let module C = Cache.ChannelMap in
         match t with
-        | GuildText c ->
+        | `GuildText c ->
             let text_channels = C.remove cache.text_channels c.id in
             { cache with text_channels }
-        | GuildVoice c ->
+        | `GuildVoice c ->
             let voice_channels = C.remove cache.voice_channels c.id in
             { cache with voice_channels }
-        | Category c ->
+        | `Category c ->
             let categories = C.remove cache.categories c.id in
             { cache with categories }
-        | Group c ->
+        | `Group c ->
             let groups = C.remove cache.groups c.id in
             { cache with groups }
-        | Private c ->
+        | `Private c ->
             let private_channels = C.remove cache.private_channels c.id in
             { cache with private_channels }
 end
@@ -65,31 +63,30 @@ module ChannelUpdate = struct
     let deserialize ev =
         Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap)
 
-    let update_cache (cache:Cache.t) t =
-        let open Channel_t in
+    let update_cache (cache:Cache.t) (t:t) =
         let module C = Cache.ChannelMap in
         match t with
-        | GuildText c ->
+        | `GuildText c ->
             let text_channels = C.update cache.text_channels c.id ~f:(function
             | Some _ -> c
             | None -> c) in
             { cache with text_channels }
-        | GuildVoice c ->
+        | `GuildVoice c ->
             let voice_channels = C.update cache.voice_channels c.id ~f:(function
             | Some _ -> c
             | None -> c) in
             { cache with voice_channels }
-        | Category c ->
+        | `Category c ->
             let categories = C.update cache.categories c.id ~f:(function
             | Some _ -> c
             | None -> c) in
             { cache with categories }
-        | Group c ->
+        | `Group c ->
             let groups = C.update cache.groups c.id ~f:(function
             | Some _ -> c
             | None -> c) in
             { cache with groups }
-        | Private c ->
+        | `Private c ->
             let private_channels = C.update cache.private_channels c.id ~f:(function
             | Some _ -> c
             | None -> c) in
@@ -184,9 +181,9 @@ module GuildCreate = struct
         let unavailable_guilds = Cache.GuildMap.remove cache.unavailable_guilds t.id in
         let text, voice, cat = ref [], ref [], ref [] in
         List.iter t.channels ~f:(function
-        | GuildText c -> text := (c.id, c) :: !text
-        | GuildVoice c -> voice := (c.id, c) :: !voice
-        | Category c -> cat := (c.id, c) :: !cat
+        | `GuildText c -> text := (c.id, c) :: !text
+        | `GuildVoice c -> voice := (c.id, c) :: !voice
+        | `Category c -> cat := (c.id, c) :: !cat
         | _ -> ());
         let text_channels = match C.of_alist !text with
         | `Ok m ->
@@ -243,9 +240,9 @@ module GuildDelete = struct
             let voice_channels = ref cache.voice_channels in
             let categories = ref cache.categories in
             List.iter g.channels ~f:(function
-                | GuildText c -> text_channels := C.remove cache.text_channels c.id
-                | GuildVoice c -> voice_channels := C.remove cache.voice_channels c.id
-                | Category c -> categories := C.remove cache.categories c.id
+                | `GuildText c -> text_channels := C.remove cache.text_channels c.id
+                | `GuildVoice c -> voice_channels := C.remove cache.voice_channels c.id
+                | `Category c -> categories := C.remove cache.categories c.id
                 | _ -> ()
             );
             let guilds = G.remove cache.guilds g.id in

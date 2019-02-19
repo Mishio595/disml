@@ -78,6 +78,7 @@ let cache message _args =
     let module U = Cache.UserMap in
     let cache = Mvar.peek_exn Cache.cache in
     let gc = G.length cache.guilds in
+    let ug = G.length cache.unavailable_guilds in
     let tc = C.length cache.text_channels in
     let vc = C.length cache.voice_channels in
     let cs = C.length cache.categories in
@@ -88,12 +89,12 @@ let cache message _args =
     let user = Option.(value ~default:"None" (cache.user >>| User.tag)) in
     let embed = Embed.(default
         |> description (Printf.sprintf
-            "Guilds: %d\nText Channels: %d\n\
-            Voice Channels: %d\nCategories: %d\n\
-            Groups: %d\nPrivate Channels: %d\n\
-            Users: %d\nPresences: %d\n\
-            Current User: %s"
-            gc tc vc cs gr pr uc pre user)) in
+            "Guilds: %d\nUnavailable Guilds: %d\n\
+            Text Channels: %d\nVoice Channels: %d\n\
+            Categories: %d\nGroups: %d\n\
+            Private Channels: %d\nUsers: %d\n\
+            Presences: %d\nCurrent User: %s"
+            gc ug tc vc cs gr pr uc pre user)) in
     Message.reply_with ~embed message >>> ignore
 
 (* Issue a shutdown to all shards, then exits the process. *)

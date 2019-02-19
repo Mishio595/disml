@@ -36,3 +36,34 @@ let cache =
     let m = Mvar.create () in
     Mvar.set m (create ());
     m
+
+let guild cache = GuildMap.find cache.guilds
+
+let text_channel cache = ChannelMap.find cache.text_channels
+
+let voice_channel cache = ChannelMap.find cache.voice_channels
+
+let category cache = ChannelMap.find cache.categories
+
+let dm cache = ChannelMap.find cache.private_channels
+
+let group cache = ChannelMap.find cache.groups
+
+let channel cache id =
+    let check = ChannelMap.find in
+    match check cache.text_channels id with
+    | Some c -> Some (`GuildText c)
+    | None -> (
+    match check cache.voice_channels id with
+    | Some c -> Some (`GuildVoice c)
+    | None -> (
+    match check cache.categories id with
+    | Some c -> Some (`Category c)
+    | None -> (
+    match check cache.private_channels id with
+    | Some c -> Some (`Private c)
+    | None -> (
+    match check cache.groups id with
+    | Some c -> Some (`Group c)
+    | None -> None
+    ))))

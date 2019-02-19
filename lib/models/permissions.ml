@@ -39,7 +39,9 @@ let of_seq seq = List.of_seq seq |> of_list
 
 let to_seq mask = elements mask |> List.to_seq
 
-let to_seq_from (elt:elt) (_:storage) = Seq.return elt
+let to_seq_from elt init =
+    let _, _, r = split elt init in
+    elements r |> List.to_seq
 
 let add_seq seq init =
     List.of_seq seq

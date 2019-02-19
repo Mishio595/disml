@@ -41,7 +41,7 @@ let to_seq mask = elements mask |> List.to_seq
 
 let to_seq_from elt init =
     let _, _, r = split elt init in
-    elements r |> List.to_seq
+    elt :: elements r |> List.to_seq
 
 let add_seq seq init =
     List.of_seq seq

@@ -6,7 +6,7 @@ type role = {
     colour: int [@key "color"];
     hoist: bool;
     position: int;
-    permissions: int;
+    permissions: Permissions.t;
     managed: bool;
     mentionable: bool;
 } [@@deriving sexp, yojson { strict = false; exn = true }]
@@ -17,7 +17,7 @@ type t = {
     colour: int [@key "color"];
     hoist: bool;
     position: int;
-    permissions: int;
+    permissions: Permissions.t;
     managed: bool;
     mentionable: bool;
     guild_id: Guild_id_t.t;

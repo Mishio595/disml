@@ -56,6 +56,4 @@ let to_seq_from elt init =
     elt :: elements r |> List.to_seq
 
 let add_seq seq init =
-    List.of_seq seq
-    |> of_list
-    |> (lor) init
+    of_seq seq |> union init

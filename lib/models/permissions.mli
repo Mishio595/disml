@@ -28,7 +28,14 @@ type elt =
 | MANAGE_ROLES 
 | MANAGE_WEBHOOKS 
 | MANAGE_EMOJIS
+[@@deriving sexp]
 
 include BitMaskSet.S with type elt := elt
                      with type storage = int
                      with type t = private int
+
+val sexp_of_t : t -> Sexplib.Sexp.t
+val t_of_sexp : Sexplib.Sexp.t -> t
+val of_yojson_exn : Yojson.Safe.t -> t
+val of_yojson : Yojson.Safe.t -> (t, string) result
+val to_yojson : t -> Yojson.Safe.t

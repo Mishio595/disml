@@ -177,3 +177,18 @@ let role_test (message:Message.t) args =
         | exn -> Message.reply message (Printf.sprintf "Error: %s" Error.(of_exn exn |> to_string_hum))
         end >>> ignore
     | None -> ()
+
+let check_permissions (message:Message.t) _args =
+    let cache = Mvar.peek_exn Cache.cache in
+    let permissions = match message.guild_id, message.member with
+    | Some g, Some m ->
+        begin match Cache.guild cache g with
+        | Some g ->
+            List.fold m.roles ~init:Permissions.empty ~f:(fun acc rid ->
+                let role = List.find_exn g.roles ~f:(fun r -> r.id = rid) in
+                Permissions.union acc role.permissions)
+        | None -> Permissions.empty
+        end
+    | _ -> Permissions.empty in
+    let permissions = Permissions.elements permissions |> List.sexp_of_t Permissions.sexp_of_elt |> Sexp.to_string_hum in
+    Message.reply message (Printf.sprintf "Permissions: %s" permissions) >>> ignore

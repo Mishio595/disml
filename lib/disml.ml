@@ -98,6 +98,9 @@ module Models = struct
     (** Represents solely a message ID. REST operations can be performed without the full object overhead using this. *)
     module Message_id = Message_id
 
+    (** Represents a permission integer as bitmask, allowing for constant set representation. *)
+    module Permissions = Permissions
+
     (** Represents a user presence. See {!Models.Event.PresenceUpdate}. *)
     module Presence = Presence
 

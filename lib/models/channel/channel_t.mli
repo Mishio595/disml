@@ -30,6 +30,7 @@ type guild_text = {
     topic: string option;
     nsfw: bool;
     slow_mode_timeout: int option;
+    permission_overwrites: Overwrites.t list;
 } [@@deriving sexp, yojson { exn = true }]
 
 (** Represents a voice channel in a guild. *)
@@ -41,6 +42,7 @@ type guild_voice = {
     position: int;
     user_limit: int;
     bitrate: int option;
+    permission_overwrites: Overwrites.t list;
 } [@@deriving sexp, yojson { exn = true }]
 
 (** Represents a guild category. *)
@@ -49,6 +51,7 @@ type category = {
     guild_id: Guild_id_t.t option;
     position: int;
     name: string;
+    permission_overwrites: Overwrites.t list;
 } [@@deriving sexp, yojson { exn = true }]
 
 (** Wrapper variant for all channel types. *)
@@ -79,6 +82,7 @@ type channel_wrapper = {
     application_id: Snowflake.t option;
     category_id: Channel_id_t.t option;
     last_pin_timestamp: string option;
+    permission_overwrites: Overwrites.t list;
 } [@@deriving sexp, yojson { exn = true }]
 
 val unwrap_as_guild_text : channel_wrapper -> guild_text

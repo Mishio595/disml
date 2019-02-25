@@ -99,7 +99,11 @@ module Models = struct
     module Message_id = Message_id
 
     (** Represents a permission integer as bitmask, allowing for constant set representation. *)
-    module Permissions = Permissions
+    module Permissions = struct
+        include Permissions
+
+        module Overwrite = Overwrites
+    end
 
     (** Represents a user presence. See {!Models.Event.PresenceUpdate}. *)
     module Presence = Presence

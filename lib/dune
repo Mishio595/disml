@@ -12,6 +12,7 @@
 		guild guild_t guild_id guild_id_t
 		member member_t
 		message message_t message_id
+		overwrites
 		permissions
 		presence
 		reaction reaction_t

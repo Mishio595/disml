@@ -29,6 +29,7 @@ type guild_text = {
     topic: string option [@default None];
     nsfw: bool;
     slow_mode_timeout: int option [@default None];
+    permission_overwrites: Overwrites.t list [@default []];
 } [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type guild_voice = {
@@ -39,6 +40,7 @@ type guild_voice = {
     position: int;
     user_limit: int [@default -1];
     bitrate: int option [@default None];
+    permission_overwrites: Overwrites.t list [@default []];
 } [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type category = {
@@ -46,6 +48,7 @@ type category = {
     guild_id: Guild_id_t.t option [@default None];
     position: int;
     name: string;
+    permission_overwrites: Overwrites.t list [@default []];
 } [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type t = [
@@ -74,19 +77,20 @@ type channel_wrapper = {
     application_id: Snowflake.t option [@default None];
     category_id: Channel_id_t.t option [@default None][@key "parent_id"];
     last_pin_timestamp: string option [@default None];
+    permission_overwrites: Overwrites.t list [@default []];
 } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-let unwrap_as_guild_text {id;guild_id;position;name;topic;nsfw;last_message_id;slow_mode_timeout;category_id;last_pin_timestamp;_} =
+let unwrap_as_guild_text {id;guild_id;position;name;topic;nsfw;last_message_id;slow_mode_timeout;category_id;last_pin_timestamp;permission_overwrites;_} =
     let position = Option.value_exn position in
     let name = Option.value_exn name in
     let nsfw = Option.value ~default:false nsfw in
-    { id; guild_id; position; name; topic; nsfw; last_message_id; slow_mode_timeout; category_id; last_pin_timestamp }
+    { id; guild_id; position; name; topic; nsfw; last_message_id; slow_mode_timeout; category_id; last_pin_timestamp; permission_overwrites }
 
-let unwrap_as_guild_voice {id;guild_id;position;name;bitrate;user_limit;category_id;_} =
+let unwrap_as_guild_voice {id;guild_id;position;name;bitrate;user_limit;category_id;permission_overwrites;_} =
     let position = Option.value_exn position in
     let name = Option.value_exn name in
     let user_limit = Option.value ~default:(-1) user_limit in
-    { id; guild_id; position; name; user_limit; bitrate ; category_id; }
+    { id; guild_id; position; name; user_limit; bitrate ; category_id; permission_overwrites }
 
 let unwrap_as_dm {id;last_message_id;last_pin_timestamp;_} =
     { id; last_message_id; last_pin_timestamp; }
@@ -96,10 +100,10 @@ let unwrap_as_group {id;name;last_message_id;recipients;icon;owner_id;last_pin_t
     let owner_id = Option.value_exn owner_id in
     { id; name; last_message_id; recipients; icon; owner_id; last_pin_timestamp; }
 
-let unwrap_as_category {id;guild_id;position;name;_} =
+let unwrap_as_category {id;guild_id;position;name;permission_overwrites;_} =
     let position = Option.value_exn position in
     let name = Option.value_exn name in
-    { id; guild_id; position; name; }
+    { id; guild_id; position; name; permission_overwrites }
 
 let wrap s =
     match s.kind with

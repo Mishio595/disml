@@ -16,6 +16,12 @@ type rl = {
 (** Type representing the specific case of {!RouteMap}. *)
 type t = ((rl, read_write) Mvar.t) RouteMap.t
 
+val get_rl :
+    [ `Get | `Delete | `Post | `Patch | `Put ] ->
+    string ->
+    t ->
+    (rl, read_write) Mvar.t * t
+
 (** Converts Cohttp header data into ratelimit information.
     @return Some of ratelimit information or None on bad headers
 *)

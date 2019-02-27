@@ -17,7 +17,7 @@ module Base : sig
     val request :
         ?body:Yojson.Safe.t ->
         ?query:(string * string) list ->
-        [> `DELETE | `GET | `PATCH | `POST | `PUT ] ->
+        [ `Delete | `Get | `Patch | `Post | `Put ] ->
         string ->
         Yojson.Safe.t Deferred.Or_error.t
 end

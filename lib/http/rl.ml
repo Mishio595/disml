@@ -12,22 +12,13 @@ type rl = {
 (* TODO improve route getting, use Date header *)
 type t = ((rl, read_write) Mvar.t) RouteMap.t
 
-let r_msg = Tyre.(str "/channel/" *> pos_int <&> str "/messages/" *> pos_int)
-let r_message_delete = Tyre.compile r_msg
-let r_emoji = Tyre.(compile (r_msg <&> str "/reactions/" *> pcre "[\w\d:]+" <* (str "/@me" <|> str "/" *> pos_int)))
+let r_message_delete = Str.regexp "/channel/[0-9]+/messages/"
+let r_emoji = Str.regexp "/channel/[0-9]+/messages/[0-9]+/reactions/[A-Za-z0-9_\\-]+/\\(@me|[0-9]+\\)"
 
 let route_of_path meth path =
     match meth with
-    | `Delete -> begin
-        match Tyre.exec r_message_delete path with
-        | Ok (cid, _) -> Printf.sprintf "/channel/%d/messages" cid
-        | Error _ -> path
-        end
-    | `Put -> begin
-        match Tyre.exec r_emoji path with
-        | Ok ((cid, mid), _) -> Printf.sprintf "channel/%d/messages/%d/reactions" cid mid
-        | Error _ -> path
-        end
+    | `Delete -> if Str.string_match r_message_delete path 0 then Str.matched_string path else path
+    | `Put -> if Str.string_match r_emoji path 0 then Str.matched_string path else path
     | _ -> path    
 
 let rl_of_header h =

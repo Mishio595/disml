@@ -46,7 +46,7 @@ let create_channel ~mode ~name guild =
         ("type", `Int kind);
     ])
 
-let delete guild = 
+let delete guild =
     Http.delete_guild (get_id guild)
 
 let get_ban ~id guild =

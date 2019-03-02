@@ -33,7 +33,7 @@ module Shard : sig
         url: string; (** The websocket URL in use. *)
         _internal: Reader.t * Writer.t;
     }
-    
+
     (** Wrapper around an internal state, used to wrap {!shard}. *)
     type 'a t = {
         mutable state: 'a;

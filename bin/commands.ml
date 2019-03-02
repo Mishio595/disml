@@ -97,7 +97,8 @@ let cache message _args =
     Message.reply_with ~embed message >>> ignore
 
 (* Issue a shutdown to all shards, then exits the process. *)
-let shutdown _message _args =
+let shutdown (message:Message.t) _args =
+    if message.author.id = `User_id 242675474927583232 then
     Ivar.read client >>= Client.shutdown_all ~restart:false >>> fun _ ->
     exit 0
 
@@ -180,6 +181,7 @@ let role_test (message:Message.t) args =
 
 let check_permissions (message:Message.t) _args =
     let cache = Mvar.peek_exn Cache.cache in
+    let empty = Permissions.empty in
     let permissions = match message.guild_id, message.member with
     | Some g, Some m ->
         begin match Cache.guild cache g with
@@ -187,8 +189,28 @@ let check_permissions (message:Message.t) _args =
             List.fold m.roles ~init:Permissions.empty ~f:(fun acc rid ->
                 let role = List.find_exn g.roles ~f:(fun r -> r.id = rid) in
                 Permissions.union acc role.permissions)
-        | None -> Permissions.empty
+        | None -> empty
         end
-    | _ -> Permissions.empty in
-    let permissions = Permissions.elements permissions |> List.sexp_of_t Permissions.sexp_of_elt |> Sexp.to_string_hum in
-    Message.reply message (Printf.sprintf "Permissions: %s" permissions) >>> ignore
+    | _ -> empty in
+    let allow, deny = match message.member with
+    | Some m ->
+        begin match Cache.text_channel cache message.channel_id with
+        | Some c ->
+            List.fold c.permission_overwrites ~init:(empty, empty) ~f:(fun (a,d) {allow; deny; id; kind} ->
+                let `User_id uid = message.author.id in
+                if (kind = "role" && List.mem m.roles (`Role_id id) ~equal:(=)) || (kind = "user" && id = uid) then
+                    Permissions.union allow a, Permissions.union deny d
+                else a, d
+            )
+        | None -> empty, empty
+        end
+    | None -> empty, empty in
+    let g_perms = Permissions.elements permissions
+        |> List.sexp_of_t Permissions.sexp_of_elt
+        |> Sexp.to_string_hum in
+    let c_perms = Permissions.(union permissions allow
+        |> diff deny
+        |> elements)
+        |> List.sexp_of_t Permissions.sexp_of_elt
+        |> Sexp.to_string_hum in
+    Message.reply message (Printf.sprintf "Global Permissions: %s\nChannel Permissions: %s" g_perms c_perms) >>> ignore

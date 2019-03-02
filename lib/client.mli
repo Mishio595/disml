@@ -10,19 +10,19 @@ type t =
 (** Start the Client. This begins shard connections to Discord and event handlers should be registered prior to calling this.
     {3 Example}
     {[
-        open Async
-        open Disml
+open Async
+open Disml
 
-        let main () =
-            let token = "a valid bot token" in
-            Client.start ~count:5 token >>> print_endline "Client launched"
+let main () =
+    let token = "a valid bot token" in
+    Client.start ~count:5 token >>> print_endline "Client launched"
 
-        let _ =
-            Scheduler.go_main ~main ()
+let _ =
+    Scheduler.go_main ~main ()
     ]}
     @param ?count Optional amount of shards to launch. Defaults to autosharding.
-    @param ?compress Whether to use compression over the gateway. }
-    @param ?large Large threshold for guilds. Default is 250.
+    @param ?compress Whether to use compression over the gateway.
+    @param ?large Large threshold for guilds. Default is 100.
     @param string The token used for authentication.
     @return A deferred client object.
 *)

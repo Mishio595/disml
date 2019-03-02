@@ -4,25 +4,25 @@
     {3 Example}
 
     {[
-    open Async
-    open Core
-    open Disml
-    open Models
+open Async
+open Core
+open Disml
+open Models
 
-    (* Create a function to handle message_create. *)
-    let check_command (Event.MessageCreate.{message}) =
-        if String.is_prefix ~prefix:"!ping" message.content then
-            Message.reply message "Pong!" >>> ignore
+(* Create a function to handle message_create. *)
+let check_command (Event.MessageCreate.{message}) =
+    if String.is_prefix ~prefix:"!ping" message.content then
+        Message.reply message "Pong!" >>> ignore
 
-    let main () =
-        (* Register the event handler *)
-        Client.message_create := check_command;
-        (* Start the client. It's recommended to load the token from an env var or other config file. *)
-        Client.start "My token" >>> ignore
+let main () =
+    (* Register the event handler *)
+    Client.message_create := check_command;
+    (* Start the client. It's recommended to load the token from an env var or other config file. *)
+    Client.start "My token" >>> ignore
 
-    let _ =
-        (* Launch the Async scheduler. You must do this for anything to work. *)
-        Scheduler.go_main ~main ()
+let _ =
+    (* Launch the Async scheduler. You must do this for anything to work. *)
+    Scheduler.go_main ~main ()
     ]}
 *)
 
@@ -125,7 +125,7 @@ module Models = struct
 
     (** Represents solely a user ID. REST operations can be performed without the full object overhead using this. *)
     module User_id = User_id
-    
+
     (** Represents the structures received over the gateway. *)
     module Event = Event_models
 end

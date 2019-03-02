@@ -220,7 +220,7 @@ module GuildDelete = struct
     { id: Guild_id_t.t
     ; unavailable: bool
     }
-    
+
     let deserialize = Guild_t.unavailable_of_yojson_exn
 
     let update_cache (cache:Cache.t) (t:t) =
@@ -298,7 +298,7 @@ module GuildMemberAdd = struct
     let update_cache (cache:Cache.t) (t:t) =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
             let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
-            | Some g -> 
+            | Some g ->
                 let members = t :: g.members in
                 let data = { g with members } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
@@ -318,7 +318,7 @@ module GuildMemberRemove = struct
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
             let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
-            | Some g -> 
+            | Some g ->
                 let members = List.filter g.members ~f:(fun m -> m.user.id <> t.user.id) in
                 let data = { g with members } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
@@ -340,7 +340,7 @@ module GuildMemberUpdate = struct
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
             let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
-            | Some g -> 
+            | Some g ->
                 let members = List.map g.members ~f:(fun m ->
                     if m.user.id = t.user.id then
                         { m with nick = t.nick; roles = t.roles }
@@ -518,7 +518,7 @@ module PresenceUpdate = struct
 end
 
 (* module PresencesReplace = struct
-    type t = 
+    type t =
 
     let deserialize = of_yojson_exn
 end *)
@@ -635,7 +635,7 @@ module Unknown = struct
     ; value: Yojson.Safe.t
     }
 
-    let deserialize kind value = { kind; value; } 
+    let deserialize kind value = { kind; value; }
 end
 
 (* module VoiceHeartbeat = struct

@@ -10,15 +10,15 @@ exception No_message_found
 
     {3 Examples}
     {[
-        open Core
-        open Disml
+open Core
+open Disml
 
-        let check_command (msg : Message.t) =
-            if String.is_prefix ~prefix:"!hello" msg.content then
-                let embed = Embed.(default |> title "Hello World!") in
-                Channel_id.send_message ~embed msg.channel_id >>> ignore
+let check_command (msg : Message.t) =
+    if String.is_prefix ~prefix:"!hello" msg.content then
+        let embed = Embed.(default |> title "Hello World!") in
+        Channel_id.send_message ~embed msg.channel_id >>> ignore
 
-        Client.message_create := check_command
+Client.message_create := check_command
     ]}
 *)
 val send_message :

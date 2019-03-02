@@ -31,7 +31,7 @@ val reply_with :
     ?tts:bool ->
     t ->
     Message_t.t Deferred.Or_error.t
-    
+
 (** Set the content of the message. *)
 val set_content : t -> string -> t Deferred.Or_error.t
 

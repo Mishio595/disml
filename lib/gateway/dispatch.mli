@@ -6,14 +6,14 @@
     [Client.guild_create := (fun guild -> print_endline guild.name)]
 
     {[
-        open Core
-        open Disml
+open Core
+open Disml
 
-        let check_command (msg : Message.t) =
-            if String.is_prefix ~prefix:"!ping" msg.content then
-                Message.reply msg "Pong!" >>> ignore
-        
-        Client.message_create := check_command
+let check_command (msg : Message.t) =
+    if String.is_prefix ~prefix:"!ping" msg.content then
+        Message.reply msg "Pong!" >>> ignore
+
+Client.message_create := check_command
     ]}
 *)
 

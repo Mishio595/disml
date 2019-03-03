@@ -3,7 +3,7 @@ image: ocaml/opam2:latest
 before_script:
   - sudo apt-get -y install m4 pkg-config libssl-dev libffi-dev
   - opam init
-  - eval `opam config env`
+  - eval $(opam env)
   - opam update
   - opam pin add ppx_deriving_yojson --dev-repo -n
   - opam pin add disml .

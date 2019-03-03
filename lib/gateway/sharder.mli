@@ -5,27 +5,17 @@ open Websocket
 exception Invalid_Payload
 exception Failure_to_Establish_Heartbeat
 
-type t
-
-(** Start the Sharder. This is called by {!Client.start}. *)
-val start :
-    ?count:int ->
-    ?compress:bool ->
-    ?large_threshold:int ->
-    unit ->
-    t Lwt.t
-
 (** Module representing a single shard. *)
 module Shard : sig
     (** Representation of the state of a shard. *)
     type shard =
     { compress: bool (** Whether to compress payloads. *)
     ; hb_interval: int Lwt.t * int Lwt.u (** Time between heartbeats. Not known until HELLO is received. *)
-    ; hb_stopper: unit Lwt.t * unit Lwt.u (** Stops the heartbeat sequencing when filled *)
+    ; hb_stopper: Lwt_engine.event option (** Used to cancel heartbeat sequencer *)
     ; id: int (** ID of the current shard. Must be less than shard_count. *)
     ; large_threshold: int (** Minimum number of members needed for a guild to be considered large. *)
     ; ready: unit Lwt.t * unit Lwt.u (** A simple promise indicating if the shard has received READY. *)
-    ; recv: Frame.t Lwt_stream.t (** Receiver function for the websocket. *)
+    ; recv: (unit -> Frame.t Lwt.t) (** Receiver function for the websocket. *)
     ; send: (Frame.t -> unit Lwt.t) (** Sender function for the websocket. *)
     ; seq: int (** Current sequence number for the session. *)
     ; session: string option (** Current session ID *)
@@ -34,10 +24,10 @@ module Shard : sig
     }
 
     (** Wrapper around an internal state, used to wrap {!shard}. *)
-    type 'a t = {
-        mutable state: 'a;
-        mutable stopped: bool;
-        mutable can_resume: bool;
+    type 'a t =
+    { mutable state: 'a
+    ; mutable stop: unit Lwt.t * unit Lwt.u
+    ; mutable can_resume: bool
     }
 
     (** Send a heartbeat to Discord. This is handled automatically. *)
@@ -78,6 +68,18 @@ module Shard : sig
         shard t ->
         unit Lwt.t
 end
+
+type t =
+{ shards: Shard.shard Shard.t list
+}
+
+(** Start the Sharder. This is called by {!Client.start}. *)
+val start :
+    ?count:int ->
+    ?compress:bool ->
+    ?large_threshold:int ->
+    unit ->
+    t Lwt.t
 
 (** Calls {!Shard.set_status} for each shard registered with the sharder. *)
 val set_status :

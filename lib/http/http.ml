@@ -41,6 +41,7 @@ module Base = struct
             Lwt_result.fail @@ Printf.sprintf "Unsuccessful response received: %d - %s" code body
 
     let request ?(body=`Null) ?(query=[]) m path =
+        Logs_lwt.info (fun m -> m "Making HTTP request. Path: %s" path) >>= fun () ->
         let limit, rlm = Rl.get_rl m path !rl in
         rl := rlm;
         Lwt_mvar.take limit >>= fun limit ->

@@ -1,5 +1,5 @@
 (executable
 	(name bot)
 	(modules bot commands)
-	(libraries lwt disml base)
+	(libraries logs.fmt lwt disml base)
 )

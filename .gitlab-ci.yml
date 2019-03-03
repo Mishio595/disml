@@ -14,6 +14,7 @@ build:
   - echo "Build successful"
   only:
   - master
+  - merge_requests
 
 pages:
   stage: deploy

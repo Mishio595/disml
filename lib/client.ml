@@ -1,4 +1,4 @@
-open Async
+open Lwt.Infix
 include Dispatch
 
 type t =
@@ -8,7 +8,7 @@ type t =
 let start ?count ?compress ?(large=250) token =
     Client_options.token := token;
     Sharder.start ?count ?compress ~large_threshold:large ()
-    >>| fun sharder ->
+    >|= fun sharder ->
     { sharder; }
 
 let set_status ?status ?kind ?name ?since ?url client =

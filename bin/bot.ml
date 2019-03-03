@@ -1,7 +1,8 @@
-open Async
-open Core
+open Lwt.Infix
 open Disml
 open Models
+
+module String = Base.String
 
 (* Define a function to handle message_create *)
 let check_command (message:Message.t) =
@@ -16,37 +17,39 @@ let check_command (message:Message.t) =
     | "!embed" -> Commands.embed message rest
     | "!status" -> Commands.status message rest
     | "!echo" -> Commands.echo message rest
-    | "!cache" -> Commands.cache message rest
+    (* | "!cache" -> Commands.cache message rest *)
     | "!shutdown" -> Commands.shutdown message rest
     | "!rgm" -> Commands.request_members message rest
-    | "!new" -> Commands.new_guild message rest
-    | "!delall" -> Commands.delete_guilds message rest
-    | "!roletest" -> Commands.role_test message rest
-    | "!perms" -> Commands.check_permissions message rest
-    | _ -> () (* Fallback case, no matched command. *)
+    (* | "!new" -> Commands.new_guild message rest *)
+    (* | "!delall" -> Commands.delete_guilds message rest *)
+    (* | "!roletest" -> Commands.role_test message rest *)
+    (* | "!perms" -> Commands.check_permissions message rest *)
+    | _ -> Lwt.return_unit (* Fallback case, no matched command. *)
 
 (* Example logs setup *)
 let setup_logger () =
-    Logs.set_reporter (Logs_fmt.reporter ());
-    Logs.set_level ~all:true (Some Logs.Debug)
+    let open Logs in
+    set_reporter (format_reporter ());
+    set_level (Some Info)
 
 let main () =
-    setup_logger ();
     (* Register some event handlers *)
     Client.message_create := check_command;
-    Client.ready := (fun ready -> Logs.info (fun m -> m "Logged in as %s" (User.tag ready.user)));
-    Client.guild_create := (fun guild -> Logs.info (fun m -> m "Joined guild %s" guild.name));
-    Client.guild_delete := (fun {id;_} -> let `Guild_id id = id in Logs.info (fun m -> m "Left guild %d" id));
+    Client.ready := (fun ready -> Logs_lwt.info (fun m -> m "Logged in as %s" (User.tag ready.user)));
+    Client.guild_create := (fun guild -> Logs_lwt.info (fun m -> m "Joined guild %s" guild.name));
+    Client.guild_delete := (fun {id;_} -> let `Guild_id id = id in Logs_lwt.info (fun m -> m "Left guild %d" id));
     (* Pull token from env var. It is not recommended to hardcode your token. *)
-    let token = match Sys.getenv "DISCORD_TOKEN" with
+    let token = match Stdlib.Sys.getenv_opt "DISCORD_TOKEN" with
     | Some t -> t
     | None -> failwith "No token in env"
     in
     (* Start client. *)
     Client.start ~large:250 ~compress:true token
     (* Fill that ivar once its done *)
-    >>> Ivar.fill Commands.client
+    >|= Lwt.wakeup_later Commands.r_client >>= fun _ ->
+    fst (Lwt.wait ())
 
 (* Lastly, we have to register this to the Async Scheduler for anything to work *)
 let _ =
-    Scheduler.go_main ~main ()
+    setup_logger ();
+    Lwt_main.run @@ main ()

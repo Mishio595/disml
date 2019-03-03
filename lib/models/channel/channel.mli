@@ -1,4 +1,3 @@
-open Async
 include module type of Channel_t
 
 exception Invalid_message
@@ -27,20 +26,20 @@ val send_message :
     ?file:string ->
     ?tts:bool ->
     t ->
-    Message_t.t Deferred.Or_error.t
+    (Message_t.t, string) Lwt_result.t
 
 (** [say str ch] is equivalent to [send_message ~content:str ch]. *)
-val say : string -> t -> Message_t.t Deferred.Or_error.t
+val say : string -> t -> (Message_t.t, string) Lwt_result.t
 
-val delete : t -> Channel_t.t Deferred.Or_error.t
-val get_message : id:Snowflake.t -> t -> Message_t.t Deferred.Or_error.t
+val delete : t -> (Channel_t.t, string) Lwt_result.t
+val get_message : id:Snowflake.t -> t -> (Message_t.t, string) Lwt_result.t
 val get_messages :
     ?mode:[ `Before | `After | `Around ] ->
     ?id:Snowflake.t ->
     ?limit:int ->
     t ->
-    Message_t.t list Deferred.Or_error.t
-val broadcast_typing : t -> unit Deferred.Or_error.t
-val get_pins : t -> Message_t.t list Deferred.Or_error.t
-val bulk_delete : Snowflake.t list -> t -> unit Deferred.Or_error.t
+    (Message_t.t list, string) Lwt_result.t
+val broadcast_typing : t -> (unit, string) Lwt_result.t
+val get_pins : t -> (Message_t.t list, string) Lwt_result.t
+val bulk_delete : Snowflake.t list -> t -> (unit, string) Lwt_result.t
 (* TODO more things related to guild channels *)

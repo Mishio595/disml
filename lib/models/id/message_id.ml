@@ -1,5 +1,3 @@
-open Core
-
 type t = [ `Message_id of Snowflake.t ] [@@deriving sexp]
 
 let of_yojson a : (t, string) result =

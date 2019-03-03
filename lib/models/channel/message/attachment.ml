@@ -1,4 +1,7 @@
-open Core
+let string_of_sexp = Base.String.t_of_sexp
+let sexp_of_string = Base.String.sexp_of_t
+let int_of_sexp    = Base.Int.t_of_sexp
+let sexp_of_int    = Base.Int.sexp_of_t
 
 type t = {
     id: Snowflake.t;

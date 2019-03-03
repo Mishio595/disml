@@ -1,27 +1,25 @@
-open Async
-
 include module type of Message_t
 
 (** Add the given emoji as a reaction. *)
-val add_reaction : t -> Emoji.t -> unit Deferred.Or_error.t
+val add_reaction : t -> Emoji.t -> (unit, string) Lwt_result.t
 
 (** Remove the reaction. Must also specify the user. *)
-val remove_reaction : t -> Emoji.t -> User_t.t -> unit Deferred.Or_error.t
+val remove_reaction : t -> Emoji.t -> User_t.t -> (unit, string) Lwt_result.t
 
 (** Remove all reactions from the message. *)
-val clear_reactions : t -> unit Deferred.Or_error.t
+val clear_reactions : t -> (unit, string) Lwt_result.t
 
 (** Delete the message. *)
-val delete : t -> unit Deferred.Or_error.t
+val delete : t -> (unit, string) Lwt_result.t
 
 (** Pin the message. *)
-val pin : t -> unit Deferred.Or_error.t
+val pin : t -> (unit, string) Lwt_result.t
 
 (** Unping the message. *)
-val unpin : t -> unit Deferred.Or_error.t
+val unpin : t -> (unit, string) Lwt_result.t
 
 (** Sugar for [Channel_id.say msg.channel_id content]. *)
-val reply : t -> string -> t Deferred.Or_error.t
+val reply : t -> string -> (t, string) Lwt_result.t
 
 (** Sugar for [Channel_id.send_message ?embed ?content ?file ?tts msg.channel_id]. *)
 val reply_with :
@@ -30,10 +28,10 @@ val reply_with :
     ?file:string ->
     ?tts:bool ->
     t ->
-    Message_t.t Deferred.Or_error.t
+    (Message_t.t, string) Lwt_result.t
 
 (** Set the content of the message. *)
-val set_content : t -> string -> t Deferred.Or_error.t
+val set_content : t -> string -> (t, string) Lwt_result.t
 
 (** Set the embed of the message. *)
-val set_embed : t -> Embed.t -> t Deferred.Or_error.t
+val set_embed : t -> Embed.t -> (t, string) Lwt_result.t

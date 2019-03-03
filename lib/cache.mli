@@ -1,6 +1,3 @@
-open Async
-open Core
-
 (** Represents a Map of {!Channel_id.t} keys. *)
 module ChannelMap : module type of Map.Make(Channel_id_t)
 
@@ -28,7 +25,7 @@ type t =
 }
 
 (** A {{!t}cache} wrapped in an {{!Async.Mvar.Read_write.t}Mvar}. *)
-val cache : t Mvar.Read_write.t
+val cache : t Lwt_mvar.t
 
 (** Creates a new, empty cache. *)
 val create :
@@ -38,42 +35,42 @@ val create :
 
 (** Equivalent to {!GuildMap.find} on cache.guilds. *)
 val guild :
-    t ->
     Guild_id_t.t ->
+    t ->
     Guild_t.t option
 
 (** Equivalent to {!ChannelMap.find} on cache.text_channels. *)
 val text_channel :
-    t ->
     Channel_id_t.t ->
+    t ->
     Channel_t.guild_text option
 
 (** Equivalent to {!ChannelMap.find} on cache.voice_channels. *)
 val voice_channel :
-    t ->
     Channel_id_t.t ->
+    t ->
     Channel_t.guild_voice option
 
 (** Equivalent to {!ChannelMap.find} on cache.categories. *)
 val category :
-    t ->
     Channel_id_t.t ->
+    t ->
     Channel_t.category option
 
 (** Equivalent to {!ChannelMap.find} on cache.private_channels. *)
 val dm :
-    t ->
     Channel_id_t.t ->
+    t ->
     Channel_t.dm option
 
 (** Equivalent to {!ChannelMap.find} on cache.groups. *)
 val group :
-    t ->
     Channel_id_t.t ->
+    t ->
     Channel_t.group option
 
 (** Helper method that scans all channel stores and returns a {!Channel.t} holding the channel. *)
 val channel :
-    t ->
     Channel_id_t.t ->
+    t ->
     Channel_t.t option

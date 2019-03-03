@@ -1,12 +1,9 @@
-open Core
-open Async
-
 include Guild_t
 
 let ban_user ~id ?(reason="") ?(days=0) guild =
-    Http.guild_ban_add (get_id guild) id (`Assoc [
-        ("delete-message-days", `Int days);
-        ("reason", `String reason);
+    Http.guild_ban_add (get_id guild) id (`Assoc
+    [ "delete-message-days", `Int days
+    ; "reason", `String reason
     ])
 
 let create data =
@@ -14,10 +11,10 @@ let create data =
     Http.create_guild data
 
 let create_emoji ~name ~image guild =
-    Http.create_emoji (get_id guild) (`Assoc [
-        ("name", `String name);
-        ("image", `String image);
-        ("roles", `List []);
+    Http.create_emoji (get_id guild) (`Assoc
+    [ "name", `String name
+    ; "image", `String image
+    ; "roles", `List []
     ])
 
 let create_role ~name ?colour ?permissions ?hoist ?mentionable guild =
@@ -41,9 +38,9 @@ let create_channel ~mode ~name guild =
     | `Text -> 0
     | `Voice -> 2
     | `Category -> 4
-    in Http.create_guild_channel (get_id guild) (`Assoc [
-        ("name", `String name);
-        ("type", `Int kind);
+    in Http.create_guild_channel (get_id guild) (`Assoc
+    [ "name", `String name
+    ; "type", `Int kind
     ])
 
 let delete guild =
@@ -71,7 +68,7 @@ let get_webhooks guild =
 
 let kick_user ~id ?reason guild =
     let payload = match reason with
-    | Some r -> `Assoc [("reason", `String r)]
+    | Some r -> `Assoc ["reason", `String r]
     | None -> `Null
     in Http.remove_member (get_id guild) id payload
 
@@ -88,21 +85,13 @@ let prune ~days guild =
 let request_members guild =
     Http.get_members (get_id guild)
 
-let set_afk_channel ~id guild = Http.edit_guild (get_id guild) (`Assoc [
-    ("afk_channel_id", `Int id);
-    ])
+let set_afk_channel ~id guild = Http.edit_guild (get_id guild) (`Assoc [ "afk_channel_id", `Int id ])
 
-let set_afk_timeout ~timeout guild = Http.edit_guild (get_id guild) (`Assoc [
-    ("afk_timeout", `Int timeout);
-    ])
+let set_afk_timeout ~timeout guild = Http.edit_guild (get_id guild) (`Assoc [ "afk_timeout", `Int timeout ])
 
-let set_name ~name guild = Http.edit_guild (get_id guild) (`Assoc [
-    ("name", `String name);
-    ])
+let set_name ~name guild = Http.edit_guild (get_id guild) (`Assoc [ "name", `String name ])
 
-let set_icon ~icon guild = Http.edit_guild (get_id guild) (`Assoc [
-    ("icon", `String icon);
-    ])
+let set_icon ~icon guild = Http.edit_guild (get_id guild) (`Assoc [ "icon", `String icon ])
 
 let unban_user ~id ?reason guild =
     let payload = match reason with
@@ -111,18 +100,18 @@ let unban_user ~id ?reason guild =
     in Http.guild_ban_remove (get_id guild) id payload
 
 let get_member ~(id:User_id_t.t) guild =
-    match List.find ~f:(fun m -> m.user.id = id) guild.members with
-    | Some m -> Deferred.Or_error.return m
+    match List.find_opt (fun (m:Member_t.t) -> m.user.id = id) guild.members with
+    | Some m -> Lwt_result.return m
     | None ->
         let `User_id id = id in
         Http.get_member (get_id guild) id
 
 let get_channel ~(id:Channel_id_t.t) guild =
     let `Channel_id id = id in
-    match List.find ~f:(fun c -> Channel_t.get_id c = id) guild.channels with
-    | Some c -> Deferred.Or_error.return c
+    match List.find_opt (fun c -> Channel_t.get_id c = id) guild.channels with
+    | Some c -> Lwt_result.return c
     | None -> Http.get_channel id
 
 (* TODO add HTTP fallback *)
 let get_role ~(id:Role_id.t) guild =
-    List.find ~f:(fun r -> r.id = id) guild.roles
+    List.find_opt (fun (r:Role_t.t) -> r.id = id) guild.roles

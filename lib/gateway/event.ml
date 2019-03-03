@@ -1,5 +1,4 @@
-open Async
-open Core
+open Lwt.Infix
 open Event_models
 
 type t =
@@ -74,103 +73,137 @@ let event_of_yojson ~contents = function
     | "WEBHOOK_UPDATE" -> WEBHOOK_UPDATE WebhookUpdate.(deserialize contents)
     | s -> UNKNOWN Unknown.(deserialize s contents)
 
-let dispatch ev =
+let dispatch cache ev =
     match ev with
     | READY d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> Ready.update_cache cache d);
-        !Dispatch.ready d
+        let cache = Ready.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.ready d);
+        cache
     | RESUMED d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> Resumed.update_cache cache d);
-        !Dispatch.resumed d
+        let cache = Resumed.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.resumed d);
+        cache
     | CHANNEL_CREATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> ChannelCreate.update_cache cache d);
-        !Dispatch.channel_create d
+        let cache = ChannelCreate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.channel_create d);
+        cache
     | CHANNEL_UPDATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> ChannelUpdate.update_cache cache d);
-        !Dispatch.channel_update d
+        let cache = ChannelDelete.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.channel_update d);
+        cache
     | CHANNEL_DELETE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> ChannelDelete.update_cache cache d);
-        !Dispatch.channel_delete d
+        let cache = ChannelDelete.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.channel_delete d);
+        cache
     | CHANNEL_PINS_UPDATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> ChannelPinsUpdate.update_cache cache d);
-        !Dispatch.channel_pins_update d
+        let cache = ChannelPinsUpdate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.channel_pins_update d);
+        cache
     | GUILD_CREATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildCreate.update_cache cache d);
-        !Dispatch.guild_create d
+        let cache = GuildCreate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.guild_create d);
+        cache
     | GUILD_UPDATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildUpdate.update_cache cache d);
-        !Dispatch.guild_update d
+        let cache = GuildUpdate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.guild_update d);
+        cache
     | GUILD_DELETE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildDelete.update_cache cache d);
-        !Dispatch.guild_delete d
+        let cache = GuildDelete.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.guild_delete d);
+        cache
     | GUILD_BAN_ADD d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildBanAdd.update_cache cache d);
-        !Dispatch.member_ban d
+        let cache = GuildBanAdd.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.member_ban d);
+        cache
     | GUILD_BAN_REMOVE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildBanRemove.update_cache cache d);
-        !Dispatch.member_unban d
+        let cache = GuildBanRemove.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.member_unban d);
+        cache
     | GUILD_EMOJIS_UPDATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildEmojisUpdate.update_cache cache d);
-        !Dispatch.guild_emojis_update d
+        let cache = GuildEmojisUpdate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.guild_emojis_update d);
+        cache
     (* | GUILD_INTEGRATIONS_UPDATE d -> !Dispatch.integrations_update d *)
     | GUILD_MEMBER_ADD d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildMemberAdd.update_cache cache d);
-        !Dispatch.member_join d
+        let cache = GuildMemberAdd.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.member_join d);
+        cache
     | GUILD_MEMBER_REMOVE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildMemberRemove.update_cache cache d);
-        !Dispatch.member_leave d
+        let cache = GuildMemberRemove.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.member_leave d);
+        cache
     | GUILD_MEMBER_UPDATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildMemberUpdate.update_cache cache d);
-        !Dispatch.member_update d
+        let cache = GuildMemberUpdate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.member_update d);
+        cache
     | GUILD_MEMBERS_CHUNK d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildMembersChunk.update_cache cache d);
-        !Dispatch.members_chunk d
+        let cache = GuildMembersChunk.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.members_chunk d);
+        cache
     | GUILD_ROLE_CREATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildRoleCreate.update_cache cache d);
-        !Dispatch.role_create d
+        let cache = GuildRoleCreate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.role_create d);
+        cache
     | GUILD_ROLE_UPDATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildRoleUpdate.update_cache cache d);
-        !Dispatch.role_update d
+        let cache = GuildRoleUpdate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.role_update d);
+        cache
     | GUILD_ROLE_DELETE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> GuildRoleDelete.update_cache cache d);
-        !Dispatch.role_delete d
+        let cache = GuildRoleDelete.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.role_delete d);
+        cache
     | MESSAGE_CREATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> MessageCreate.update_cache cache d);
-        !Dispatch.message_create d
+        let cache = MessageCreate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.message_create d);
+        cache
     | MESSAGE_UPDATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> MessageUpdate.update_cache cache d);
-        !Dispatch.message_update d
+        let cache = MessageUpdate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.message_update d);
+        cache
     | MESSAGE_DELETE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> MessageDelete.update_cache cache d);
-        !Dispatch.message_delete d
+        let cache = MessageDelete.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.message_delete d);
+        cache
     | MESSAGE_DELETE_BULK d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> MessageDeleteBulk.update_cache cache d);
-        !Dispatch.message_delete_bulk d
+        let cache = MessageDeleteBulk.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.message_delete_bulk d);
+        cache
     | REACTION_ADD d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> ReactionAdd.update_cache cache d);
-        !Dispatch.reaction_add d
+        let cache = ReactionAdd.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.reaction_add d);
+        cache
     | REACTION_REMOVE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> ReactionRemove.update_cache cache d);
-        !Dispatch.reaction_remove d
+        let cache = ReactionRemove.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.reaction_remove d);
+        cache
     | REACTION_REMOVE_ALL d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> ReactionRemoveAll.update_cache cache d);
-        !Dispatch.reaction_remove_all d
+        let cache = ReactionRemoveAll.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.reaction_remove_all d);
+        cache
     | PRESENCE_UPDATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> PresenceUpdate.update_cache cache d);
-        !Dispatch.presence_update d
+        let cache = PresenceUpdate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.presence_update d);
+        cache
     | TYPING_START d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> TypingStart.update_cache cache d);
-        !Dispatch.typing_start d
+        let cache = TypingStart.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.typing_start d);
+        cache
     | USER_UPDATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> UserUpdate.update_cache cache d);
-        !Dispatch.user_update d
+        let cache = UserUpdate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.user_update d);
+        cache
     (* | VOICE_STATE_UPDATE d -> !Dispatch.voice_state_update d *)
     (* | VOICE_SERVER_UPDATE d -> !Dispatch.voice_server_update d *)
     | WEBHOOK_UPDATE d ->
-        Mvar.update_exn Cache.cache ~f:(fun cache -> WebhookUpdate.update_cache cache d);
-        !Dispatch.webhook_update d
-    | UNKNOWN d -> !Dispatch.unknown d
+        let cache = WebhookUpdate.update_cache cache d in
+        Lwt.async (fun () -> !Dispatch.webhook_update d);
+        cache
+    | UNKNOWN d ->
+        Lwt.async (fun () -> !Dispatch.unknown d);
+        cache
 
 let handle_event ~ev contents =
+    Lwt_mvar.take Cache.cache >>= fun cache ->
     event_of_yojson ~contents ev
-    |> dispatch
+    |> dispatch cache
+    |> Lwt_mvar.put Cache.cache

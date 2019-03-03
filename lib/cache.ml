@@ -1,6 +1,3 @@
-open Core
-open Async
-
 module ChannelMap = Map.Make(Channel_id_t)
 module GuildMap = Map.Make(Guild_id_t)
 module UserMap = Map.Make(User_id_t)
@@ -32,38 +29,35 @@ let create () =
     ; users = UserMap.empty
     }
 
-let cache =
-    let m = Mvar.create () in
-    Mvar.set m (create ());
-    m
+let cache = Lwt_mvar.create (create ())
 
-let guild cache = GuildMap.find cache.guilds
+let guild k cache = GuildMap.find_opt k cache.guilds
 
-let text_channel cache = ChannelMap.find cache.text_channels
+let text_channel k cache = ChannelMap.find_opt k cache.text_channels
 
-let voice_channel cache = ChannelMap.find cache.voice_channels
+let voice_channel k cache = ChannelMap.find_opt k cache.voice_channels
 
-let category cache = ChannelMap.find cache.categories
+let category k cache = ChannelMap.find_opt k cache.categories
 
-let dm cache = ChannelMap.find cache.private_channels
+let dm k cache = ChannelMap.find_opt k cache.private_channels
 
-let group cache = ChannelMap.find cache.groups
+let group k cache = ChannelMap.find_opt k cache.groups
 
-let channel cache id =
-    let check = ChannelMap.find in
-    match check cache.text_channels id with
+let channel id cache : Channel_t.t option =
+    let check = ChannelMap.find_opt in
+    match check id cache.text_channels with
     | Some c -> Some (`GuildText c)
     | None -> (
-    match check cache.voice_channels id with
+    match check id cache.voice_channels with
     | Some c -> Some (`GuildVoice c)
     | None -> (
-    match check cache.categories id with
+    match check id cache.categories with
     | Some c -> Some (`Category c)
     | None -> (
-    match check cache.private_channels id with
+    match check id cache.private_channels with
     | Some c -> Some (`Private c)
     | None -> (
-    match check cache.groups id with
+    match check id cache.groups with
     | Some c -> Some (`Group c)
     | None -> None
     ))))

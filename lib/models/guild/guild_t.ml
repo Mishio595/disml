@@ -1,4 +1,13 @@
-open Core
+let string_of_sexp = Base.String.t_of_sexp
+let sexp_of_string = Base.String.sexp_of_t
+let option_of_sexp = Base.Option.t_of_sexp
+let sexp_of_option = Base.Option.sexp_of_t
+let int_of_sexp    = Base.Int.t_of_sexp
+let sexp_of_int    = Base.Int.sexp_of_t
+let bool_of_sexp   = Base.Bool.t_of_sexp
+let sexp_of_bool   = Base.Bool.sexp_of_t
+let list_of_sexp   = Base.List.t_of_sexp
+let sexp_of_list   = Base.List.sexp_of_t
 
 type unavailable = {
     id: Guild_id_t.t;
@@ -63,9 +72,9 @@ type t = {
 
 let wrap ({id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel_id;system_channel_id;large;member_count;members;channels}:pre) =
     let `Guild_id id = id in
-    let roles = List.map ~f:(Role_t.wrap ~guild_id:id) roles in
-    let members = List.map ~f:(Member_t.wrap ~guild_id:id) members in
-    let channels = List.map ~f:Channel_t.wrap channels in
+    let roles = List.map (Role_t.wrap ~guild_id:id) roles in
+    let members = List.map (Member_t.wrap ~guild_id:id) members in
+    let channels = List.map Channel_t.wrap channels in
     {id = `Guild_id id;name;icon;splash;owner_id;region;afk_channel_id;afk_timeout;embed_enabled;embed_channel_id;verification_level;default_message_notifications;explicit_content_filter;roles;emojis;features;mfa_level;application_id;widget_enabled;widget_channel_id;system_channel_id;large;member_count;members;channels}
 
 let get_id guild = let `Guild_id id = guild.id in id

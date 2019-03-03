@@ -13,6 +13,7 @@ type t =
 | INVALID_SESSION
 | HELLO
 | HEARTBEAT_ACK
+[@@deriving sexp]
 
 (** Raised when receiving an invalid opcode. This should never occur. *)
 exception Invalid_Opcode of int

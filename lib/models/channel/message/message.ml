@@ -1,5 +1,3 @@
-open Core
-open Async
 include Message_t
 
 let add_reaction msg (emoji:Emoji.t) =

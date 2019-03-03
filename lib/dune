@@ -22,7 +22,7 @@
 		event_models
 		cache client client_options disml dispatch endpoints event http opcode rl sharder
 	)
-	(libraries checkseum.ocaml core async_ssl cohttp-async decompress logs yojson websocket-async ppx_deriving_yojson.runtime bitmasks)
+	(libraries str checkseum.ocaml base lwt_ssl cohttp-lwt decompress yojson websocket-lwt ppx_deriving_yojson.runtime bitmasks)
 	(preprocess (pps ppx_sexp_conv ppx_deriving_yojson)))
 
 (include_subdirs unqualified)

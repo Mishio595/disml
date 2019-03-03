@@ -1,4 +1,9 @@
-open Core
+let string_of_sexp = Base.String.t_of_sexp
+let sexp_of_string = Base.String.sexp_of_t
+let int_of_sexp    = Base.Int.t_of_sexp
+let sexp_of_int    = Base.Int.sexp_of_t
+let bool_of_sexp   = Base.Bool.t_of_sexp
+let sexp_of_bool   = Base.Bool.sexp_of_t
 
 type role = {
     id: Role_id.t;

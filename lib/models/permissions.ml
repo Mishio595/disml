@@ -36,8 +36,8 @@ include BitMaskSet.Make(struct
     let mask = 0b0111_1111_1111_0111_1111_1101_1111_1111
 end)
 
-let sexp_of_t = Core.Int.sexp_of_t
-let t_of_sexp = Core.Int.t_of_sexp
+let sexp_of_t = Base.Int.sexp_of_t
+let t_of_sexp = Base.Int.t_of_sexp
 
 let of_yojson_exn j = create @@ Yojson.Safe.Util.to_int j
 

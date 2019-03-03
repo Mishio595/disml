@@ -1,5 +1,3 @@
-open Async
-
 include module type of Dispatch
 
 (** Type of the Client, it isn't recommended to access the fields directly. *)
@@ -31,7 +29,7 @@ val start :
     ?compress:bool ->
     ?large:int ->
     string ->
-    t Deferred.t
+    t Lwt.t
 
 (** Same as {!Sharder.set_status} where [client.sharder] is passed. *)
 val set_status :
@@ -41,7 +39,7 @@ val set_status :
     ?since:int ->
     ?url:string ->
     t ->
-    Sharder.Shard.shard list Deferred.t
+    unit Lwt.t
 
 (** Same as {!Sharder.request_guild_members} where [client.sharder] is passed. *)
 val request_guild_members :
@@ -49,10 +47,10 @@ val request_guild_members :
     ?query:string ->
     ?limit:int ->
     t ->
-    Sharder.Shard.shard list Deferred.t
+    unit Lwt.t
 
 (** Same as {!Sharder.shutdown_all} where [client.sharder] is passed. *)
 val shutdown_all :
     ?restart:bool ->
     t ->
-    unit list Deferred.t
+    unit Lwt.t

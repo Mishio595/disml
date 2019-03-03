@@ -1,7 +1,7 @@
-open Async
-open Core
+open Lwt.Infix
 open Decompress
-open Websocket_async
+open Websocket
+open Websocket_lwt
 
 exception Invalid_Payload
 exception Failure_to_Establish_Heartbeat
@@ -32,16 +32,17 @@ let decompress src =
 module Shard = struct
     type shard =
     { compress: bool
-    ; id: int * int
-    ; hb_interval: Time.Span.t Ivar.t
-    ; hb_stopper: unit Ivar.t
+    ; hb_interval: int Lwt.t * int Lwt.u
+    ; hb_stopper: unit Lwt.t * unit Lwt.u
+    ; id: int
     ; large_threshold: int
-    ; pipe: Frame.t Pipe.Reader.t * Frame.t Pipe.Writer.t
-    ; ready: unit Ivar.t
+    ; ready: unit Lwt.t * unit Lwt.u
+    ; recv: Frame.t Lwt_stream.t
+    ; send: (Frame.t -> unit Lwt.t)
     ; seq: int
     ; session: string option
+    ; shard_count: int
     ; url: string
-    ; _internal: Reader.t * Writer.t
     }
 
     type 'a t =
@@ -50,44 +51,38 @@ module Shard = struct
     ; mutable can_resume: bool
     }
 
-    let identify_lock = Mvar.create ()
-    let _ = Mvar.set identify_lock ()
+    let identify_lock = Lwt_mvar.create ()
 
-    let parse ~compress (frame:[`Ok of Frame.t | `Eof]) =
-        match frame with
-        | `Ok s -> begin
-            let open Frame.Opcode in
-            match s.opcode with
-            | Text -> `Ok (Yojson.Safe.from_string s.content)
-            | Binary ->
-                if compress then `Ok (decompress s.content |> Yojson.Safe.from_string)
-                    else `Error "Failed to decompress"
-            | Close -> `Close s
-            | op ->
-                let op = Frame.Opcode.to_string op in
-                `Error ("Unexpected opcode " ^ op)
-        end
-        | `Eof -> `Eof
+    let parse ~compress (frame:Frame.t) =
+        let open Frame.Opcode in
+        match frame.opcode with
+        | Text -> `Ok (Yojson.Safe.from_string frame.content)
+        | Binary ->
+            if compress then `Ok (decompress frame.content |> Yojson.Safe.from_string)
+                else `Error "Failed to decompress"
+        | Close -> `Close frame
+        | op ->
+            let op = Frame.Opcode.to_string op in
+            `Error ("Unexpected opcode " ^ op)
 
     let push_frame ?payload ~ev shard =
         let content = match payload with
         | None -> ""
         | Some p ->
-            Yojson.Safe.to_string @@ `Assoc [
-                "op", `Int (Opcode.to_int ev);
-                "d", p;
+            Yojson.Safe.to_string @@ `Assoc
+            [ "op", `Int (Opcode.to_int ev)
+            ; "d", p
             ]
         in
-        let (_, write) = shard.pipe in
-        Pipe.write_if_open write @@ Frame.create ~content ()
-        >>| fun () ->
+        Frame.create ~content ()
+        |> shard.send >|= fun () ->
         shard
 
     let heartbeat shard =
         match shard.seq with
-        | 0 -> return shard
+        | 0 -> Lwt.return shard
         | i ->
-            Logs.debug (fun m -> m "Heartbeating - Shard: [%d, %d] - Seq: %d" (fst shard.id) (snd shard.id) (shard.seq));
+            Logs_lwt.debug (fun m -> m "Heartbeating - Shard: [%d, %d] - Seq: %d" shard.id shard.shard_count shard.seq) >>= fun () ->
             push_frame ~payload:(`Int i) ~ev:HEARTBEAT shard
 
     let dispatch ~payload shard =
@@ -96,20 +91,20 @@ module Shard = struct
         let t = J.(member "t" payload |> to_string) in
         let data = J.member "d" payload in
         let session = if t = "READY" then begin
-            Ivar.fill_if_empty shard.ready ();
-            Clock.after (Core.Time.Span.create ~sec:5 ())
-            >>> (fun _ -> Mvar.put identify_lock () >>> ignore);
+            Lwt.wakeup_later (snd shard.ready) ();
+            (* TODO figure out action after time in Lwt *)
+            (* Clock.after (Core.Time.Span.create ~sec:5 ())
+            >>> (fun _ -> Lwt_mvar.put identify_lock () >>> ignore); *)
             J.(member "session_id" data |> to_string_option)
         end else shard.session in
-        Event.handle_event ~ev:t data;
-        return
+        Event.handle_event ~ev:t data >|= fun () ->
         { shard with seq = seq
         ; session = session
         }
 
-    let set_status ?(status="online") ?(kind=0) ?name ?since ?url shard =
-        let since = Option.(since >>| (fun v -> `Int v) |> value ~default:`Null) in
-        let url = Option.(url >>| (fun v -> `String v) |> value ~default:`Null) in
+    let set_status ?(status="online") ?(kind=0) ?name ?since ?url shard = 
+        let since = Option.(map since ~f:(fun v -> `Int v) |> value ~default:`Null) in
+        let url = Option.(map url ~f:(fun v -> `String v) |> value ~default:`Null) in
         let game = match name with
             | Some name -> `Assoc
                 [ "name", `String name
@@ -125,30 +120,30 @@ module Shard = struct
             ; "game", game
             ]
         in
-        Ivar.read shard.ready >>= fun _ ->
+        fst shard.ready >>= fun _ ->
         push_frame ~payload ~ev:STATUS_UPDATE shard
 
     let request_guild_members ?(query="") ?(limit=0) ~guild shard =
         let payload = `Assoc
-            [ "guild_id", `String (Int.to_string guild)
+            [ "guild_id", `String (string_of_int guild)
             ; "query", `String query
             ; "limit", `Int limit
             ]
         in
-        Ivar.read shard.ready >>= fun _ ->
+        fst shard.ready >>= fun _ ->
         push_frame ~payload ~ev:REQUEST_GUILD_MEMBERS shard
 
     let initialize ?data shard =
         let module J = Yojson.Safe.Util in
         let _ = match data with
-        | Some data -> Ivar.fill_if_empty shard.hb_interval (Time.Span.create ~ms:J.(member "heartbeat_interval" data |> to_int) ())
+        | Some data -> Lwt.wakeup_later (snd shard.hb_interval) J.(member "heartbeat_interval" data |> to_int)
         | None -> raise Failure_to_Establish_Heartbeat
         in
-        let shards = [`Int (fst shard.id); `Int (snd shard.id)] in
+        let shards = [`Int shard.id; `Int shard.shard_count] in
         match shard.session with
         | None -> begin
-            Mvar.take identify_lock >>= fun () ->
-            Logs.debug (fun m -> m "Identifying shard [%d, %d]" (fst shard.id) (snd shard.id));
+            Lwt_mvar.take identify_lock >>= fun () ->
+            Logs_lwt.debug (fun m -> m "Identifying shard [%d, %d]" shard.id shard.shard_count) >>= fun () ->
             let payload = `Assoc
                 [ "token", `String !Client_options.token
                 ; "properties", `Assoc
@@ -162,7 +157,6 @@ module Shard = struct
                 ]
             in
             push_frame ~payload ~ev:IDENTIFY shard
-            >>| fun s -> s
         end
         | Some s ->
             let payload = `Assoc
@@ -180,117 +174,50 @@ module Shard = struct
         | DISPATCH -> dispatch ~payload:f shard
         | HEARTBEAT -> heartbeat shard
         | INVALID_SESSION -> begin
-            Logs.err (fun m -> m "Invalid Session on Shard [%d, %d]: %s" (fst shard.id) (snd shard.id) (Yojson.Safe.pretty_to_string f));
-            if J.(member "d" f |> to_bool) then
-                initialize shard
-            else begin
-                initialize { shard with session = None; }
-            end
+            Logs_lwt.warn (fun m -> m "Invalid Session on Shard [%d, %d]: %s" shard.id shard.shard_count (Yojson.Safe.pretty_to_string f)) >>= fun () ->
+            if J.(member "d" f |> to_bool) then initialize shard
+            else initialize { shard with session = None; }
         end
         | RECONNECT -> initialize shard
         | HELLO -> initialize ~data:(J.member "d" f) shard
-        | HEARTBEAT_ACK -> return shard
+        | HEARTBEAT_ACK -> Lwt.return shard
         | opcode ->
-            Logs.warn (fun m -> m "Invalid Opcode: %s" (Opcode.to_string opcode));
-            return shard
+            Logs_lwt.warn (fun m -> m "Invalid Opcode: %s" (Opcode.to_string opcode)) >|= fun () ->
+            shard
 
-    let rec make_client
-        ~initialized
-        ~extra_headers
-        ~app_to_ws
-        ~ws_to_app
-        ~net_to_ws
-        ~ws_to_net
-        ?(ms=500)
-        uri =
-        client
-            ~initialized
-            ~extra_headers
-            ~app_to_ws
-            ~ws_to_app
-            ~net_to_ws
-            ~ws_to_net
-            uri
-            >>> fun res ->
-                match res with
-                | Ok () -> ()
-                | Error _ ->
-                    let backoff = Time.Span.create ~ms () in
-                    Clock.after backoff >>> (fun () ->
-                    make_client
-                        ~initialized
-                        ~extra_headers
-                        ~app_to_ws
-                        ~ws_to_app
-                        ~net_to_ws
-                        ~ws_to_net
-                        ~ms:(min 60_000 (ms * 2))
-                        uri)
-
+    let make_client ?extra_headers uri =
+        let uri = Uri.with_scheme uri (Some "https") in
+        Resolver_lwt.resolve_uri ~uri Resolver_lwt_unix.system >>= fun endp ->
+        Conduit_lwt_unix.(
+            endp_to_client ~ctx:default_ctx endp >>= fun client ->
+            with_connection ?extra_headers ~ctx:default_ctx client uri)
 
     let create ~url ~shards ?(compress=true) ?(large_threshold=100) () =
-        let open Core in
-        let uri = (url ^ "?v=6&encoding=json") |> Uri.of_string in
+        let uri = Uri.(with_query' (of_string url) ["encoding", "json"; "v", "6"]) in
         let extra_headers = Http.Base.process_request_headers () in
-        let host = Option.value_exn ~message:"no host in uri" Uri.(host uri) in
-        let port =
-            match Uri.port uri, Uri_services.tcp_port_of_uri uri with
-            | Some p, _ -> p
-            | None, Some p -> p
-            | _ -> 443 in
-        let scheme = Option.value_exn ~message:"no scheme in uri" Uri.(scheme uri) in
-        let tcp_fun (net_to_ws, ws_to_net) =
-            let (app_to_ws, write) = Pipe.create () in
-            let (read, ws_to_app) = Pipe.create () in
-            let initialized = Ivar.create () in
-            make_client
-                ~initialized
-                ~extra_headers
-                ~app_to_ws
-                ~ws_to_app
-                ~net_to_ws
-                ~ws_to_net
-                uri;
-            Ivar.read initialized >>| fun () ->
-            { pipe = (read, write)
-            ; ready = Ivar.create ()
-            ; hb_interval = Ivar.create ()
-            ; hb_stopper = Ivar.create ()
-            ; seq = 0
-            ; id = shards
-            ; session = None
-            ; url
-            ; large_threshold
-            ; compress
-            ; _internal = (net_to_ws, ws_to_net)
-            }
-        in
-        match Unix.getaddrinfo host (string_of_int port) [] with
-        | [] -> failwithf "DNS resolution failed for %s" host ()
-        | { ai_addr; _ } :: _ ->
-            let addr =
-            match scheme, ai_addr with
-            | _, ADDR_UNIX path -> `Unix_domain_socket path
-            | "https", ADDR_INET (h, p)
-            | "wss", ADDR_INET (h, p) ->
-                let h = Ipaddr_unix.of_inet_addr h in
-                `OpenSSL (h, p, Conduit_async.V2.Ssl.Config.create ())
-            | _, ADDR_INET (h, p) ->
-                let h = Ipaddr_unix.of_inet_addr h in
-                `TCP (h, p)
-            in
-            Conduit_async.V2.connect addr >>= tcp_fun
+        make_client ~extra_headers uri >|= fun (recv, send) ->
+        let recv = mk_frame_stream recv in
+        { compress
+        ; hb_interval = Lwt.wait ()
+        ; hb_stopper = Lwt.wait ()
+        ; id = fst shards
+        ; large_threshold
+        ; ready = Lwt.wait ()
+        ; recv
+        ; send
+        ; seq = 0
+        ; session = None
+        ; shard_count = snd shards
+        ; url
+        }
 
     let shutdown ?(clean=false) ?(restart=true) t =
         let _ = clean in
         t.can_resume <- restart;
         t.stopped <- true;
-        Logs.debug (fun m -> m "Performing shutdown. Shard [%d, %d]" (fst t.state.id) (snd t.state.id));
-        Pipe.write_if_open (snd t.state.pipe) (Frame.close 1001)
-        >>= fun () ->
-        Ivar.fill_if_empty t.state.hb_stopper ();
-        Pipe.close_read (fst t.state.pipe);
-        Writer.close (snd t.state._internal)
+        Logs_lwt.debug (fun m -> m "Performing shutdown. Shard [%d, %d]" t.state.id t.state.shard_count) >>= fun () ->
+        t.state.send (Frame.close 1001) >|= fun () ->
+        Lwt.wakeup_later (snd t.state.hb_stopper) ()
 end
 
 type t = { shards: (Shard.shard Shard.t) list }
@@ -300,7 +227,7 @@ let start ?count ?compress ?large_threshold () =
     Http.get_gateway_bot () >>= fun data ->
     let data = match data with
     | Ok d -> d
-    | Error e -> Error.raise e
+    | Error e -> Base.Error.(of_string e |> raise)
     in
     let url = J.(member "url" data |> to_string) in
     let count = match count with
@@ -311,36 +238,36 @@ let start ?count ?compress ?large_threshold () =
     Logs.info (fun m -> m "Connecting to %s" url);
     let rec ev_loop (t:Shard.shard Shard.t) =
         let step (t:Shard.shard Shard.t) =
-            Pipe.read (fst t.state.pipe) >>= fun frame ->
+            Lwt_stream.get t.state.recv >>= function None -> Lwt.return t | Some frame ->
             begin match Shard.parse ~compress:t.state.compress frame with
             | `Ok f ->
-                Shard.handle_frame ~f t.state >>| fun s ->
+                Shard.handle_frame ~f t.state >|= fun s ->
                 t.state <- s
             | `Close c ->
-                Logs.warn (fun m -> m "Close frame received. %s" (Frame.show c));
+                Logs_lwt.warn (fun m -> m "Close frame received. %s" (Frame.show c)) >>= fun () ->
                 Shard.shutdown t
             | `Error e ->
-                Logs.warn (fun m -> m "Websocket soft error: %s" e);
-                return ()
+                Logs_lwt.warn (fun m -> m "Websocket soft error: %s" e) >>= fun () ->
+                Lwt.return_unit
             | `Eof ->
-                Logs.warn (fun m -> m "Websocket closed unexpectedly");
+                Logs_lwt.warn (fun m -> m "Websocket closed unexpectedly") >>= fun () ->
                 Shard.shutdown t
-            end >>| fun () -> t
+            end >|= fun () -> t
         in
-        if t.stopped then return ()
+        if t.stopped then Lwt.return_unit
         else step t >>= ev_loop
     in
     let rec gen_shards l a =
         match l with
-        | (id, total) when id >= total -> return a
+        | (id, total) when id >= total -> Lwt.return a
         | (id, total) ->
             let wrap ?(reuse:Shard.shard Shard.t option) state = match reuse with
             | Some t ->
                 t.state <- state;
                 t.stopped <- false;
-                return t
+                Lwt.return t
             | None ->
-                return Shard.{ state
+                Lwt.return Shard.{ state
                     ; stopped = false
                     ; can_resume = true
                     }
@@ -349,34 +276,38 @@ let start ?count ?compress ?large_threshold () =
                 Shard.create ~url ~shards:(id, total) ?compress ?large_threshold ()
             in
             let rec bind (t:Shard.shard Shard.t) =
-                let _ = Ivar.read t.state.hb_interval >>> fun hb ->
-                    Clock.every'
-                    ~stop:(Ivar.read t.state.hb_stopper)
-                    ~continue_on_error:true
-                    hb (fun () -> Shard.heartbeat t.state >>| ignore) in
-                ev_loop t >>> (fun () -> Logs.debug (fun m -> m "Event loop stopped."));
-                Pipe.closed (fst t.state.pipe) >>> (fun () -> if t.can_resume then
-                create () >>= wrap ~reuse:t >>= bind >>> ignore);
-                return t
+                Lwt.async (fun () ->
+                    fst t.state.hb_interval >|= fun _hb -> ()
+                    (* TODO figure out clocks in Lwt *)
+                    );
+                Lwt.async (fun () -> ev_loop t >>= fun () -> Logs_lwt.debug (fun m -> m "Event loop stopped."));
+                (* TODO figure out how to bind to closed websocket *)
+                Lwt.async (fun () -> Lwt_stream.closed t.state.recv >>= fun () ->
+                    if t.can_resume then create () >>= wrap ~reuse:t >>= bind >|= ignore
+                    else Lwt.return_unit);
+                Lwt.return t
             in
             create () >>= wrap >>= bind >>= fun t ->
             gen_shards (id+1, total) (t :: a)
     in
     gen_shards shard_list []
-    >>| fun shards ->
+    >|= fun shards ->
     { shards }
 
 let set_status ?status ?kind ?name ?since ?url sharder =
-    Deferred.all @@ List.map ~f:(fun t ->
-        Shard.set_status ?status ?kind ?name ?since ?url t.state
-    ) sharder.shards
+    List.map (fun (t:Shard.shard Shard.t) ->
+        Shard.set_status ?status ?kind ?name ?since ?url t.state >|= ignore)
+        sharder.shards
+    |> Lwt.join
 
 let request_guild_members ?query ?limit ~guild sharder =
-    Deferred.all @@ List.map ~f:(fun t ->
-        Shard.request_guild_members ~guild ?query ?limit t.state
-    ) sharder.shards
+    List.map (fun (t:Shard.shard Shard.t) ->
+        Shard.request_guild_members ~guild ?query ?limit t.state >|= ignore)
+        sharder.shards
+    |> Lwt.join
 
 let shutdown_all ?restart sharder =
-    Deferred.all @@ List.map ~f:(fun t ->
-        Shard.shutdown ~clean:true ?restart t
-    ) sharder.shards
+    List.map (fun t ->
+        Shard.shutdown ~clean:true ?restart t)
+        sharder.shards
+    |> Lwt.join

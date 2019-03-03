@@ -1,4 +1,11 @@
-open Core
+let string_of_sexp = Base.String.t_of_sexp
+let sexp_of_string = Base.String.sexp_of_t
+let option_of_sexp = Base.Option.t_of_sexp
+let sexp_of_option = Base.Option.sexp_of_t
+let bool_of_sexp   = Base.Bool.t_of_sexp
+let sexp_of_bool   = Base.Bool.sexp_of_t
+let list_of_sexp   = Base.List.t_of_sexp
+let sexp_of_list   = Base.List.sexp_of_t
 
 type partial_emoji = {
     id: Snowflake.t option [@default None];

@@ -1,4 +1,3 @@
-open Core
 open Printf
 
 let gateway = "/gateway"

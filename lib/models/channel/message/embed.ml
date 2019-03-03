@@ -1,4 +1,13 @@
-open Core
+let string_of_sexp = Base.String.t_of_sexp
+let sexp_of_string = Base.String.sexp_of_t
+let option_of_sexp = Base.Option.t_of_sexp
+let sexp_of_option = Base.Option.sexp_of_t
+let int_of_sexp    = Base.Int.t_of_sexp
+let sexp_of_int    = Base.Int.sexp_of_t
+let bool_of_sexp   = Base.Bool.t_of_sexp
+let sexp_of_bool   = Base.Bool.sexp_of_t
+let list_of_sexp   = Base.List.t_of_sexp
+let sexp_of_list   = Base.List.sexp_of_t
 
 type footer = {
     text: string;
@@ -111,7 +120,7 @@ let image v e = { e with image = Some { default_image with url = Some v } }
 let thumbnail v e = { e with thumbnail = Some { default_image with url = Some v } }
 let author f e = { e with author = Some (f default_author) }
 let field (name, value, inline) e = { e with fields = { name; value; inline; }::e.fields }
-let fields l e = { e with fields = List.map ~f:(fun (name, value, inline) -> { name; value; inline; }) l }
+let fields l e = { e with fields = List.map (fun (name, value, inline) -> { name; value; inline; }) l }
 
 let footer_text v f : footer = { f with text = v }
 let footer_icon v f : footer = { f with icon_url = Some v }

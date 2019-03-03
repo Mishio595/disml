@@ -1,4 +1,7 @@
-open Core
+let option_of_sexp = Base.Option.t_of_sexp
+let sexp_of_option = Base.Option.sexp_of_t
+let int_of_sexp    = Base.Int.t_of_sexp
+let sexp_of_int    = Base.Int.sexp_of_t
 
 type reaction_event = {
     user_id: User_id_t.t;

@@ -7,7 +7,7 @@ module String = Base.String
 (* Define a function to handle message_create *)
 let check_command (message:Message.t) =
     (* Simple example of command parsing. *)
-    let cmd, rest = match String.split ~on:' ' message.content with
+    let cmd, rest = match String.split ~on:' ' (String.lowercase message.content) with
     | hd::tl -> hd, tl
     | [] -> "", []
     in match cmd with
@@ -19,6 +19,7 @@ let check_command (message:Message.t) =
     | "!echo" -> Commands.echo message rest
     (* | "!cache" -> Commands.cache message rest *)
     | "!shutdown" -> Commands.shutdown message rest
+    | "!restart" -> Commands.restart message rest
     | "!rgm" -> Commands.request_members message rest
     (* | "!new" -> Commands.new_guild message rest *)
     (* | "!delall" -> Commands.delete_guilds message rest *)

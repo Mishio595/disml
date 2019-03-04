@@ -108,6 +108,11 @@ let shutdown (message:Message.t) _args =
         exit 0
     else Lwt.return_unit
 
+let restart (message:Message.t) _args =
+    if message.author.id = `User_id 242675474927583232 then
+        client >>= Client.shutdown_all
+    else Lwt.return_unit
+
 (* Request guild members to be sent over the gateway for the guild the command is run in. This will cause multiple GUILD_MEMBERS_CHUNK events. *)
 let request_members (message:Message.t) _args =
     client >>= fun client ->

@@ -12,6 +12,7 @@ module Shard : sig
     { compress: bool (** Whether to compress payloads. *)
     ; hb_interval: int Lwt.t * int Lwt.u (** Time between heartbeats. Not known until HELLO is received. *)
     ; hb_stopper: Lwt_engine.event option (** Used to cancel heartbeat sequencer *)
+    ; hb_acked: bool (** Whether the last heartbeat was acked. Missing an ack will reconnect the shard. *)
     ; id: int (** ID of the current shard. Must be less than shard_count. *)
     ; large_threshold: int (** Minimum number of members needed for a guild to be considered large. *)
     ; ready: unit Lwt.t * unit Lwt.u (** A simple promise indicating if the shard has received READY. *)

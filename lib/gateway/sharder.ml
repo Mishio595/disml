@@ -61,7 +61,7 @@ module Shard = struct
         | Binary ->
             if compress then `Ok (decompress frame.content |> Yojson.Safe.from_string)
                 else `Error "Failed to decompress"
-        | Close -> `Close frame
+        | Close -> `Close (String.sub frame.content 0 2)
         | op ->
             let op = Frame.Opcode.to_string op in
             `Error ("Unexpected opcode " ^ op)
@@ -226,7 +226,7 @@ module Shard = struct
         else
             let re = if restart then "restarting..." else "shutting down." in
             Logs_lwt.info (fun m -> m "Shard closed unexpectedly, %s Shard [%d, %d]" re t.state.id t.state.shard_count) >>= fun () ->
-            t.state.send (Frame.close 1000) >|= fun () ->
+            t.state.send (Frame.close 1001) >|= fun () ->
             Option.map t.state.hb_stopper ~f:(fun ev -> Lwt_engine.stop_event ev) |> ignore
 end
 
@@ -254,7 +254,7 @@ let start ?count ?compress ?large_threshold () =
                 Shard.handle_frame ~f t.state >|= fun s ->
                 t.state <- s
             | `Close c ->
-                Logs_lwt.warn (fun m -> m "Close frame received. %s" (Frame.show c)) >>= fun () ->
+                Logs_lwt.warn (fun m -> m "Close frame received. %s" c) >>= fun () ->
                 Shard.shutdown t
             | `Error e ->
                 Logs_lwt.warn (fun m -> m "Websocket soft error: %s" e) >>= fun () ->

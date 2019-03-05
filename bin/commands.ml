@@ -13,9 +13,11 @@ let client, r_client = Lwt.wait ()
 (* Example ping command with REST round trip time edited into the response. *)
 let ping message _args =
     Message.reply message "Pong!" >>= function
-    | Ok _message -> Lwt.return_unit
-        (* let diff = Time.diff (Time.now ()) (Time.of_string message.timestamp) in
-        Message.set_content message (Printf.sprintf "Pong! `%d ms`" (Time.Span.to_ms diff |> Float.abs |> Float.to_int)) *)
+    | Ok message' ->
+        let `Message_id t, `Message_id t' = message.id, message'.id in
+        let time = Snowflake.(timestamp t' - timestamp t) |> abs in
+        Message.set_content message' (Printf.sprintf "Pong! `%d ms`" time)
+        >|= ignore
     | Error e -> Error.(of_string e |> raise)
 
 (* Send a list of consecutive integers of N size with 1 message per list item. *)

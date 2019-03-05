@@ -41,7 +41,6 @@ module Base = struct
             Lwt_result.fail @@ Printf.sprintf "Unsuccessful response received: %d - %s" code body
 
     let request ?(body=`Null) ?(query=[]) m path =
-        Logs_lwt.info (fun m -> m "Making HTTP request. Path: %s" path) >>= fun () ->
         let limit, rlm = Rl.get_rl m path !rl in
         rl := rlm;
         Lwt_mvar.take limit >>= fun limit ->
@@ -58,10 +57,11 @@ module Base = struct
             >>= process_response path
         in if limit.remaining > 0 then process ()
         else
-            (* let time = Time.(Span.of_int_sec limit.reset |> of_span_since_epoch) in
-            Logs.debug (fun m -> m "Rate-limiting [Route: %s] [Duration: %d ms]" path Time.(diff time (Time.now ()) |> Span.to_ms |> Float.to_int) );
-            Clock.at time >>= process *)
-            process ()
+            let time = float_of_int limit.reset -. Unix.time () in
+            Logs_lwt.info (fun m -> m
+                "Rate-limiting [Route: %s] [Duration: %f s]"
+                path time) >>= fun () ->
+            Lwt_unix.sleep time >>= process
 end
 
 let r_map f = function

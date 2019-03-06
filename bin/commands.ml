@@ -78,11 +78,11 @@ let echo (message:Message.t) args =
     | _ -> Lwt.return_unit
 
 (* Output cache counts as a a basic embed. *)
-(* let cache message _args =
+let cache message _args =
     let module C = Cache.ChannelMap in
     let module G = Cache.GuildMap in
     let module U = Cache.UserMap in
-    let cache = Mvar.peek_exn Cache.cache in
+    Cache.read_copy Cache.cache >>= fun cache ->
     let gc = G.cardinal cache.guilds in
     let ug = G.cardinal cache.unavailable_guilds in
     let tc = C.cardinal cache.text_channels in
@@ -101,7 +101,7 @@ let echo (message:Message.t) args =
             Private Channels: %d\nUsers: %d\n\
             Presences: %d\nCurrent User: %s"
             gc ug tc vc cs gr pr uc pre user)) in
-    Message.reply_with ~embed message >|= ignore *)
+    Message.reply_with ~embed message >|= ignore
 
 (* Issue a shutdown to all shards, then exits the process. *)
 let shutdown (message:Message.t) _args =
@@ -123,54 +123,54 @@ let request_members (message:Message.t) _args =
     | None -> Lwt.return_unit
 
 (* Creates a guild named testing or what the user provided *)
-(* let new_guild message args =
+let new_guild message args =
     let name = List.fold ~init:"" ~f:(fun a v -> a ^ " " ^ v) args in
     let name = if String.length name = 0 then "Testing" else name in
     Guild.create [ "name", `String name ] >>= begin function
     | Ok g -> Message.reply message (Printf.sprintf "Created guild %s" g.name)
     | Error e -> Message.reply message (Printf.sprintf "Failed to create guild. Error: %s" e)
-    end *)
+    end >|= ignore
 
 (* Deletes all guilds made by the bot *)
-(* let delete_guilds message _args =
-    let cache = Mvar.peek_exn Cache.cache in
+let delete_guilds message _args =
+    Cache.read_copy Cache.cache >>= fun cache ->
     let uid = match cache.user with
     | Some u -> u.id
     | None -> `User_id 0
     in
-    let guilds = Cache.GuildMap.filter cache.guilds ~f:(fun g -> g.owner_id = uid) in
+    let guilds = Cache.GuildMap.filter (fun _ (g:Guild.t) -> g.owner_id = uid) cache.guilds in
     let res = ref "" in
-    let all = Cache.GuildMap.(map guilds ~f:(fun g -> Guild.delete g >>| function
+    let all = Cache.GuildMap.(map (fun g -> Guild.delete g >|= function
     | Ok () -> res := Printf.sprintf "%s\nDeleted %s" !res g.name
-    | Error _ -> ()) |> to_alist) |> List.map ~f:(snd) in
-    Deferred.all all >>= (fun _ ->
-    Message.reply message !res) >|= ignore *)
+    | Error _ -> ()) guilds |> to_seq) |> Seq.map snd |> Stdlib.List.of_seq in
+    Lwt.join all >>= (fun _ ->
+    Message.reply message !res) >|= ignore
 
-(* let role_test (message:Message.t) args =
+let role_test (message:Message.t) args =
     let exception Member_not_found in
-    let cache = Mvar.peek_exn Cache.cache in
+    Cache.read_copy Cache.cache >>= fun cache ->
     let name = List.fold ~init:"" ~f:(fun a v -> a ^ " " ^ v) args in
     let create_role name guild_id =
-        Guild_id.create_role ~name guild_id >>| function
+        Guild_id.create_role ~name guild_id >|= function
         | Ok role -> role
-        | Error e -> Error.raise e
+        | Error e -> raise (Failure e)
     in
     let delete_role role =
-        Role.delete role >>| function
+        Role.delete role >|= function
         | Ok () -> ()
-        | Error e -> Error.raise e
+        | Error e -> raise (Failure e)
     in
     let add_role member role =
-        Member.add_role ~role member >>| function
+        Member.add_role ~role member >|= function
         | Ok () -> role
-        | Error e -> Error.raise e
+        | Error e -> raise (Failure e)
     in
     let remove_role member role =
-        Member.remove_role ~role member >>| function
+        Member.remove_role ~role member >|= function
         | Ok () -> role
-        | Error e -> Error.raise e
+        | Error e -> raise (Failure e)
     in
-    let get_member id = match Cache.GuildMap.find cache.guilds id with
+    let get_member id = match Cache.GuildMap.find_opt id cache.guilds with
         | Some guild ->
             begin match List.find guild.members ~f:(fun m -> m.user.id = message.author.id) with
             | Some member -> member
@@ -190,14 +190,14 @@ let request_members (message:Message.t) _args =
         | Member_not_found -> Message.reply message "Error: Member not found"
         | exn -> Message.reply message (Printf.sprintf "Error: %s" Error.(of_exn exn |> to_string_hum))
         end >|= ignore
-    | None -> () *)
+    | None -> Lwt.return_unit
 
-(* let check_permissions (message:Message.t) _args =
-    let cache = Mvar.peek_exn Cache.cache in
+let check_permissions (message:Message.t) _args =
+    Cache.read_copy Cache.cache >>= fun cache ->
     let empty = Permissions.empty in
     let permissions = match message.guild_id, message.member with
     | Some g, Some m ->
-        begin match Cache.guild cache g with
+        begin match Cache.guild g cache with
         | Some g ->
             List.fold m.roles ~init:Permissions.empty ~f:(fun acc rid ->
                 let role = List.find_exn g.roles ~f:(fun r -> r.id = rid) in
@@ -226,4 +226,4 @@ let request_members (message:Message.t) _args =
         |> elements)
         |> List.sexp_of_t Permissions.sexp_of_elt
         |> Sexplib.Sexp.to_string_hum in
-    Message.reply message (Printf.sprintf "Global Permissions: %s\nChannel Permissions: %s" g_perms c_perms) >|= ignore *)
+    Message.reply message (Printf.sprintf "Global Permissions: %s\nChannel Permissions: %s" g_perms c_perms) >|= ignore

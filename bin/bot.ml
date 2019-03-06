@@ -17,14 +17,14 @@ let check_command (message:Message.t) =
     | "!embed" -> Commands.embed message rest
     | "!status" -> Commands.status message rest
     | "!echo" -> Commands.echo message rest
-    (* | "!cache" -> Commands.cache message rest *)
+    | "!cache" -> Commands.cache message rest
     | "!shutdown" -> Commands.shutdown message rest
     | "!restart" -> Commands.restart message rest
     | "!rgm" -> Commands.request_members message rest
-    (* | "!new" -> Commands.new_guild message rest *)
-    (* | "!delall" -> Commands.delete_guilds message rest *)
-    (* | "!roletest" -> Commands.role_test message rest *)
-    (* | "!perms" -> Commands.check_permissions message rest *)
+    | "!new" -> Commands.new_guild message rest
+    | "!delall" -> Commands.delete_guilds message rest
+    | "!roletest" -> Commands.role_test message rest
+    | "!perms" -> Commands.check_permissions message rest
     | _ -> Lwt.return_unit (* Fallback case, no matched command. *)
 
 (* Example Lwt-friendly logs setup *)

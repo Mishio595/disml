@@ -1,4 +1,3 @@
-open Lwt.Infix
 open Event_models
 
 type t =
@@ -203,7 +202,6 @@ let dispatch cache ev =
         cache
 
 let handle_event ~ev contents =
-    Lwt_mvar.take Cache.cache >>= fun cache ->
-    event_of_yojson ~contents ev
-    |> dispatch cache
-    |> Lwt_mvar.put Cache.cache
+    Cache.update Cache.cache (fun cache ->
+        event_of_yojson ~contents ev
+        |> dispatch cache)

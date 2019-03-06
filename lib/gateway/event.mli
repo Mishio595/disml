@@ -43,7 +43,7 @@ type t =
 val event_of_yojson : contents:Yojson.Safe.t -> string -> t
 
 (** Sends the event to the registered handler. *)
-val dispatch : Cache.t -> t -> Cache.t
+val dispatch : Cache.cache -> t -> Cache.cache
 
 (** Wrapper to other functions. This is called from the shards. *)
 val handle_event : ev:string -> Yojson.Safe.t -> unit Lwt.t

@@ -57,6 +57,7 @@ module Base = struct
             >>= process_response path
         in if limit.remaining > 0 then process ()
         else
+            (* TODO use Date header instead of unix time *)
             let time = float_of_int limit.reset -. Unix.time () in
             Logs_lwt.info (fun m -> m
                 "Rate-limiting [Route: %s] [Duration: %f s]"

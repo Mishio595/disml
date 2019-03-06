@@ -2,7 +2,7 @@ module ChannelMap = Map.Make(Channel_id_t)
 module GuildMap = Map.Make(Guild_id_t)
 module UserMap = Map.Make(User_id_t)
 
-type t =
+type cache =
 { text_channels: Channel_t.guild_text ChannelMap.t
 ; voice_channels: Channel_t.guild_voice ChannelMap.t
 ; categories: Channel_t.category ChannelMap.t
@@ -16,20 +16,37 @@ type t =
 ; users: User_t.t UserMap.t
 }
 
-let create () =
-    { text_channels = ChannelMap.empty
-    ; voice_channels = ChannelMap.empty
-    ; categories = ChannelMap.empty
-    ; groups = ChannelMap.empty
-    ; private_channels = ChannelMap.empty
-    ; guilds = GuildMap.empty
-    ; presences = UserMap.empty
-    ; unavailable_guilds = GuildMap.empty
-    ; user = None
-    ; users = UserMap.empty
-    }
+type t =
+{ lock: Lwt_mutex.t
+; mutable cache: cache
+}
 
-let cache = Lwt_mvar.create (create ())
+let create () =
+    let lock = Lwt_mutex.create () in
+    let cache =
+        { text_channels = ChannelMap.empty
+        ; voice_channels = ChannelMap.empty
+        ; categories = ChannelMap.empty
+        ; groups = ChannelMap.empty
+        ; private_channels = ChannelMap.empty
+        ; guilds = GuildMap.empty
+        ; presences = UserMap.empty
+        ; unavailable_guilds = GuildMap.empty
+        ; user = None
+        ; users = UserMap.empty
+        } in
+    { lock; cache }
+
+let cache = create ()
+
+let update ({lock; cache} as t) f =
+    Lwt_mutex.with_lock lock (fun () -> 
+        let cache = f cache in
+        t.cache <- cache;
+        Lwt.return_unit)
+
+let read_copy {lock; cache} =
+    Lwt_mutex.with_lock lock (fun () -> Lwt.return cache)
 
 let guild k cache = GuildMap.find_opt k cache.guilds
 

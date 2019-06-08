@@ -1,63 +1,128 @@
 open Printf
 
-let gateway = "/gateway"
-let gateway_bot = "/gateway/bot"
-let channel = sprintf "/channels/%d"
-let channel_messages = sprintf "/channels/%d/messages"
-let channel_message = sprintf "/channels/%d/messages/%d"
-let channel_reaction_me = sprintf "/channels/%d/messages/%d/reactions/%s/@me"
-let channel_reaction = sprintf "/channels/%d/messages/%d/reactions/%s/%d"
-let channel_reactions_get = sprintf "/channels/%d/messages/%d/reactions/%s"
-let channel_reactions_delete = sprintf "/channels/%d/messages/%d/reactions"
-let channel_bulk_delete = sprintf "/channels/%d"
-let channel_permission = sprintf "/channels/%d/permissions/%d"
-let channel_permissions = sprintf "/channels/%d/permissions"
-let channels = "/channels"
-let channel_call_ring = sprintf "/channels/%d/call/ring"
-let channel_invites = sprintf "/channels/%d/invites"
-let channel_typing = sprintf "/channels/%d/typing"
-let channel_pins = sprintf "/channels/%d/pins"
-let channel_pin = sprintf "/channels/%d/pins/%d"
-let guilds = "/guilds"
-let guild = sprintf "/guilds/%d"
-let guild_channels = sprintf "/guilds/%d/channels"
-let guild_members = sprintf "/guilds/%d/members"
-let guild_member = sprintf "/guilds/%d/members/%d"
-let guild_member_role = sprintf "/guilds/%d/members/%d/roles/%d"
-let guild_bans = sprintf "/guilds/%d/bans"
-let guild_ban = sprintf "/guilds/%d/bans/%d"
-let guild_roles = sprintf "/guilds/%d/roles"
-let guild_role = sprintf "/guilds/%d/roles/%d"
-let guild_prune = sprintf "/guilds/%d/prune"
-let guild_voice_regions = sprintf "/guilds/%d/regions"
-let guild_invites = sprintf "/guilds/%d/invites"
-let guild_integrations = sprintf "/guilds/%d/integrations"
-let guild_integration = sprintf "/guilds/%d/integrations/%d"
-let guild_integration_sync = sprintf "/guilds/%d/integrations/%d/sync"
-let guild_embed = sprintf "/guilds/%d/embed"
-let guild_emojis = sprintf "/guilds/%d/emojis"
-let guild_emoji = sprintf "/guilds/%d/emojis/%d"
-let webhooks_guild = sprintf "/guilds/%d/webhooks"
-let webhooks_channel = sprintf "/channels/%d/webhooks"
-let webhook = sprintf "/webhooks/%d"
-let webhook_token = sprintf "/webhooks/%d/%s"
-let webhook_git = sprintf "/webhooks/%d/%s/github"
-let webhook_slack = sprintf "/webhooks/%d/%s/slack"
-let user = sprintf "/users/%d"
-let me = "/users/@me"
-let me_guilds = "/users/@me/guilds"
-let me_guild = sprintf "/users/@me/guilds/%d"
-let me_channels = "/users/@me/channels"
-let me_connections = "/users/@me/connections"
-let invite = sprintf "/invites/%s"
-let regions = "/voice/regions"
-let application_information = "/oauth2/applications/@me"
-let group_recipient = sprintf "/channels/%d/recipients/%d"
-let guild_me_nick = sprintf "/guilds/%d/members/@me/nick"
-let guild_vanity_url = sprintf "/guilds/%d/vanity-url"
-let guild_audit_logs = sprintf "/guilds/%d/audit-logs"
-let cdn_embed_avatar = sprintf "/embed/avatars/%s.png"
-let cdn_emoji = sprintf "/emojis/%s.%s"
-let cdn_icon = sprintf "/icons/%d/%s.%s"
-let cdn_avatar = sprintf "/avatars/%d/%s.%s"
-let cdn_default_avatar = sprintf "/embed/avatars/%d"
+type t =
+{ endpoint: string
+; route: string
+}
+
+let make endpoint = { endpoint; route = endpoint }
+(* let make_complex endpoint route = { endpoint; route } *)
+
+let gateway = make "/gateway"
+let gateway_bot = make "/gateway/bot"
+
+let channel cid =
+    make (sprintf "/channels/%d" cid)
+let channel_messages cid =
+    make (sprintf "/channels/%d/messages" cid)
+let channel_message cid mid =
+    make (sprintf "/channels/%d/messages/%d" cid mid)
+let channel_reaction_me cid mid em =
+    make (sprintf "/channels/%d/messages/%d/reactions/%s/@me" cid mid em)
+let channel_reaction cid mid em uid =
+    make (sprintf "/channels/%d/messages/%d/reactions/%s/%d" cid mid em uid)
+let channel_reactions_get cid mid em =
+    make (sprintf "/channels/%d/messages/%d/reactions/%s" cid mid em)
+let channel_reactions_delete cid mid =
+    make (sprintf "/channels/%d/messages/%d/reactions" cid mid)
+let channel_bulk_delete cid =
+    make (sprintf "/channels/%d" cid)
+let channel_permission cid uid =
+    make (sprintf "/channels/%d/permissions/%d" cid uid)
+let channel_permissions cid =
+    make (sprintf "/channels/%d/permissions" cid)
+let channels = make "/channels"
+let channel_call_ring cid =
+    make (sprintf "/channels/%d/call/ring" cid)
+let channel_invites cid =
+    make (sprintf "/channels/%d/invites" cid)
+let channel_typing cid =
+    make (sprintf "/channels/%d/typing" cid)
+let channel_pins cid =
+    make (sprintf "/channels/%d/pins" cid)
+let channel_pin cid mid =
+    make (sprintf "/channels/%d/pins/%d" cid mid)
+
+let guilds = make "/guilds"
+let guild gid =
+    make (sprintf "/guilds/%d" gid)
+let guild_channels gid =
+    make (sprintf "/guilds/%d/channels" gid)
+let guild_members gid =
+    make (sprintf "/guilds/%d/members" gid)
+let guild_member gid uid =
+    make (sprintf "/guilds/%d/members/%d" gid uid)
+let guild_member_role gid uid rid =
+    make (sprintf "/guilds/%d/members/%d/roles/%d" gid uid rid)
+let guild_bans gid =
+    make (sprintf "/guilds/%d/bans" gid)
+let guild_ban gid uid =
+    make (sprintf "/guilds/%d/bans/%d" gid uid)
+let guild_roles gid =
+    make (sprintf "/guilds/%d/roles" gid)
+let guild_role gid rid =
+    make (sprintf "/guilds/%d/roles/%d" gid rid)
+let guild_prune gid =
+    make (sprintf "/guilds/%d/prune" gid)
+let guild_voice_regions gid =
+    make (sprintf "/guilds/%d/regions" gid)
+let guild_invites gid =
+    make (sprintf "/guilds/%d/invites" gid)
+let guild_integrations gid =
+    make (sprintf "/guilds/%d/integrations" gid)
+let guild_integration gid iid =
+    make (sprintf "/guilds/%d/integrations/%d" gid iid)
+let guild_integration_sync gid iid =
+    make (sprintf "/guilds/%d/integrations/%d/sync" gid iid)
+let guild_embed gid =
+    make (sprintf "/guilds/%d/embed" gid)
+let guild_emojis gid =
+    make (sprintf "/guilds/%d/emojis" gid)
+let guild_emoji gid eid =
+    make (sprintf "/guilds/%d/emojis/%d" gid eid)
+let guild_me_nick gid =
+    make (sprintf "/guilds/%d/members/@me/nick" gid)
+let guild_vanity_url gid =
+    make (sprintf "/guilds/%d/vanity-url" gid)
+let guild_audit_logs gid =
+    make (sprintf "/guilds/%d/audit-logs" gid)
+
+let webhooks_guild gid =
+    make (sprintf "/guilds/%d/webhooks" gid)
+let webhooks_channel cid =
+    make (sprintf "/channels/%d/webhooks" cid)
+let webhook wid =
+    make (sprintf "/webhooks/%d" wid)
+let webhook_token wid token =
+    make (sprintf "/webhooks/%d/%s" wid token)
+let webhook_git wid token =
+    make (sprintf "/webhooks/%d/%s/github" wid token)
+let webhook_slack wid token =
+    make (sprintf "/webhooks/%d/%s/slack" wid token)
+
+let user uid =
+    make (sprintf "/users/%d" uid)
+let me = make "/users/@me"
+let me_guilds = make "/users/@me/guilds"
+let me_guild gid =
+    make (sprintf "/users/@me/guilds/%d" gid)
+let me_channels = make "/users/@me/channels"
+let me_connections = make "/users/@me/connections"
+
+let invite iid =
+    make (sprintf "/invites/%s" iid)
+let regions = make "/voice/regions"
+let application_information = make "/oauth2/applications/@me"
+let group_recipient cid uid =
+    make (sprintf "/channels/%d/recipients/%d" cid uid)
+
+let cdn_embed_avatar hash =
+    make (sprintf "/embed/avatars/%s.png" hash)
+let cdn_emoji hash ext =
+    make (sprintf "/emojis/%s.%s" hash ext)
+let cdn_icon uid hash ext =
+    make (sprintf "/icons/%d/%s.%s" uid hash ext)
+let cdn_avatar uid hash ext =
+    make (sprintf "/avatars/%d/%s.%s" uid hash ext)
+let cdn_default_avatar ind =
+    make (sprintf "/embed/avatars/%d" ind)

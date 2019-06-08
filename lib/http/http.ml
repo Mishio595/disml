@@ -40,12 +40,12 @@ module Base = struct
             Logs_lwt.warn (fun m -> m "[Unsuccessful Response] [Code: %d]\n%s\n%s" code body headers) >>= fun () ->
             Lwt_result.fail @@ Printf.sprintf "Unsuccessful response received: %d - %s" code body
 
-    let request ?(body=`Null) ?(query=[]) m path =
-        let limit, rlm = Rl.get_rl m path !rl in
+    let request ?(body=`Null) ?(query=[]) m (endpoint:Endpoints.t) =
+        let limit, rlm = Rl.get_rl m endpoint.route !rl in
         rl := rlm;
         Lwt_mvar.take limit >>= fun limit ->
         let process () =
-            let uri = Uri.add_query_params' (process_url path) query in
+            let uri = Uri.add_query_params' (process_url endpoint.endpoint) query in
             let headers = process_request_headers () in
             let body = process_request_body body in
             (match m with
@@ -54,14 +54,14 @@ module Base = struct
             | `Patch -> Cohttp_lwt_unix.Client.patch ~headers ~body uri
             | `Post -> Cohttp_lwt_unix.Client.post ~headers ~body uri
             | `Put -> Cohttp_lwt_unix.Client.put ~headers ~body uri)
-            >>= process_response path
+            >>= process_response endpoint.endpoint
         in if limit.remaining > 0 then process ()
         else
             (* TODO use Date header instead of unix time *)
             let time = float_of_int limit.reset -. Unix.time () in
             Logs_lwt.info (fun m -> m
                 "Rate-limiting [Route: %s] [Duration: %f s]"
-                path time) >>= fun () ->
+                endpoint.route time) >>= fun () ->
             Lwt_unix.sleep time >>= process
 end
 

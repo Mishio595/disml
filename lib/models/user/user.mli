@@ -7,7 +7,7 @@ val tag : t -> string
 val mention : t -> string
 
 (** The default avatar for the user. *)
-val default_avatar : t -> string
+val default_avatar : t -> Endpoints.t
 
 (** The avatar url of the user, falling back to the default avatar. *)
-val face : t -> string
+val face : t -> Endpoints.t

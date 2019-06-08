@@ -16,7 +16,7 @@ module Base : sig
         ?body:Yojson.Safe.t ->
         ?query:(string * string) list ->
         [ `Delete | `Get | `Patch | `Post | `Put ] ->
-        string ->
+        Endpoints.t ->
         (Yojson.Safe.t, string) Lwt_result.t
 end
 

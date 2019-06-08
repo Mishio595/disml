@@ -194,13 +194,15 @@ let role_test (message:Message.t) args =
 
 let check_permissions (message:Message.t) _args =
     Cache.read_copy Cache.cache >>= fun cache ->
+    let itemized = ref "" in
     let empty = Permissions.empty in
     let permissions = match message.guild_id, message.member with
     | Some g, Some m ->
         begin match Cache.guild g cache with
         | Some g ->
-            List.fold m.roles ~init:Permissions.empty ~f:(fun acc rid ->
+            List.fold m.roles ~init:empty ~f:(fun acc rid ->
                 let role = List.find_exn g.roles ~f:(fun r -> r.id = rid) in
+                itemized := !itemized ^ "\n" ^ (Permissions.to_int role.permissions |> string_of_int);
                 Permissions.union acc role.permissions)
         | None -> empty
         end
@@ -218,12 +220,13 @@ let check_permissions (message:Message.t) _args =
         | None -> empty, empty
         end
     | None -> empty, empty in
-    let g_perms = Permissions.elements permissions
+    let _g_perms = Permissions.elements permissions
         |> List.sexp_of_t Permissions.sexp_of_elt
         |> Sexplib.Sexp.to_string_hum in
-    let c_perms = Permissions.(union permissions allow
+    let _c_perms = Permissions.(union permissions allow
         |> diff deny
         |> elements)
         |> List.sexp_of_t Permissions.sexp_of_elt
         |> Sexplib.Sexp.to_string_hum in
-    Message.reply message (Printf.sprintf "Global Permissions: %s\nChannel Permissions: %s" g_perms c_perms) >|= ignore
+    Message.reply message !itemized >|= ignore
+    (* Message.reply message (Printf.sprintf "Global Permissions: %s\nChannel Permissions: %s" g_perms c_perms) >|= ignore *)

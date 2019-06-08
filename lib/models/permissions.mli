@@ -34,6 +34,7 @@ include BitMaskSet.S with type elt := elt
                      with type storage = int
                      with type t = private int
 
+val to_int : t -> int
 val sexp_of_t : t -> Sexplib.Sexp.t
 val t_of_sexp : Sexplib.Sexp.t -> t
 val of_yojson_exn : Yojson.Safe.t -> t
